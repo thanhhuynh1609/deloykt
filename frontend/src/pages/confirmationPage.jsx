@@ -42,7 +42,7 @@ function ConfirmationPage(props) {
     };
 
     fetchPaymentStatus();
-  });
+  }, [id, payment_intent, success]); // ✅ Thêm dependency array
 
   return (
     <div>

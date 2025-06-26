@@ -1,0 +1,93 @@
+# Hướng dẫn chi tiết chạy dự án với PostgreSQL
+
+## 1. Cài đặt PostgreSQL
+1. Tải và cài đặt PostgreSQL từ [trang chủ PostgreSQL](https://www.postgresql.org/download/)
+2. Trong quá trình cài đặt, tạo mật khẩu cho người dùng `postgres`
+3. Sau khi cài đặt, mở pgAdmin hoặc psql để tạo cơ sở dữ liệu mới:
+   ```
+   CREATE DATABASE ecommerce;
+   ```
+
+## 2. Cài đặt môi trường Python
+1. Đảm bảo Python đã được cài đặt (phiên bản 3.8 theo Pipfile)
+2. Tạo môi trường ảo:
+   ```
+   python -m venv venv
+   ```
+3. Kích hoạt môi trường ảo:
+   - Windows: `venv\Scripts\activate`
+   - Linux/Mac: `source venv/bin/activate`
+
+## 3. Cài đặt các phụ thuộc
+```
+pip install -r requirements.txt
+```
+Hoặc sử dụng Pipfile:
+```
+pip install pipenv
+pipenv install
+```
+
+## 4. Tạo file .env
+Tạo file `.env` trong thư mục gốc của dự án với nội dung:
+
+```` path=.env mode=EDIT
+SECRET_KEY=your_random_secret_key
+DEBUG=True
+STRIPE_API_KEY=your_stripe_api_key
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/ecommerce
+````
+
+Thay thế:
+- `your_random_secret_key` bằng một chuỗi ngẫu nhiên
+- `your_password` bằng mật khẩu PostgreSQL của bạn
+- `your_stripe_api_key` bằng API key từ tài khoản Stripe (nếu cần thanh toán)
+
+## 5. Kiểm tra cấu hình cơ sở dữ liệu
+Đảm bảo dòng sau trong `backend/settings.py` không bị comment:
+
+````python path=backend/settings.py mode=EXCERPT
+DATABASES = {'default': dj_database_url.config(default=os.environ['DATABASE_URL'], engine='django.db.backends.postgresql')}
+````
+
+## 6. Tạo và áp dụng migrations
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+
+## 7. Tạo tài khoản admin (tùy chọn)
+```
+python manage.py createsuperuser
+```
+
+## 8. Chạy máy chủ Django
+```
+python manage.py runserver
+```
+Ứng dụng sẽ chạy tại `http://127.0.0.1:8000`
+
+## 9. Cài đặt và chạy frontend React
+1. Đảm bảo Node.js đã được cài đặt
+2. Di chuyển đến thư mục frontend:
+   ```
+   cd frontend
+   ```
+3. Cài đặt các phụ thuộc:
+   ```
+   npm install
+   ```
+4. Chạy ứng dụng React:
+   ```
+   npm start
+   ```
+   Frontend sẽ chạy tại `http://localhost:3000`
+
+## 10. Kiểm tra kết nối
+- Truy cập `http://127.0.0.1:8000/admin` để kiểm tra trang admin Django
+- Truy cập `http://localhost:3000` để xem giao diện người dùng React
+
+Nếu bạn gặp lỗi kết nối PostgreSQL, hãy kiểm tra:
+- Mật khẩu PostgreSQL trong DATABASE_URL
+- PostgreSQL đang chạy
+- Cơ sở dữ liệu 'ecommerce' đã được tạo

@@ -88,7 +88,11 @@ export const UserProvider = ({ children }) => {
         JSON.stringify({ access: data.access, refresh: data.refresh })
       );
     } catch (ex) {
-      logout();
+      // ✅ Chỉ logout khi refresh token thực sự hết hạn
+      console.error("Token refresh failed:", ex.response?.status);
+      if (ex.response?.status === 401) {
+        logout();
+      }
     }
   };
 

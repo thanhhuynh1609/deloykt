@@ -1,0 +1,154 @@
+.admin-orders {
+  padding: 0;
+}
+
+.order-item-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.action-buttons .btn {
+  padding: 0.25rem 0.5rem;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  border-top: none;
+  font-weight: 600;
+  color: #495057;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.card-header {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+/* Modal Styling */
+.modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.5rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding: 1.5rem;
+}
+
+/* Badge Styling */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+/* Button Styling */
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.btn-outline-primary:hover {
+  background: #667eea;
+  border-color: #667eea;
+}
+
+.btn-outline-success {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.btn-outline-success:hover {
+  background: #28a745;
+  border-color: #28a745;
+}
+
+/* Order Details Styling */
+.modal-body h6 {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.25rem;
+}
+
+.modal-body p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* Table in Modal */
+.modal-body .table {
+  margin-bottom: 0;
+}
+
+.modal-body .table td,
+.modal-body .table th {
+  padding: 0.5rem;
+  border-color: #e9ecef;
+}
+
+.modal-body .table-borderless td {
+  border: none;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .order-item-image {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    padding: 1rem;
+  }
+}

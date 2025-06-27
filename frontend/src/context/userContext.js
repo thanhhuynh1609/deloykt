@@ -31,7 +31,7 @@ export const UserProvider = ({ children }) => {
       setUserInfo({
         username: data.username,
         email: data.email,
-        isAdmin: data.email,
+        isAdmin: data.isAdmin,
       });
       localStorage.setItem(
         "authTokens",

@@ -7,6 +7,7 @@ import Message from "../components/message";
 import BrandCard from "../components/brandCard";
 import CategoryCard from '../components/categoryCard';
 import ProductsCarousel from '../components/productsCarousel';
+import AdminRedirect from '../components/AdminRedirect';
 
 function HomePage(props) {
   const { error, products, loadProducts, brands, categories } = useContext(ProductsContext);
@@ -34,9 +35,10 @@ function HomePage(props) {
   popularProducts = popularProducts.slice(0, 6);
 
   return (
-    <div>
-      <ProductsCarousel products={products}/>
-      <h1>Popular Products</h1>
+    <AdminRedirect>
+      <div>
+        <ProductsCarousel products={products}/>
+        <h1>Popular Products</h1>
       <Row>
         {popularProducts.map((product) => (
           <Col key={product.id} sm={12} md={6} lg={4} xl={3}>
@@ -60,7 +62,8 @@ function HomePage(props) {
           </Col>
         ))}
       </Row>
-    </div>
+      </div>
+    </AdminRedirect>
   );
 }
 

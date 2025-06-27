@@ -5,6 +5,7 @@ import ProductsContext from "../context/productsContext";
 import Message from "../components/message";
 import Loader from "../components/loader";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import AdminRedirect from '../components/AdminRedirect';
 
 function SearchPage() {
   const { error, products, loadProducts, brands, categories } =
@@ -67,8 +68,9 @@ function SearchPage() {
     );
 
   return (
-    <div>
-      <Row>
+    <AdminRedirect>
+      <div>
+        <Row>
         <Col md={3}>
           <h3>Filters</h3>
           <Form>
@@ -135,7 +137,8 @@ function SearchPage() {
           </Row>
         </Col>
       </Row>
-    </div>
+      </div>
+    </AdminRedirect>
   );
 }
 

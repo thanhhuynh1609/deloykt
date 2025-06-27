@@ -1,0 +1,108 @@
+.admin-sidebar {
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.admin-details h6 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.admin-details small {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar-nav {
+  padding: 1rem 0;
+}
+
+.nav-section {
+  margin-bottom: 2rem;
+}
+
+.nav-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0 1.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.sidebar-link {
+  display: flex !important;
+  align-items: center;
+  padding: 0.75rem 1.5rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  transform: translateX(5px);
+}
+
+.sidebar-link.active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border-left: 3px solid #fff !important;
+}
+
+.sidebar-link i {
+  width: 20px;
+  margin-right: 0.75rem;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .admin-sidebar.show {
+    transform: translateX(0);
+  }
+}

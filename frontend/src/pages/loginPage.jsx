@@ -16,13 +16,28 @@ function LoginPage(props) {
     : "/";
 
   useEffect(() => {
-    if (userInfo && userInfo.username) navigate(redirect);
+    if (userInfo && userInfo.username) {
+      // Redirect admin users to admin dashboard
+      if (userInfo.isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate(redirect);
+      }
+    }
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const status = await login(username, password);
-    if (status) navigate(redirect);
+    if (status) {
+      // Check if user is admin after successful login
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      if (userInfo && userInfo.isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate(redirect);
+      }
+    }
   };
 
   return (

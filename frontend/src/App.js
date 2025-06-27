@@ -3,7 +3,7 @@ import { Container } from "react-bootstrap";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import HomePage from "./pages/homePage";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import ProductPage from "./pages/productPage";
 import { ProductsProvider } from "./context/productsContext";
 import CartPage from "./pages/cartPage";
@@ -20,8 +20,18 @@ import "./App.css";
 import ConfirmationPage from "./pages/confirmationPage";
 import PaymentPage from "./pages/paymentPage";
 import SearchPage from "./pages/searchPage";
+// Admin imports
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminBrands from "./pages/admin/AdminBrands";
+import AdminReviews from "./pages/admin/AdminReviews";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-function App() {
+const AppContent = () => {
+  const location = useLocation();
   const [keyword, setKeyword] = useState("");
   const queryParams = new URLSearchParams(window.location.search);
   const keywordParam = queryParams.get("keyword")
@@ -32,15 +42,19 @@ function App() {
     setKeyword(keywordParam);
   });
 
+  // Check if current route is admin
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <div>
       <UserProvider>
-        <Header keyword={keyword} setKeyword={setKeyword} />
-        <main className="py-3">
-          <Container>
-            <ProductsProvider>
-              <CartProvider>
-                <Routes>
+        {!isAdminRoute && <Header keyword={keyword} setKeyword={setKeyword} />}
+        <main className={isAdminRoute ? "" : "py-3"}>
+          <ProductsProvider>
+            <CartProvider>
+              {!isAdminRoute ? (
+                <Container>
+                  <Routes>
                   <Route path="/" element={<HomePage />} exact />
                   <Route
                     path="/search"
@@ -57,15 +71,58 @@ function App() {
                   <Route path="/confirmation" element={<ConfirmationPage />} />
                   <Route path="/placeorder" element={<PlacerOrderPage />} />
                   <Route path="/cart" element={<CartPage />} />
+                  </Routes>
+                </Container>
+              ) : (
+                <Routes>
+                  <Route path="/admin" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/products" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminProducts />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/orders" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminOrders />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/categories" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminCategories />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/users" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminUsers />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/brands" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminBrands />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/reviews" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminReviews />
+                    </ProtectedRoute>
+                  } />
                 </Routes>
-              </CartProvider>
-            </ProductsProvider>
-          </Container>
+              )}
+            </CartProvider>
+          </ProductsProvider>
         </main>
-        <Footer />
+        {!isAdminRoute && <Footer />}
       </UserProvider>
     </div>
   );
+};
+
+function App() {
+  return <AppContent />;
 }
 
 export default App;

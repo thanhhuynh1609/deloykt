@@ -1,13 +1,14 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from api.views import BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet, ReviewView, StripePaymentView, placeOrder, updateOrderToPaid
+from api.views import BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet, ReviewView, ReviewViewSet, StripePaymentView, placeOrder, updateOrderToPaid
 
 router = DefaultRouter()
 router.register('brands', BrandViewSet, basename='brands')
 router.register('category', CategoryViewSet, basename='category')
 router.register('products', ProductViewSet, basename='products')
 router.register('orders', OrderViewSet, basename='orders')
+router.register('reviews', ReviewViewSet, basename='reviews')
 
 urlpatterns = [*router.urls,
     path('placeorder/', placeOrder, name='create-order'),

@@ -2,7 +2,7 @@ from datetime import datetime
 from django.conf import settings
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,13 +15,13 @@ from django.shortcuts import get_object_or_404, redirect
 import stripe
 
 
-class BrandViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class BrandViewSet(ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     permission_classes = [IsAdminUserOrReadOnly]
 
 
-class CategoryViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUserOrReadOnly]
@@ -115,13 +115,19 @@ def placeOrder(request):
         return Response(serializer.data)
 
 
-class OrderViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class OrderViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):
     def get_queryset(self):
         if (self.request.user.is_staff):
             return Order.objects.all()
         return Order.objects.filter(user=self.request.user)
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
+
+
+class ReviewViewSet(ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
 
 
 stripe.api_key = settings.STRIPE_API_KEY

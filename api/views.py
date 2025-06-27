@@ -167,3 +167,49 @@ class StripePaymentView(APIView):
         except Exception as e:
             print(e)
             return Response({'error': 'Something went wrong while creating stripe checkout session!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Thêm endpoint để cập nhật review
+@api_view(['PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def update_review(request, pk, review_id):
+    user = request.user
+    product = get_object_or_404(Product, id=pk)
+    
+    try:
+        review = Review.objects.get(id=review_id, product=product)
+    except Review.DoesNotExist:
+        return Response({'detail': 'Review not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Chỉ admin hoặc người tạo review mới có thể cập nhật/xóa
+    if not user.is_staff and review.user != user:
+        return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+    
+    if request.method == 'DELETE':
+        with transaction.atomic():
+            # Cập nhật lại rating của sản phẩm
+            if product.numReviews > 1:
+                product.rating = (product.rating * product.numReviews - review.rating) / (product.numReviews - 1)
+            else:
+                product.rating = 0
+            product.numReviews -= 1
+            product.save()
+            
+            review.delete()
+        return Response({'detail': 'Review deleted'}, status=status.HTTP_204_NO_CONTENT)
+    
+    # PUT request - cập nhật review
+    data = request.data
+    
+    with transaction.atomic():
+        # Cập nhật lại rating của sản phẩm
+        product.rating = (product.rating * product.numReviews - review.rating + data['rating']) / product.numReviews
+        product.save()
+        
+        review.rating = data['rating']
+        review.comment = data['comment']
+        review.save()
+        
+        serializer = ReviewSerializer(review)
+        return Response(serializer.data)
+

@@ -162,12 +162,23 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
 
 DJOSER = {
     'SERIALIZERS': {
         'current_user': 'user.serializers.MyUserSerializer',
-    }
+        'user': 'user.serializers.MyUserSerializer',
+        'user_delete': 'user.serializers.AdminUserDeleteSerializer',  # Custom serializer for admin delete
+    },
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user_list': ['rest_framework.permissions.IsAdminUser'],
+        'user_delete': ['rest_framework.permissions.IsAdminUser'],
+    },
+    'HIDE_USERS': False,  # Allow listing users for admin
 }
 
 SIMPLE_JWT = {
@@ -212,3 +223,18 @@ SIMPLE_JWT = {
 
 
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+
+# CSRF settings
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access the cookie
+CSRF_USE_SESSIONS = False  # Store CSRF token in cookie instead of session
+CSRF_COOKIE_SAMESITE = None  # Allow cross-site requests
+
+# Exempt API endpoints from CSRF
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+]
+

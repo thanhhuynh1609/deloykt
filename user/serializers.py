@@ -11,11 +11,18 @@ class MyUserSerializer(UserSerializer):
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
         }
-    
+
     def update(self, instance, validated_data):
         if (validated_data.get('password')):
             validated_data['password'] = make_password(validated_data['password'])
         return super().update(instance, validated_data)
+
+
+class AdminUserDeleteSerializer(serializers.Serializer):
+    """
+    Custom serializer for admin user deletion that doesn't require current password
+    """
+    pass  # Empty serializer - no validation needed for admin delete
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):

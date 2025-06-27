@@ -1,7 +1,11 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from api.views import BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet, ReviewView, ReviewViewSet, StripePaymentView, placeOrder, updateOrderToPaid
+from api.views import (
+    BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet, 
+    ReviewView, ReviewViewSet, StripePaymentView, 
+    placeOrder, updateOrderToPaid, update_review
+)
 
 router = DefaultRouter()
 router.register('brands', BrandViewSet, basename='brands')
@@ -16,4 +20,7 @@ urlpatterns = [*router.urls,
     path('stripe-payment/', StripePaymentView.as_view(),
         name='stipe-payment'),
     path('products/<str:pk>/reviews/', ReviewView.as_view(), name='product-reviews'),
+    path('products/<str:pk>/reviews/<str:review_id>/', update_review, name='update-review'),
 ]
+
+

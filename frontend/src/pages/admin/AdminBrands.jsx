@@ -11,7 +11,8 @@ const AdminBrands = () => {
   const [editingBrand, setEditingBrand] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
-    description: ''
+    description: '',
+    image: null
   });
 
   useEffect(() => {
@@ -34,13 +35,15 @@ const AdminBrands = () => {
       setEditingBrand(brand);
       setFormData({
         title: brand.title || '',
-        description: brand.description || ''
+        description: brand.description || '',
+        image: null
       });
     } else {
       setEditingBrand(null);
       setFormData({
         title: '',
-        description: ''
+        description: '',
+        image: null
       });
     }
     setShowModal(true);
@@ -52,20 +55,38 @@ const AdminBrands = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, files } = e.target;
+    if (name === 'image') {
+      setFormData(prev => ({
+        ...prev,
+        image: files[0]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
       if (editingBrand) {
-        await httpService.put(`/api/brands/${editingBrand.id}/`, formData);
+        await httpService.put(`/api/brands/${editingBrand.id}/`, formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else {
-        await httpService.post('/api/brands/', formData);
+        await httpService.post('/api/brands/', formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
       fetchBrands();
       handleCloseModal();
@@ -200,6 +221,26 @@ const AdminBrands = () => {
                   onChange={handleInputChange}
                 />
               </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Brand Image</Form.Label>
+                <Form.Control
+                  type="file"
+                  name="image"
+                  onChange={handleInputChange}
+                  accept="image/*"
+                />
+                {editingBrand && editingBrand.image && (
+                  <div className="mt-2">
+                    <p>Current image:</p>
+                    <img 
+                      src={editingBrand.image} 
+                      alt={editingBrand.title}
+                      style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                    />
+                  </div>
+                )}
+              </Form.Group>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={handleCloseModal}>
@@ -217,3 +258,5 @@ const AdminBrands = () => {
 };
 
 export default AdminBrands;
+
+

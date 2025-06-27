@@ -160,9 +160,13 @@ const AdminDashboard = () => {
                     <i className="fas fa-users me-1"></i>
                     Manage Users
                   </Link>
-                  <Link to="/admin/categories" className="btn btn-warning mb-2">
+                  <Link to="/admin/categories" className="btn btn-warning me-2 mb-2">
                     <i className="fas fa-tags me-1"></i>
                     Categories
+                  </Link>
+                  <Link to="/admin/reviews" className="btn btn-secondary mb-2">
+                    <i className="fas fa-star me-1"></i>
+                    Reviews
                   </Link>
                 </div>
               </Card.Body>
@@ -208,3 +212,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

@@ -11,7 +11,8 @@ const AdminCategories = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
-    description: ''
+    description: '',
+    image: null
   });
 
   useEffect(() => {
@@ -34,13 +35,15 @@ const AdminCategories = () => {
       setEditingCategory(category);
       setFormData({
         title: category.title || '',
-        description: category.description || ''
+        description: category.description || '',
+        image: null
       });
     } else {
       setEditingCategory(null);
       setFormData({
         title: '',
-        description: ''
+        description: '',
+        image: null
       });
     }
     setShowModal(true);
@@ -52,20 +55,38 @@ const AdminCategories = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, files } = e.target;
+    if (name === 'image') {
+      setFormData(prev => ({
+        ...prev,
+        image: files[0]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
       if (editingCategory) {
-        await httpService.put(`/api/category/${editingCategory.id}/`, formData);
+        await httpService.put(`/api/category/${editingCategory.id}/`, formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else {
-        await httpService.post('/api/category/', formData);
+        await httpService.post('/api/category/', formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
       fetchCategories();
       handleCloseModal();
@@ -200,6 +221,26 @@ const AdminCategories = () => {
                   onChange={handleInputChange}
                 />
               </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Category Image</Form.Label>
+                <Form.Control
+                  type="file"
+                  name="image"
+                  onChange={handleInputChange}
+                  accept="image/*"
+                />
+                {editingCategory && editingCategory.image && (
+                  <div className="mt-2">
+                    <p>Current image:</p>
+                    <img 
+                      src={editingCategory.image} 
+                      alt={editingCategory.title}
+                      style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                    />
+                  </div>
+                )}
+              </Form.Group>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={handleCloseModal}>
@@ -217,3 +258,6 @@ const AdminCategories = () => {
 };
 
 export default AdminCategories;
+
+
+

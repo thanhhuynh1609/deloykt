@@ -9,6 +9,13 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: ''
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -69,6 +76,94 @@ const AdminUsers = () => {
     }
   };
 
+  // Hàm mở modal edit user
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setFormData({
+      username: user.username || '',
+      email: user.email || '',
+      password: ''
+    });
+    setShowEditModal(true);
+  };
+
+  // Hàm mở modal thêm user mới
+  const handleAddUser = () => {
+    setEditingUser(null);
+    setFormData({
+      username: '',
+      email: '',
+      password: ''
+    });
+    setShowEditModal(true);
+  };
+
+  // Hàm đóng modal edit
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingUser(null);
+  };
+
+  // Hàm xử lý thay đổi input
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Hàm submit form (thêm/sửa user)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingUser) {
+        // Cập nhật user - luôn gửi username và email, chỉ gửi password nếu có
+        const dataToUpdate = {
+          username: formData.username,
+          email: formData.email
+        };
+
+        // Chỉ thêm password nếu user nhập password mới
+        if (formData.password && formData.password.trim() !== '') {
+          dataToUpdate.password = formData.password;
+        }
+
+        await httpService.put(`/auth/users/${editingUser.id}/`, dataToUpdate);
+      } else {
+        // Tạo user mới
+        await httpService.post('/auth/users/', {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          re_password: formData.password
+        });
+      }
+      fetchUsers();
+      handleCloseEditModal();
+    } catch (error) {
+      console.error('Error saving user:', error);
+      if (error.response) {
+        alert('Error: ' + JSON.stringify(error.response.data));
+      } else {
+        alert('An error occurred. Please try again.');
+      }
+    }
+  };
+
+  // Hàm xóa user
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await httpService.delete(`/auth/users/${userId}/`);
+        fetchUsers();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Error deleting user. Please try again.');
+      }
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -105,8 +200,15 @@ const AdminUsers = () => {
         <Row className="mb-4">
           <Col>
             <Card>
-              <Card.Header>
+              <Card.Header className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">Users Management</h5>
+                <Button
+                  variant="primary"
+                  onClick={handleAddUser}
+                >
+                  <i className="fas fa-plus me-2"></i>
+                  Add User
+                </Button>
               </Card.Header>
               <Card.Body>
                 <Table responsive hover>
@@ -114,7 +216,6 @@ const AdminUsers = () => {
                     <tr>
                       <th>ID</th>
                       <th>Username</th>
-                      <th>Name</th>
                       <th>Email</th>
                       <th>Status</th>
                       <th>Joined</th>
@@ -128,26 +229,43 @@ const AdminUsers = () => {
                         <td>
                           <strong>{user.username}</strong>
                         </td>
-                        <td>
-                          {user.first_name} {user.last_name}
-                        </td>
                         <td>{user.email}</td>
                         <td>{getUserStatusBadge(user)}</td>
                         <td>{formatDate(user.date_joined)}</td>
                         <td>
                           <div className="action-buttons">
                             <Button
-                              variant="outline-primary"
+                              variant="outline-info"
                               size="sm"
                               onClick={() => handleShowUserDetails(user)}
                               className="me-1"
+                              title="View Details"
                             >
                               <i className="fas fa-eye"></i>
                             </Button>
                             <Button
-                              variant={user.is_active ? "outline-danger" : "outline-success"}
+                              variant="outline-primary"
+                              size="sm"
+                              onClick={() => handleEditUser(user)}
+                              className="me-1"
+                              title="Edit User"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="me-1"
+                              title="Delete User"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
+                            <Button
+                              variant={user.is_active ? "outline-warning" : "outline-success"}
                               size="sm"
                               onClick={() => toggleUserStatus(user.id, user.is_active)}
+                              title={user.is_active ? "Deactivate User" : "Activate User"}
                             >
                               <i className={`fas fa-${user.is_active ? 'ban' : 'check'}`}></i>
                             </Button>
@@ -175,9 +293,7 @@ const AdminUsers = () => {
                     <h6>Personal Information</h6>
                     <p>
                       <strong>Username:</strong> {selectedUser.username}<br />
-                      <strong>Email:</strong> {selectedUser.email}<br />
-                      <strong>First Name:</strong> {selectedUser.first_name}<br />
-                      <strong>Last Name:</strong> {selectedUser.last_name}
+                      <strong>Email:</strong> {selectedUser.email}
                     </p>
                   </Col>
                   <Col md={6}>
@@ -230,6 +346,63 @@ const AdminUsers = () => {
               </Button>
             )}
           </Modal.Footer>
+        </Modal>
+
+        {/* Add/Edit User Modal */}
+        <Modal show={showEditModal} onHide={handleCloseEditModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {editingUser ? 'Edit User' : 'Add New User'}
+            </Modal.Title>
+          </Modal.Header>
+          <Form onSubmit={handleSubmit}>
+            <Modal.Body>
+              <Form.Group className="mb-3">
+                <Form.Label>Username</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                />
+              </Form.Group>
+
+
+
+              <Form.Group className="mb-3">
+                <Form.Label>
+                  {editingUser ? 'New Password (leave blank to keep current)' : 'Password'}
+                </Form.Label>
+                <Form.Control
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required={!editingUser}
+                />
+              </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseEditModal}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                {editingUser ? 'Update User' : 'Add User'}
+              </Button>
+            </Modal.Footer>
+          </Form>
         </Modal>
       </div>
     </AdminLayout>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Carousel, Image } from 'react-bootstrap';
+import { formatVND } from '../utils/currency';
 
 function ProductsCarousel({products}) {
     let topRatedProducts = [...products];
@@ -13,7 +14,7 @@ function ProductsCarousel({products}) {
                 <Link to={`/products/${product.id}`}>
                     <Image src={product.image} alt={product.name} style={{objectFit:'cover'}}/>
                     <Carousel.Caption className='carousel-caption'>
-                        <h4>{product.name} (₹{product.price})</h4></Carousel.Caption>
+                        <h4>{product.name} ({formatVND(product.price)})</h4></Carousel.Caption>
                 </Link>
             </Carousel.Item>))}
         </Carousel>

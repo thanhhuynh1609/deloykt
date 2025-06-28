@@ -3,6 +3,7 @@ import { Row, Col, Card, Table, Button, Badge, Modal, Form } from 'react-bootstr
 import AdminLayout from '../../components/admin/AdminLayout';
 import httpService from '../../services/httpService';
 import './AdminProducts.css';
+import { formatVND } from '../../utils/currency';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -179,7 +180,7 @@ const AdminProducts = () => {
                         </td>
                         <td>{getBrandName(product.brand)}</td>
                         <td>{getCategoryName(product.category)}</td>
-                        <td>${product.price}</td>
+                        <td>{formatVND(product.price)}</td>
                         <td>
                           <Badge 
                             bg={product.countInStock > 0 ? 'success' : 'danger'}

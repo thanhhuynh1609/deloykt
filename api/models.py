@@ -41,7 +41,7 @@ class Product(models.Model):
         max_digits=7, decimal_places=2, null=True, blank=True)
     numReviews = models.IntegerField(null=True, blank=True, default=0)
     price = models.DecimalField(
-        max_digits=7, decimal_places=2, null=True, blank=True)
+        max_digits=12, decimal_places=0, null=True, blank=True)
     countInStock = models.IntegerField(null=True, blank=True, default=0)
     createdAt = models.DateTimeField(auto_now_add=True)
 
@@ -66,9 +66,9 @@ class Review(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.SET_NULL, null=True)
-    taxPrice = models.DecimalField(max_digits=7, decimal_places=2)
-    shippingPrice = models.DecimalField(max_digits=7, decimal_places=2)
-    totalPrice = models.DecimalField(max_digits=7, decimal_places=2)
+    taxPrice = models.DecimalField(max_digits=12, decimal_places=0)
+    shippingPrice = models.DecimalField(max_digits=12, decimal_places=0)
+    totalPrice = models.DecimalField(max_digits=12, decimal_places=0)
     paymentMethod = models.CharField(max_length=255, null=True, blank=True)
     isPaid = models.BooleanField(default=False)
     isDelivered = models.BooleanField(default=False)
@@ -89,7 +89,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     productName = models.CharField(max_length=255, null=True, blank=True)
     qty = models.IntegerField(null=True, blank=True, default=1)
-    price = models.DecimalField(max_digits=7, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=0)
     image = models.ImageField(null=True, blank=True,
                               default='/placeholder.png')
 

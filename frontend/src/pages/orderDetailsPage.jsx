@@ -6,6 +6,7 @@ import UserContext from "../context/userContext";
 import Loader from "../components/loader";
 import Message from "../components/message";
 import StripePaymentWrapper from "../components/stripePaymentWrapper";
+import { formatVND } from "../utils/currency";
 
 function OrderDetailsPage(props) {
   const [loading, setLoading] = useState(true);
@@ -111,8 +112,7 @@ function OrderDetailsPage(props) {
                             </Link>
                           </Col>
                           <Col sm={3} md={4}>
-                            {product.qty} X ₹{product.price} = ₹
-                            {(product.qty * product.price).toFixed(2)}
+                            {product.qty} X {formatVND(product.price)} = {formatVND(product.qty * product.price)}
                           </Col>
                         </Row>
                       </ListGroup.Item>
@@ -132,29 +132,28 @@ function OrderDetailsPage(props) {
                   <Row>
                     <Col>Items</Col>
                     <Col>
-                      ₹
-                      {orderDetails.totalPrice -
+                      {formatVND(orderDetails.totalPrice -
                         orderDetails.taxPrice -
-                        orderDetails.shippingPrice}
+                        orderDetails.shippingPrice)}
                     </Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <Row>
                     <Col>Shipping</Col>
-                    <Col>₹{orderDetails.shippingPrice}</Col>
+                    <Col>{formatVND(orderDetails.shippingPrice)}</Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <Row>
                     <Col>Tax</Col>
-                    <Col>₹{orderDetails.taxPrice}</Col>
+                    <Col>{formatVND(orderDetails.taxPrice)}</Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <Row>
                     <Col>Total</Col>
-                    <Col>₹{orderDetails.totalPrice}</Col>
+                    <Col>{formatVND(orderDetails.totalPrice)}</Col>
                   </Row>
                 </ListGroup.Item>
               </ListGroup>

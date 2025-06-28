@@ -15,6 +15,7 @@ import Loader from "../components/loader";
 import Message from "../components/message";
 import CartContext from "../context/cartContext";
 import ReviewsList from "../components/reviewsList";
+import { formatVND } from "../utils/currency";
 
 function ProductPage(props) {
   const { id } = useParams();
@@ -81,7 +82,7 @@ function ProductPage(props) {
                   <Row>
                     <Col>Price:</Col>
                     <Col>
-                      <strong>₹{product.price}</strong>
+                      <strong>{formatVND(product.price)}</strong>
                     </Col>
                   </Row>
                 </ListGroup.Item>

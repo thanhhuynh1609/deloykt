@@ -1,0 +1,190 @@
+TOÀN BỘ API ENDPOINTS VÀ HƯỚNG DẪN TEST POSTMAN
+🔧 Cấu hình cơ bản
+Base URL: http://localhost:8000 (hoặc domain của bạn)
+
+Authentication: JWT Token
+
+Header: Authorization: JWT <access_token>
+🔐 1. AUTHENTICATION APIs
+1.1 Đăng ký tài khoản
+File:  venv/Lib/site-packages/djoser/views.py (UserViewSet)
+URL: POST /auth/users/
+Body:
+{
+    "username": "testuser",
+    "email": "test@example.com", 
+    "password": "strongpassword123"
+}
+
+1.2 Đăng nhập
+File:  user/views.py (MyTokenObtainPairView)
+URL: POST /auth/jwt/create/
+Body:
+{
+    "username": "testuser",
+    "password": "strongpassword123"
+}
+Response:
+{
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "username": "testuser",
+    "email": "test@example.com",
+    "isAdmin": false
+}
+
+1.3 Refresh Token
+File: rest_framework_simplejwt (built-in)
+URL: POST /auth/jwt/refresh/
+Body:
+{
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+
+1.4 Lấy thông tin user hiện tại
+File: venv/Lib/site-packages/djoser/views.py
+URL: GET /auth/users/me/
+Headers: Authorization: JWT <access_token>
+
+🏷️ 2. CATEGORY APIs
+2.1 Lấy danh sách categories
+File:  api/views.py (CategoryViewSet)
+URL: GET /api/category/
+Permission: Public (không cần auth)
+
+
+2.2 Lấy chi tiết category
+File:  api/views.py (CategoryViewSet)
+URL: GET /api/category/{id}/
+Permission: Public
+
+
+🏢 3. BRAND APIs
+3.1 Lấy danh sách brands
+File:  api/views.py (BrandViewSet)
+URL: GET /api/brands/
+Permission: Public
+
+
+3.2 Lấy chi tiết brand
+File: api/views.py (BrandViewSet)
+URL: GET /api/brands/{id}/
+Permission: Public
+
+
+📦 4. PRODUCT APIs
+4.1 Lấy danh sách products
+File:  api/views.py (ProductViewSet)
+URL: GET /api/products/
+Permission: Public
+
+
+4.2 Lấy chi tiết product
+File:  api/views.py (ProductViewSet)
+URL: GET /api/products/{id}/
+Permission: Public
+
+
+4.3 Tạo product mới (Admin only)
+File:  api/views.py (ProductViewSet)
+URL: POST /api/products/
+Headers: Authorization: JWT <admin_access_token>
+Body:
+{
+    "name": "iPhone 14",
+    "description": "Latest iPhone model",
+    "brand": 1,
+    "category": 1,
+    "price": "999.99",
+    "countInStock": 50
+}
+Loading...
+
+4.4 Cập nhật product (Admin only)
+File: api/views.py (ProductViewSet)
+URL: PUT /api/products/{id}/
+Headers: Authorization: JWT <admin_access_token>
+
+4.5 Xóa product (Admin only)
+File: api/views.py (ProductViewSet)
+URL: DELETE /api/products/{id}/
+Headers: Authorization: JWT <admin_access_token>
+
+
+⭐ 5. REVIEW APIs
+5.1 Lấy reviews của product
+File: api/views.py (ReviewView)
+URL: GET /api/products/{product_id}/reviews/
+Permission: Public
+
+5.2 Tạo review cho product
+File:  api/views.py (ReviewView)
+URL: POST /api/products/{product_id}/reviews/
+Headers: Authorization: JWT <access_token>
+Body:
+{
+    "rating": 5,
+    "comment": "Excellent product!"
+}
+
+🛒 6. ORDER APIs
+6.1 Lấy danh sách orders của user
+File:  api/views.py (OrderViewSet)
+URL: GET /api/orders/
+Headers: Authorization: JWT <access_token>
+
+6.2 Lấy chi tiết order
+File: api/views.py (OrderViewSet)
+URL: GET /api/orders/{id}/
+Headers: Authorization: JWT <access_token>
+
+6.3 Tạo order mới
+File:  api/views.py (placeOrder function)
+URL: POST /api/placeorder/
+Headers: Authorization: JWT <access_token>
+Body:
+{
+    "orderItems": [
+        {
+            "id": 1,
+            "qty": 2
+        },
+        {
+            "id": 2,
+            "qty": 1
+        }
+    ],
+    "shippingAddress": {
+        "address": "123 Main St",
+        "city": "New York",
+        "postalCode": "10001",
+        "country": "USA"
+    },
+    "paymentMethod": "Credit Card",
+    "taxPrice": "10.00",
+    "shippingPrice": "5.00",
+    "totalPrice": "115.00"
+}
+
+💳 7. PAYMENT APIs
+7.1 Tạo Stripe Payment Intent
+File:  api/views.py (StripePaymentView)
+URL: POST /api/stripe-payment/
+Headers: Authorization: JWT <access_token>
+Body:
+{
+    "order": 1
+}
+Response:
+{
+    "clientSecret": "pi_1234567890_secret_abcdef"
+}
+
+7.2 Cập nhật order thành đã thanh toán
+File:  api/views.py (updateOrderToPaid function)
+URL: POST /api/orders/{order_id}/pay/
+Headers: Authorization: JWT <access_token>
+Body:
+{
+    "payment_intent": "pi_1234567890"
+}

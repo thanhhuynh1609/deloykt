@@ -2,6 +2,7 @@ import { createContext, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import httpService from "../services/httpService";
 import UserContext from './userContext';
+import { CURRENCY } from "../utils/currency";
 
 const CartContext = createContext();
 
@@ -97,13 +98,14 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("paymentMethod", method);
   };
 
-  const totalItemsPrice = Number(
+  const totalItemsPrice = Math.round(
     productsInCart
       .reduce((acc, prod) => acc + prod.qty * prod.price, 0)
-      .toFixed(2)
   );
-  const shippingPrice = totalItemsPrice > 1000 ? (totalItemsPrice >= 2000 ? 0 : 100) : 250;
-  const taxPrice = Number((0.05 * totalItemsPrice).toFixed(2));
+  const shippingPrice = totalItemsPrice > CURRENCY.REDUCED_SHIPPING_THRESHOLD ?
+    (totalItemsPrice >= CURRENCY.FREE_SHIPPING_THRESHOLD ? CURRENCY.FREE_SHIPPING : CURRENCY.REDUCED_SHIPPING) :
+    CURRENCY.STANDARD_SHIPPING;
+  const taxPrice = Math.round(0.05 * totalItemsPrice);
   const totalPrice = totalItemsPrice + shippingPrice + taxPrice;
 
   const placeOrder = async () => {

@@ -6,6 +6,7 @@ import CheckoutSteps from "../components/checkoutSteps";
 import UserContext from "../context/userContext";
 import CartContext from "../context/cartContext";
 import FormContainer from "../components/formContainer";
+import { CURRENCY, formatVND } from "../utils/currency";
 
 function PlacerOrderPage(props) {
   const { userInfo } = useContext(UserContext);
@@ -80,8 +81,7 @@ function PlacerOrderPage(props) {
                           </Link>
                         </Col>
                         <Col sm={3} md={4}>
-                          {product.qty} X ₹{product.price} = ₹
-                          {(product.qty * product.price).toFixed(2)}
+                          {product.qty} X {formatVND(product.price)} = {formatVND(product.qty * product.price)}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -100,25 +100,25 @@ function PlacerOrderPage(props) {
               <ListGroup.Item>
                 <Row>
                   <Col>Items</Col>
-                  <Col>₹{totalItemsPrice}</Col>
+                  <Col>{formatVND(totalItemsPrice)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Shipping</Col>
-                  <Col>₹{shippingPrice}</Col>
+                  <Col>{formatVND(shippingPrice)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Tax</Col>
-                  <Col>₹{taxPrice}</Col>
+                  <Col>{formatVND(taxPrice)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
-                  <Col>₹{totalPrice}</Col>
+                  <Col>{formatVND(totalPrice)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -136,9 +136,9 @@ function PlacerOrderPage(props) {
             </ListGroup>
           </Card>
 
-          {totalItemsPrice <= 2000 ? (
+          {totalItemsPrice <= CURRENCY.FREE_SHIPPING_THRESHOLD ? (
             <Message variant="info">
-              Free shipping on minimum item value ₹2000.
+              Free shipping on minimum item value {formatVND(CURRENCY.FREE_SHIPPING_THRESHOLD)}.
             </Message>
           ) : (
             <Message variant="info">Free shipping on this order!</Message>

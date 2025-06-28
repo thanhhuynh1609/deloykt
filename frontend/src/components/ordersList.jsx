@@ -5,6 +5,7 @@ import Loader from "./loader";
 import Message from "./message";
 import { Button, Table } from "react-bootstrap";
 import { LinkContainer } from 'react-router-bootstrap';
+import { formatVND } from "../utils/currency";
 
 function OrdersList(props) {
   const [orders, setOrders] = useState([]);
@@ -50,7 +51,7 @@ function OrdersList(props) {
               <tr key={order.id}>
                 <td>{order.id}</td>
                 <td>{order.createdAt.substring(0, 10)}</td>
-                <td>₹{order.totalPrice}</td>
+                <td>{formatVND(order.totalPrice)}</td>
                 <td>
                   {order.isPaid && order.paidAt ? (
                     order.paidAt.substring(0, 10)

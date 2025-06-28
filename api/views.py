@@ -156,8 +156,8 @@ class StripePaymentView(APIView):
             # print(request.data)
             order = get_object_or_404(Order, id=request.data['order'])
             intent = stripe.PaymentIntent.create(
-                amount=int(order.totalPrice*100),
-                currency='inr',
+                amount=int(order.totalPrice),  # VND doesn't use cents like USD/EUR
+                currency='vnd',
                 automatic_payment_methods={
                     'enabled': True,
                 }
@@ -212,4 +212,5 @@ def update_review(request, pk, review_id):
         
         serializer = ReviewSerializer(review)
         return Response(serializer.data)
+
 

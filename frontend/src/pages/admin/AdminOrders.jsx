@@ -3,6 +3,7 @@ import { Row, Col, Card, Table, Badge, Button, Modal } from 'react-bootstrap';
 import AdminLayout from '../../components/admin/AdminLayout';
 import httpService from '../../services/httpService';
 import './AdminOrders.css';
+import { formatVND } from '../../utils/currency';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -117,7 +118,7 @@ const AdminOrders = () => {
                         </td>
                         <td>{formatDate(order.createdAt)}</td>
                         <td>
-                          <strong>${order.totalPrice}</strong>
+                          <strong>{formatVND(order.totalPrice)}</strong>
                         </td>
                         <td>
                           <Badge bg={order.isPaid ? 'success' : 'danger'}>
@@ -236,8 +237,8 @@ const AdminOrders = () => {
                           </div>
                         </td>
                         <td>{item.qty}</td>
-                        <td>${item.price}</td>
-                        <td>${(item.qty * item.price).toFixed(2)}</td>
+                        <td>{formatVND(item.price)}</td>
+                        <td>{formatVND(item.qty * item.price)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -249,19 +250,19 @@ const AdminOrders = () => {
                       <tbody>
                         <tr>
                           <td><strong>Subtotal:</strong></td>
-                          <td>${(selectedOrder.totalPrice - selectedOrder.taxPrice - selectedOrder.shippingPrice).toFixed(2)}</td>
+                          <td>{formatVND(selectedOrder.totalPrice - selectedOrder.taxPrice - selectedOrder.shippingPrice)}</td>
                         </tr>
                         <tr>
                           <td><strong>Shipping:</strong></td>
-                          <td>${selectedOrder.shippingPrice}</td>
+                          <td>{formatVND(selectedOrder.shippingPrice)}</td>
                         </tr>
                         <tr>
                           <td><strong>Tax:</strong></td>
-                          <td>${selectedOrder.taxPrice}</td>
+                          <td>{formatVND(selectedOrder.taxPrice)}</td>
                         </tr>
                         <tr className="border-top">
                           <td><strong>Total:</strong></td>
-                          <td><strong>${selectedOrder.totalPrice}</strong></td>
+                          <td><strong>{formatVND(selectedOrder.totalPrice)}</strong></td>
                         </tr>
                       </tbody>
                     </Table>

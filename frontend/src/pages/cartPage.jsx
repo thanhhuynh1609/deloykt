@@ -11,6 +11,7 @@ import {
 } from "react-bootstrap";
 import Message from "../components/message";
 import CartContext from "../context/cartContext";
+import { formatVND } from "../utils/currency";
 
 function CartPage(props) {
   const { error, productsInCart, updateItemQty, removeFromCart } =
@@ -59,7 +60,7 @@ function CartPage(props) {
                     </Link>
                   </Col>
                   <Col xs={3} md={2}>
-                    ₹{product.price}
+                    {formatVND(product.price)}
                   </Col>
                   <Col xs={6} md={3}>
                     <Form.Select
@@ -109,13 +110,11 @@ function CartPage(props) {
                 items
               </h2>
               <h4>
-                ₹
-                {productsInCart
+                {formatVND(productsInCart
                   .reduce(
                     (acc, product) => acc + product.qty * product.price,
                     0
-                  )
-                  .toFixed(2)}
+                  ))}
               </h4>
             </ListGroup.Item>
             <ListGroup.Item>

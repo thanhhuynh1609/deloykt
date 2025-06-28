@@ -1,5 +1,8 @@
 from datetime import datetime
 from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -214,3 +217,42 @@ def update_review(request, pk, review_id):
         return Response(serializer.data)
 
 
+class ImageUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            if 'image' not in request.FILES:
+                return Response({'error': 'No image file provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+            image_file = request.FILES['image']
+
+            # Validate file type
+            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+            if image_file.content_type not in allowed_types:
+                return Response({'error': 'Invalid file type. Only JPEG, PNG, and GIF are allowed.'},
+                              status=status.HTTP_400_BAD_REQUEST)
+
+            # Validate file size (max 5MB)
+            if image_file.size > 5 * 1024 * 1024:
+                return Response({'error': 'File too large. Maximum size is 5MB.'},
+                              status=status.HTTP_400_BAD_REQUEST)
+
+            # Generate unique filename
+            import uuid
+            file_extension = os.path.splitext(image_file.name)[1]
+            unique_filename = f"products/{uuid.uuid4()}{file_extension}"
+
+            # Save file
+            file_path = default_storage.save(unique_filename, ContentFile(image_file.read()))
+
+            # Return the file URL
+            file_url = default_storage.url(file_path)
+
+            return Response({
+                'image_url': file_url,
+                'message': 'Image uploaded successfully'
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

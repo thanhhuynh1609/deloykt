@@ -18,8 +18,10 @@ const AdminProducts = () => {
     price: '',
     countInStock: '',
     brand: '',
-    category: ''
+    category: '',
+    image: null
   });
+  const [imagePreview, setImagePreview] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -52,8 +54,10 @@ const AdminProducts = () => {
         price: product.price || '',
         countInStock: product.countInStock || '',
         brand: product.brand || '',
-        category: product.category || ''
+        category: product.category || '',
+        image: null
       });
+      setImagePreview(product.image || '');
     } else {
       setEditingProduct(null);
       setFormData({
@@ -62,8 +66,10 @@ const AdminProducts = () => {
         price: '',
         countInStock: '',
         brand: '',
-        category: ''
+        category: '',
+        image: null
       });
+      setImagePreview('');
     }
     setShowModal(true);
   };
@@ -71,28 +77,63 @@ const AdminProducts = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingProduct(null);
+    setImagePreview('');
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, files } = e.target;
+    if (name === 'image') {
+      const file = files[0];
+      setFormData(prev => ({
+        ...prev,
+        image: file
+      }));
+
+      // Create preview URL
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('countInStock', formData.countInStock);
+      formDataToSend.append('brand', formData.brand);
+      formDataToSend.append('category', formData.category);
+
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
       if (editingProduct) {
-        await httpService.put(`/api/products/${editingProduct.id}/`, formData);
+        await httpService.put(`/api/products/${editingProduct.id}/`, formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else {
-        await httpService.post('/api/products/', formData);
+        await httpService.post('/api/products/', formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
       fetchData();
       handleCloseModal();
     } catch (error) {
       console.error('Error saving product:', error);
+      console.error('Error response:', error.response?.data);
     }
   };
 
@@ -249,13 +290,15 @@ const AdminProducts = () => {
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Price</Form.Label>
+                    <Form.Label>Price (VND)</Form.Label>
                     <Form.Control
                       type="number"
-                      step="0.01"
+                      step="1"
+                      min="0"
                       name="price"
                       value={formData.price}
                       onChange={handleInputChange}
+                      placeholder="Enter price in VND (e.g., 1500000)"
                       required
                     />
                   </Form.Group>
@@ -321,6 +364,42 @@ const AdminProducts = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                 />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Product Image</Form.Label>
+                <Form.Control
+                  type="file"
+                  name="image"
+                  onChange={handleInputChange}
+                  accept="image/*"
+                />
+                {editingProduct && editingProduct.image && !imagePreview && (
+                  <div className="mt-2">
+                    <p>Current image:</p>
+                    <img
+                      src={editingProduct.image}
+                      alt={editingProduct.name}
+                      style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                    />
+                  </div>
+                )}
+                {imagePreview && (
+                  <div className="mt-2">
+                    <p>New image preview:</p>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      style={{
+                        maxWidth: '200px',
+                        maxHeight: '200px',
+                        objectFit: 'cover',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px'
+                      }}
+                    />
+                  </div>
+                )}
               </Form.Group>
             </Modal.Body>
             <Modal.Footer>

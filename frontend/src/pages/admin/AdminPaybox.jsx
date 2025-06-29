@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Table, Badge, Button, Form, Alert } from "react-bootstrap";
 import httpService from "../../services/httpService";
 import Loader from "../../components/loader";
+import AdminLayout from "../../components/admin/AdminLayout"; // Thêm dòng này sau các import khác
 import Message from "../../components/message";
 
 function AdminPaybox() {
@@ -85,6 +86,7 @@ function AdminPaybox() {
   if (error) return <Message variant="danger">{error}</Message>;
 
   return (
+    <AdminLayout>
     <Container fluid>
       <Row className="mb-4">
         <Col>
@@ -299,6 +301,7 @@ function AdminPaybox() {
         </Card>
       )}
     </Container>
+    </AdminLayout>
   );
 }
 

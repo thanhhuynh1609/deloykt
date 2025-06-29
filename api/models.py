@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator
 from decimal import Decimal
+import logging;
 # Create your models here.
 
 
@@ -151,6 +152,8 @@ class PayboxWallet(models.Model):
     def has_sufficient_balance(self, amount):
         """Kiểm tra số dư có đủ không"""
         return self.balance >= Decimal(str(amount))
+    
+    
 
     class Meta:
         verbose_name = "Paybox Wallet"

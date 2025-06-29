@@ -445,9 +445,9 @@ class PayboxPaymentView(APIView):
             wallet, created = PayboxWallet.objects.get_or_create(user=request.user)
 
             # Kiểm tra số dư
-            if not wallet.has_sufficient_balance(order.totalPrice):
+            if not wallet.has_sufficient_balance(float(order.totalPrice)):
                 return Response({
-                    'error': 'Số dư ví không đủ',
+                    'error': 'Số dư không đủ để thanh toán đơn hàng',
                     'required': float(order.totalPrice),
                     'available': float(wallet.balance)
                 }, status=status.HTTP_400_BAD_REQUEST)

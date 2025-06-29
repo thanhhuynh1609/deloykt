@@ -10,6 +10,7 @@ import StripePaymentWrapper from "../components/stripePaymentWrapper";
 import { formatVND } from "../utils/currency";
 
 function OrderDetailsPage(props) {
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("paybox"); // Mặc định chọn Paybox
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState({});
   const [error, setError] = useState("");
@@ -196,7 +197,30 @@ function OrderDetailsPage(props) {
                   )}
 
                   {/* Paybox Payment Option */}
-                  {wallet && (
+                  {/* Chọn phương thức thanh toán */}
+                  <Card className="mb-3">
+                    <Card.Body className="p-2">
+                      <div className="d-flex gap-3">
+                        <Button
+                          variant={selectedPaymentMethod === "paybox" ? "primary" : "outline-primary"}
+                          onClick={() => setSelectedPaymentMethod("paybox")}
+                        >
+                          <i className="fas fa-wallet me-2"></i>
+                          Ví Paybox
+                        </Button>
+                        <Button
+                          variant={selectedPaymentMethod === "stripe" ? "primary" : "outline-primary"}
+                          onClick={() => setSelectedPaymentMethod("stripe")}
+                        >
+                          <i className="fas fa-credit-card me-2"></i>
+                          Thẻ tín dụng/ghi nợ
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+
+                  {/* Paybox Payment Option */}
+                  {selectedPaymentMethod === "paybox" && wallet && (
                     <Card className="mb-3">
                       <Card.Header>
                         <h6 className="mb-0">
@@ -254,17 +278,19 @@ function OrderDetailsPage(props) {
                   )}
 
                   {/* Stripe Payment Option */}
-                  <Card>
-                    <Card.Header>
-                      <h6 className="mb-0">
-                        <i className="fas fa-credit-card me-2"></i>
-                        Thanh toán bằng thẻ tín dụng/ghi nợ
-                      </h6>
-                    </Card.Header>
-                    <Card.Body className="p-0">
-                      <StripePaymentWrapper id={orderDetails.id} />
-                    </Card.Body>
-                  </Card>
+                  {selectedPaymentMethod === "stripe" && (
+                    <Card>
+                      <Card.Header>
+                        <h6 className="mb-0">
+                          <i className="fas fa-credit-card me-2"></i>
+                          Thanh toán bằng thẻ tín dụng/ghi nợ
+                        </h6>
+                      </Card.Header>
+                      <Card.Body className="p-0">
+                        <StripePaymentWrapper id={orderDetails.id} />
+                      </Card.Body>
+                    </Card>
+                  )}
                 </div>
               )}
             </Row>

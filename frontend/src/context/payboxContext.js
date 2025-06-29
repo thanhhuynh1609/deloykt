@@ -155,7 +155,7 @@ export const PayboxProvider = ({ children }) => {
 
   // Kiểm tra số dư có đủ không
   const hasSufficientBalance = (amount) => {
-    return wallet && wallet.balance >= amount;
+    return wallet && Number(wallet.balance) >= Number(amount);
   };
 
   // Load dữ liệu khi user đăng nhập và authentication hoàn tất

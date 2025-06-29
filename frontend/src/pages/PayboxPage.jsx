@@ -66,8 +66,8 @@ function PayboxPage() {
             }>
               <Row>
                 <Col>
-                  <PayboxSimpleTest />
-                  <PayboxDebug />
+                  {/* <PayboxSimpleTest /> */}
+                  {/* <PayboxDebug /> */}
                   <PayboxWallet />
                 </Col>
               </Row>

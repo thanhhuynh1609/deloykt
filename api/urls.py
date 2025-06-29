@@ -4,7 +4,10 @@ from rest_framework.routers import DefaultRouter
 from api.views import (
     BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet,
     ReviewView, ReviewViewSet, StripePaymentView,
-    placeOrder, updateOrderToPaid, update_review
+    placeOrder, updateOrderToPaid, update_review,
+    PayboxWalletView, PayboxTransactionListView, PayboxDepositView,
+    PayboxDepositConfirmView, PayboxPaymentView,
+    AdminPayboxWalletListView, AdminPayboxTransactionListView
 )
 
 router = DefaultRouter()
@@ -21,6 +24,17 @@ urlpatterns = [*router.urls,
         name='stipe-payment'),
     path('products/<str:pk>/reviews/', ReviewView.as_view(), name='product-reviews'),
     path('products/<str:pk>/reviews/<str:review_id>/', update_review, name='update-review'),
+
+    # Paybox endpoints
+    path('paybox/wallet/', PayboxWalletView.as_view(), name='paybox-wallet'),
+    path('paybox/transactions/', PayboxTransactionListView.as_view(), name='paybox-transactions'),
+    path('paybox/deposit/', PayboxDepositView.as_view(), name='paybox-deposit'),
+    path('paybox/deposit/confirm/', PayboxDepositConfirmView.as_view(), name='paybox-deposit-confirm'),
+    path('paybox/payment/', PayboxPaymentView.as_view(), name='paybox-payment'),
+
+    # Admin Paybox endpoints
+    path('admin/paybox/wallets/', AdminPayboxWalletListView.as_view(), name='admin-paybox-wallets'),
+    path('admin/paybox/transactions/', AdminPayboxTransactionListView.as_view(), name='admin-paybox-transactions'),
 ]
 
 

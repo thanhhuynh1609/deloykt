@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator
+from decimal import Decimal
 # Create your models here.
 
 
@@ -107,3 +108,129 @@ class ShippingAddress(models.Model):
 
     def __str__(self) -> str:
         return self.address
+
+
+class PayboxWallet(models.Model):
+    """
+    Ví điện tử Paybox cho người dùng
+    """
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='paybox_wallet'
+    )
+    balance = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        default=0,
+        help_text="Số dư ví tính bằng VND"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Paybox - {self.user.username}: {self.balance:,.0f} VND"
+
+    def add_balance(self, amount):
+        """Thêm tiền vào ví"""
+        if amount > 0:
+            self.balance += Decimal(str(amount))
+            self.save()
+            return True
+        return False
+
+    def deduct_balance(self, amount):
+        """Trừ tiền từ ví"""
+        if amount > 0 and self.balance >= Decimal(str(amount)):
+            self.balance -= Decimal(str(amount))
+            self.save()
+            return True
+        return False
+
+    def has_sufficient_balance(self, amount):
+        """Kiểm tra số dư có đủ không"""
+        return self.balance >= Decimal(str(amount))
+
+    class Meta:
+        verbose_name = "Paybox Wallet"
+        verbose_name_plural = "Paybox Wallets"
+
+
+class PayboxTransaction(models.Model):
+    """
+    Lịch sử giao dịch của ví Paybox
+    """
+    TRANSACTION_TYPES = [
+        ('DEPOSIT', 'Nạp tiền'),
+        ('PAYMENT', 'Thanh toán đơn hàng'),
+        ('REFUND', 'Hoàn tiền'),
+        ('TRANSFER', 'Chuyển tiền'),
+    ]
+
+    TRANSACTION_STATUS = [
+        ('PENDING', 'Đang xử lý'),
+        ('COMPLETED', 'Hoàn thành'),
+        ('FAILED', 'Thất bại'),
+        ('CANCELLED', 'Đã hủy'),
+    ]
+
+    wallet = models.ForeignKey(
+        PayboxWallet,
+        on_delete=models.CASCADE,
+        related_name='transactions'
+    )
+    transaction_type = models.CharField(
+        max_length=20,
+        choices=TRANSACTION_TYPES
+    )
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        help_text="Số tiền giao dịch tính bằng VND"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=TRANSACTION_STATUS,
+        default='PENDING'
+    )
+    description = models.TextField(blank=True, null=True)
+
+    # Liên kết với đơn hàng nếu là thanh toán
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='paybox_transactions'
+    )
+
+    # Thông tin Stripe nếu là nạp tiền
+    stripe_payment_intent_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    # Số dư trước và sau giao dịch
+    balance_before = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        help_text="Số dư trước giao dịch"
+    )
+    balance_after = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        help_text="Số dư sau giao dịch"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.wallet.user.username} - {self.get_transaction_type_display()}: {self.amount:,.0f} VND"
+
+    class Meta:
+        verbose_name = "Paybox Transaction"
+        verbose_name_plural = "Paybox Transactions"
+        ordering = ['-created_at']

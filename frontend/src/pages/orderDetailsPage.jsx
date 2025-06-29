@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Row, Col, ListGroup, Image, Card } from "react-bootstrap";
+import { Row, Col, ListGroup, Image, Card, Button, Alert } from "react-bootstrap";
 import httpService from "../services/httpService";
 import UserContext from "../context/userContext";
+import PayboxContext from "../context/payboxContext";
 import Loader from "../components/loader";
 import Message from "../components/message";
 import StripePaymentWrapper from "../components/stripePaymentWrapper";
@@ -12,7 +13,10 @@ function OrderDetailsPage(props) {
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState({});
   const [error, setError] = useState("");
+  const [payboxLoading, setPayboxLoading] = useState(false);
+  const [payboxMessage, setPayboxMessage] = useState("");
   const { userInfo, logout } = useContext(UserContext);
+  const { wallet, payWithPaybox, hasSufficientBalance, formatVND: formatPayboxVND } = useContext(PayboxContext);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -33,6 +37,26 @@ function OrderDetailsPage(props) {
     };
     fetchOrder();
   }, []);
+
+  const handlePayboxPayment = async () => {
+    try {
+      setPayboxLoading(true);
+      setPayboxMessage("");
+
+      await payWithPaybox(id);
+
+      // Refresh order details
+      const { data } = await httpService.get(`/api/orders/${id}/`);
+      setOrderDetails(data);
+
+      setPayboxMessage("Thanh toán thành công!");
+    } catch (ex) {
+      const errorMessage = ex.response?.data?.error || "Không thể thanh toán bằng ví Paybox";
+      setPayboxMessage(errorMessage);
+    } finally {
+      setPayboxLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -160,7 +184,88 @@ function OrderDetailsPage(props) {
             </Card>
             <Row className="p-2">
               {!orderDetails.isPaid && (
-                <StripePaymentWrapper id={orderDetails.id} />
+                <div>
+                  {/* Paybox Payment Messages */}
+                  {payboxMessage && (
+                    <Alert
+                      variant={payboxMessage.includes("thành công") ? "success" : "danger"}
+                      className="mb-3"
+                    >
+                      {payboxMessage}
+                    </Alert>
+                  )}
+
+                  {/* Paybox Payment Option */}
+                  {wallet && (
+                    <Card className="mb-3">
+                      <Card.Header>
+                        <h6 className="mb-0">
+                          <i className="fas fa-wallet me-2"></i>
+                          Thanh toán bằng ví Paybox
+                        </h6>
+                      </Card.Header>
+                      <Card.Body>
+                        <div className="mb-3">
+                          <small className="text-muted">Số dư hiện tại:</small>
+                          <div className="h5 text-primary mb-0">
+                            {formatPayboxVND(wallet.balance)}
+                          </div>
+                        </div>
+
+                        {hasSufficientBalance(orderDetails.totalPrice) ? (
+                          <Button
+                            variant="success"
+                            onClick={handlePayboxPayment}
+                            disabled={payboxLoading}
+                            className="w-100"
+                          >
+                            {payboxLoading ? (
+                              <>
+                                <i className="fas fa-spinner fa-spin me-2"></i>
+                                Đang xử lý...
+                              </>
+                            ) : (
+                              <>
+                                <i className="fas fa-check me-2"></i>
+                                Thanh toán {formatPayboxVND(orderDetails.totalPrice)}
+                              </>
+                            )}
+                          </Button>
+                        ) : (
+                          <div>
+                            <Alert variant="warning" className="mb-2">
+                              <small>
+                                <i className="fas fa-exclamation-triangle me-1"></i>
+                                Số dư không đủ để thanh toán đơn hàng này
+                              </small>
+                            </Alert>
+                            <Button
+                              variant="outline-primary"
+                              href="/paybox"
+                              className="w-100"
+                            >
+                              <i className="fas fa-plus me-2"></i>
+                              Nạp thêm tiền vào ví
+                            </Button>
+                          </div>
+                        )}
+                      </Card.Body>
+                    </Card>
+                  )}
+
+                  {/* Stripe Payment Option */}
+                  <Card>
+                    <Card.Header>
+                      <h6 className="mb-0">
+                        <i className="fas fa-credit-card me-2"></i>
+                        Thanh toán bằng thẻ tín dụng/ghi nợ
+                      </h6>
+                    </Card.Header>
+                    <Card.Body className="p-0">
+                      <StripePaymentWrapper id={orderDetails.id} />
+                    </Card.Body>
+                  </Card>
+                </div>
               )}
             </Row>
           </Col>

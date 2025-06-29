@@ -10,11 +10,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from api.models import Brand, Category, Order, OrderItem, Product, Review, ShippingAddress
+from api.models import Brand, Category, Order, OrderItem, Product, Review, ShippingAddress, PayboxWallet, PayboxTransaction
 from api.permissions import IsAdminUserOrReadOnly
-from api.serializers import BrandSerializer, CategorySerializer, OrderSerializer, ProductSerializer, ReviewSerializer
+from api.serializers import BrandSerializer, CategorySerializer, OrderSerializer, ProductSerializer, ReviewSerializer, PayboxWalletSerializer, PayboxTransactionSerializer
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
 import stripe
 
 
@@ -254,5 +255,275 @@ class ImageUploadView(APIView):
                 'message': 'Image uploaded successfully'
             }, status=status.HTTP_201_CREATED)
 
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ==================== PAYBOX WALLET VIEWS ====================
+
+class PayboxWalletView(APIView):
+    """
+    API để quản lý ví Paybox của người dùng
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Lấy thông tin ví của người dùng hiện tại"""
+        try:
+            print(f"PayboxWalletView: User = {request.user}")
+            print(f"PayboxWalletView: User authenticated = {request.user.is_authenticated}")
+
+            wallet, created = PayboxWallet.objects.get_or_create(user=request.user)
+            print(f"PayboxWalletView: Wallet = {wallet}, Created = {created}")
+
+            serializer = PayboxWalletSerializer(wallet)
+            print(f"PayboxWalletView: Serialized data = {serializer.data}")
+
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"PayboxWalletView: Error = {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PayboxTransactionListView(APIView):
+    """
+    API để xem lịch sử giao dịch của ví
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Lấy danh sách giao dịch của người dùng hiện tại"""
+        try:
+            print(f"PayboxTransactionListView: User = {request.user}")
+
+            wallet, created = PayboxWallet.objects.get_or_create(user=request.user)
+            print(f"PayboxTransactionListView: Wallet = {wallet}")
+
+            transactions = PayboxTransaction.objects.filter(wallet=wallet)
+            print(f"PayboxTransactionListView: Found {transactions.count()} transactions")
+
+            serializer = PayboxTransactionSerializer(transactions, many=True)
+            print(f"PayboxTransactionListView: Serialized {len(serializer.data)} transactions")
+
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"PayboxTransactionListView: Error = {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PayboxDepositView(APIView):
+    """
+    API để nạp tiền vào ví Paybox qua Stripe
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Tạo payment intent để nạp tiền vào ví"""
+        try:
+            print(f"PayboxDepositView: User = {request.user}")
+            print(f"PayboxDepositView: Request data = {request.data}")
+
+            amount = request.data.get('amount')
+            print(f"PayboxDepositView: Amount = {amount}")
+
+            if not amount or amount <= 0:
+                return Response({'error': 'Số tiền nạp phải lớn hơn 0'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Tạo Stripe payment intent
+            print(f"PayboxDepositView: Creating Stripe payment intent for amount {amount}")
+            intent = stripe.PaymentIntent.create(
+                amount=int(amount),  # VND không dùng cents
+                currency='vnd',
+                metadata={
+                    'user_id': request.user.id,
+                    'transaction_type': 'DEPOSIT'
+                },
+                automatic_payment_methods={
+                    'enabled': True,
+                }
+            )
+
+            print(f"PayboxDepositView: Stripe intent created = {intent['id']}")
+
+            response_data = {
+                'clientSecret': intent['client_secret'],
+                'paymentIntentId': intent['id']
+            }
+            print(f"PayboxDepositView: Returning response = {response_data}")
+
+            return Response(response_data)
+        except Exception as e:
+            print(f"PayboxDepositView: Error = {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PayboxDepositConfirmView(APIView):
+    """
+    API để xác nhận nạp tiền thành công
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Xác nhận và cập nhật số dư ví sau khi thanh toán Stripe thành công"""
+        try:
+            payment_intent_id = request.data.get('payment_intent_id')
+            if not payment_intent_id:
+                return Response({'error': 'Payment intent ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Lấy thông tin payment intent từ Stripe
+            intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+            if intent['status'] != 'succeeded':
+                return Response({'error': 'Payment not completed'}, status=status.HTTP_400_BAD_REQUEST)
+
+            amount = intent['amount']
+
+            with transaction.atomic():
+                # Lấy hoặc tạo ví
+                wallet, created = PayboxWallet.objects.get_or_create(user=request.user)
+
+                # Kiểm tra xem giao dịch đã được xử lý chưa
+                existing_transaction = PayboxTransaction.objects.filter(
+                    stripe_payment_intent_id=payment_intent_id
+                ).first()
+
+                if existing_transaction:
+                    return Response({'error': 'Transaction already processed'}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Lưu số dư trước giao dịch
+                balance_before = wallet.balance
+
+                # Cập nhật số dư ví
+                wallet.add_balance(amount)
+
+                # Tạo giao dịch
+                PayboxTransaction.objects.create(
+                    wallet=wallet,
+                    transaction_type='DEPOSIT',
+                    amount=amount,
+                    status='COMPLETED',
+                    description=f'Nạp tiền qua Stripe - {payment_intent_id}',
+                    stripe_payment_intent_id=payment_intent_id,
+                    balance_before=balance_before,
+                    balance_after=wallet.balance
+                )
+
+            return Response({
+                'message': 'Nạp tiền thành công',
+                'new_balance': wallet.balance
+            })
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PayboxPaymentView(APIView):
+    """
+    API để thanh toán đơn hàng bằng ví Paybox
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Thanh toán đơn hàng bằng số dư ví Paybox"""
+        try:
+            order_id = request.data.get('order_id')
+            if not order_id:
+                return Response({'error': 'Order ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Lấy đơn hàng
+            order = get_object_or_404(Order, id=order_id, user=request.user)
+
+            if order.isPaid:
+                return Response({'error': 'Đơn hàng đã được thanh toán'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Lấy ví của người dùng
+            wallet, created = PayboxWallet.objects.get_or_create(user=request.user)
+
+            # Kiểm tra số dư
+            if not wallet.has_sufficient_balance(order.totalPrice):
+                return Response({
+                    'error': 'Số dư ví không đủ',
+                    'required': float(order.totalPrice),
+                    'available': float(wallet.balance)
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            with transaction.atomic():
+                # Lưu số dư trước giao dịch
+                balance_before = wallet.balance
+
+                # Trừ tiền từ ví
+                if wallet.deduct_balance(order.totalPrice):
+                    # Cập nhật trạng thái đơn hàng
+                    order.isPaid = True
+                    order.paidAt = timezone.now()
+                    order.paymentMethod = 'Paybox'
+                    order.save()
+
+                    # Tạo giao dịch
+                    PayboxTransaction.objects.create(
+                        wallet=wallet,
+                        transaction_type='PAYMENT',
+                        amount=order.totalPrice,
+                        status='COMPLETED',
+                        description=f'Thanh toán đơn hàng #{order.id}',
+                        order=order,
+                        balance_before=balance_before,
+                        balance_after=wallet.balance
+                    )
+
+                    return Response({
+                        'message': 'Thanh toán thành công',
+                        'order_id': order.id,
+                        'amount_paid': float(order.totalPrice),
+                        'remaining_balance': float(wallet.balance)
+                    })
+                else:
+                    return Response({'error': 'Không thể thực hiện thanh toán'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ==================== ADMIN PAYBOX VIEWS ====================
+
+class AdminPayboxWalletListView(APIView):
+    """
+    API cho admin để xem danh sách tất cả ví Paybox
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Lấy danh sách tất cả ví (chỉ admin)"""
+        if not request.user.is_staff:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            wallets = PayboxWallet.objects.all().order_by('-created_at')
+            serializer = PayboxWalletSerializer(wallets, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AdminPayboxTransactionListView(APIView):
+    """
+    API cho admin để xem danh sách tất cả giao dịch Paybox
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Lấy danh sách tất cả giao dịch (chỉ admin)"""
+        if not request.user.is_staff:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            transactions = PayboxTransaction.objects.all().order_by('-created_at')
+            serializer = PayboxTransactionSerializer(transactions, many=True)
+            return Response(serializer.data)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

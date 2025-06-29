@@ -9,6 +9,7 @@ import { ProductsProvider } from "./context/productsContext";
 import CartPage from "./pages/cartPage";
 import { CartProvider } from "./context/cartContext";
 import { UserProvider } from "./context/userContext";
+import { PayboxProvider } from "./context/payboxContext";
 import LoginPage from "./pages/loginPage";
 import RegisterPage from "./pages/registerPage";
 import ProfilePage from "./pages/profilePage";
@@ -20,6 +21,7 @@ import "./App.css";
 import ConfirmationPage from "./pages/confirmationPage";
 import PaymentPage from "./pages/paymentPage";
 import SearchPage from "./pages/searchPage";
+import PayboxPage from "./pages/PayboxPage";
 // Admin imports
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -28,6 +30,7 @@ import AdminCategories from "./pages/admin/AdminCategories";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminBrands from "./pages/admin/AdminBrands";
 import AdminReviews from "./pages/admin/AdminReviews";
+import AdminPaybox from "./pages/admin/AdminPaybox";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const AppContent = () => {
@@ -48,10 +51,11 @@ const AppContent = () => {
   return (
     <div>
       <UserProvider>
-        {!isAdminRoute && <Header keyword={keyword} setKeyword={setKeyword} />}
-        <main className={isAdminRoute ? "" : "py-3"}>
-          <ProductsProvider>
-            <CartProvider>
+        <PayboxProvider>
+          {!isAdminRoute && <Header keyword={keyword} setKeyword={setKeyword} />}
+          <main className={isAdminRoute ? "" : "py-3"}>
+            <ProductsProvider>
+              <CartProvider>
               {!isAdminRoute ? (
                 <Container>
                   <Routes>
@@ -64,6 +68,7 @@ const AppContent = () => {
                   <Route path="/logout" element={<Logout />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/paybox" element={<PayboxPage />} />
                   <Route path="/products/:id" element={<ProductPage />} />
                   <Route path="/orders/:id" element={<OrderDetailsPage />} />
                   <Route path="/payment" element={<PaymentPage />} />
@@ -110,12 +115,18 @@ const AppContent = () => {
                       <AdminReviews />
                     </ProtectedRoute>
                   } />
+                  <Route path="/admin/paybox" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminPaybox />
+                    </ProtectedRoute>
+                  } />
                 </Routes>
               )}
-            </CartProvider>
-          </ProductsProvider>
-        </main>
-        {!isAdminRoute && <Footer />}
+              </CartProvider>
+            </ProductsProvider>
+          </main>
+          {!isAdminRoute && <Footer />}
+        </PayboxProvider>
       </UserProvider>
     </div>
   );

@@ -24,6 +24,13 @@ function Header({keyword,setKeyword}) {
                 </Nav.Link>
               </LinkContainer>
               {userInfo && (
+                <LinkContainer to="/paybox">
+                  <Nav.Link>
+                    <i className="fas fa-wallet" /> Paybox
+                  </Nav.Link>
+                </LinkContainer>
+              )}
+              {userInfo && (
                 <NavDropdown title={userInfo.username} id="username">
                   <LinkContainer to="/profile">
                     <NavDropdown.Item>Profile</NavDropdown.Item>

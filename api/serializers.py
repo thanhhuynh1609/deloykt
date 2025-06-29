@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Brand, Category, Product, Review, ShippingAddress, Order, OrderItem
+from api.models import Brand, Category, Product, Review, ShippingAddress, Order, OrderItem, PayboxWallet, PayboxTransaction
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -86,6 +86,53 @@ class OrderSerializer(serializers.ModelSerializer):
         user = obj.user
         serializer = UserSerializer(user)
         return serializer.data
+
+
+class PayboxWalletSerializer(serializers.ModelSerializer):
+    user_info = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = PayboxWallet
+        fields = ['id', 'user', 'user_info', 'balance', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'created_at', 'updated_at']
+
+    def get_user_info(self, obj):
+        return {
+            'username': obj.user.username,
+            'email': obj.user.email
+        }
+
+
+class PayboxTransactionSerializer(serializers.ModelSerializer):
+    wallet_info = serializers.SerializerMethodField(read_only=True)
+    order_info = serializers.SerializerMethodField(read_only=True)
+    transaction_type_display = serializers.CharField(source='get_transaction_type_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = PayboxTransaction
+        fields = [
+            'id', 'wallet', 'wallet_info', 'transaction_type', 'transaction_type_display',
+            'amount', 'status', 'status_display', 'description', 'order', 'order_info',
+            'stripe_payment_intent_id', 'balance_before', 'balance_after',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['wallet', 'balance_before', 'balance_after', 'created_at', 'updated_at']
+
+    def get_wallet_info(self, obj):
+        return {
+            'user_username': obj.wallet.user.username,
+            'user_email': obj.wallet.user.email
+        }
+
+    def get_order_info(self, obj):
+        if obj.order:
+            return {
+                'id': obj.order.id,
+                'total_price': obj.order.totalPrice,
+                'created_at': obj.order.createdAt
+            }
+        return None
 
     def update(self, instance, validated_data):
         # If isDelivered is being set to True and deliveredAt is not set

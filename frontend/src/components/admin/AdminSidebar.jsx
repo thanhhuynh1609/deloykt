@@ -95,13 +95,24 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/reviews" 
+            <Nav.Link
+              as={Link}
+              to="/admin/reviews"
               className={`sidebar-link ${isActive('/admin/reviews') ? 'active' : ''}`}
             >
               <i className="fas fa-star"></i>
               Reviews
+            </Nav.Link>
+          </Nav.Item>
+
+          <Nav.Item>
+            <Nav.Link
+              as={Link}
+              to="/admin/paybox"
+              className={`sidebar-link ${isActive('/admin/paybox') ? 'active' : ''}`}
+            >
+              <i className="fas fa-wallet"></i>
+              Paybox
             </Nav.Link>
           </Nav.Item>
         </div>

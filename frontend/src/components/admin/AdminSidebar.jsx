@@ -116,7 +116,10 @@ const AdminSidebar = () => {
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link as={Link} to="/admin/coupons">
+            <Nav.Link as={Link} 
+            to="/admin/coupons"
+            className={`sidebar-link ${isActive('/admin/coupons') ? 'active' : ''}`}
+            >
               <i className="fas fa-ticket-alt me-2"></i>
               Mã giảm giá
             </Nav.Link>

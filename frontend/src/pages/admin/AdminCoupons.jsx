@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchCoupons, createCoupon, updateCoupon, deleteCoupon } from "../../services/couponService";
 import { Table, Button, Modal, Form } from "react-bootstrap";
+import AdminLayout from '../../components/admin/AdminLayout';
 
 function AdminCoupons() {
   const [coupons, setCoupons] = useState([]);
@@ -56,6 +57,7 @@ function AdminCoupons() {
   };
 
   return (
+    <AdminLayout>
     <div>
       <h2>Quản lý mã giảm giá</h2>
       <Button onClick={() => handleShowModal()}>Thêm mã giảm giá</Button>
@@ -130,6 +132,7 @@ function AdminCoupons() {
         </Modal.Footer>
       </Modal>
     </div>
+    </AdminLayout>
   );
 }
 

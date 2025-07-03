@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator
 from decimal import Decimal
+from django.utils import timezone
 import logging;
 # Create your models here.
 
@@ -65,6 +66,23 @@ class Review(models.Model):
         return str(self.rating)
 
 
+class Coupon(models.Model):
+    code = models.CharField(max_length=30, unique=True)
+    description = models.TextField(blank=True, null=True)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=0, help_text="Số tiền giảm (VND)")
+    min_order_amount = models.DecimalField(max_digits=12, decimal_places=0, help_text="Đơn tối thiểu để áp dụng (VND)")
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        now = timezone.now()
+        return self.is_active and self.valid_from <= now <= self.valid_to
+
+    def __str__(self):
+        return f"{self.code} - {self.discount_amount} VND"
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.SET_NULL, null=True)
@@ -78,6 +96,8 @@ class Order(models.Model):
     paidAt = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     deliveredAt = models.DateTimeField(
         auto_now_add=False, null=True, blank=True)
+    coupon = models.ForeignKey(
+        Coupon, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self) -> str:
         return f'{str(self.createdAt)} at {"Deleted User" if self.user == None else self.user.username}'
@@ -97,6 +117,9 @@ class OrderItem(models.Model):
 
     def __str__(self) -> str:
         return f'Order #{self.order.id} - {self.productName}'
+    
+
+
 
 
 class ShippingAddress(models.Model):

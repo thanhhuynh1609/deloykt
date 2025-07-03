@@ -1,4 +1,5 @@
 from django.urls import path
+from .views import CouponViewSet
 from rest_framework.routers import DefaultRouter
 
 from api.views import (
@@ -16,6 +17,7 @@ router.register('category', CategoryViewSet, basename='category')
 router.register('products', ProductViewSet, basename='products')
 router.register('orders', OrderViewSet, basename='orders')
 router.register('reviews', ReviewViewSet, basename='reviews')
+router.register(r'coupons', CouponViewSet, basename='coupon')
 
 urlpatterns = [*router.urls,
     path('placeorder/', placeOrder, name='create-order'),

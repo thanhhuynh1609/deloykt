@@ -27,11 +27,11 @@ const AdminSidebar = () => {
       <Nav className="flex-column sidebar-nav">
         <div className="nav-section">
           <small className="nav-section-title">MANAGEMENT</small>
-          
+
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin" 
+            <Nav.Link
+              as={Link}
+              to="/admin"
               className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
             >
               <i className="fas fa-tachometer-alt"></i>
@@ -40,9 +40,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/products" 
+            <Nav.Link
+              as={Link}
+              to="/admin/products"
               className={`sidebar-link ${isActive('/admin/products') ? 'active' : ''}`}
             >
               <i className="fas fa-box"></i>
@@ -51,9 +51,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/categories" 
+            <Nav.Link
+              as={Link}
+              to="/admin/categories"
               className={`sidebar-link ${isActive('/admin/categories') ? 'active' : ''}`}
             >
               <i className="fas fa-tags"></i>
@@ -62,9 +62,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/brands" 
+            <Nav.Link
+              as={Link}
+              to="/admin/brands"
               className={`sidebar-link ${isActive('/admin/brands') ? 'active' : ''}`}
             >
               <i className="fas fa-trademark"></i>
@@ -73,9 +73,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/orders" 
+            <Nav.Link
+              as={Link}
+              to="/admin/orders"
               className={`sidebar-link ${isActive('/admin/orders') ? 'active' : ''}`}
             >
               <i className="fas fa-shopping-cart"></i>
@@ -84,9 +84,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/users" 
+            <Nav.Link
+              as={Link}
+              to="/admin/users"
               className={`sidebar-link ${isActive('/admin/users') ? 'active' : ''}`}
             >
               <i className="fas fa-users"></i>
@@ -113,6 +113,12 @@ const AdminSidebar = () => {
             >
               <i className="fas fa-wallet"></i>
               Paybox
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link as={Link} to="/admin/coupons">
+              <i className="fas fa-ticket-alt me-2"></i>
+              Mã giảm giá
             </Nav.Link>
           </Nav.Item>
         </div>

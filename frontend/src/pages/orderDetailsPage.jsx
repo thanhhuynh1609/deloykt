@@ -181,6 +181,20 @@ function OrderDetailsPage(props) {
                     <Col>{formatVND(orderDetails.totalPrice)}</Col>
                   </Row>
                 </ListGroup.Item>
+                {/* <ListGroup.Item>
+                  <Row>
+                    <Col>Giảm giá</Col>
+                    <Col className="text-success">
+                      {orderDetails.coupon ? `- ${formatVND(orderDetails.coupon.discount_amount)}` : "0 VND"}
+                    </Col>
+                  </Row>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <Row>
+                    <Col><strong>Tổng cộng</strong></Col>
+                    <Col><strong>{formatVND(orderDetails.totalPrice)}</strong></Col>
+                  </Row>
+                </ListGroup.Item> */}
               </ListGroup>
             </Card>
             <Row className="p-2">

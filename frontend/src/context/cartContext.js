@@ -25,8 +25,13 @@ export const CartProvider = ({ children }) => {
       ? localStorage.getItem("paymentMethod")
       : "Stripe"
   );
+  const [couponCode, setCouponCode] = useState(
+    localStorage.getItem("couponCode") || ""
+  );
+  const [couponMessage, setCouponMessage] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
   const navigate = useNavigate();
-  const {logout} = useContext(UserContext);
+  const { logout } = useContext(UserContext);
 
   const addItemToCart = async (id, qty) => {
     const item = productsInCart.find((prod) => prod.id === Number(id));
@@ -98,6 +103,25 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("paymentMethod", method);
   };
 
+  const applyCoupon = async (code) => {
+    try {
+      setCouponMessage("Đang kiểm tra mã...");
+      const { data } = await httpService.post("/api/coupons/check/", {
+        code,
+        total_price: totalPrice,
+      });
+      setCouponMessage(data.message);
+      setDiscountAmount(data.discount_amount);
+      setCouponCode(code);
+      localStorage.setItem("couponCode", code);
+    } catch (ex) {
+      setCouponMessage(ex.response?.data?.error || "Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+      setDiscountAmount(0);
+      setCouponCode("");
+      localStorage.removeItem("couponCode");
+    }
+  };
+
   const totalItemsPrice = Math.round(
     productsInCart
       .reduce((acc, prod) => acc + prod.qty * prod.price, 0)
@@ -106,10 +130,11 @@ export const CartProvider = ({ children }) => {
     (totalItemsPrice >= CURRENCY.FREE_SHIPPING_THRESHOLD ? CURRENCY.FREE_SHIPPING : CURRENCY.REDUCED_SHIPPING) :
     CURRENCY.STANDARD_SHIPPING;
   const taxPrice = Math.round(0.05 * totalItemsPrice);
-  const totalPrice = totalItemsPrice + shippingPrice + taxPrice;
+  const totalPrice = totalItemsPrice + shippingPrice + taxPrice ;
 
   const placeOrder = async () => {
     try {
+      setError(""); // Reset lỗi trước khi gửi
       const { data } = await httpService.post("/api/placeorder/", {
         orderItems: productsInCart,
         shippingAddress,
@@ -118,14 +143,21 @@ export const CartProvider = ({ children }) => {
         taxPrice,
         shippingPrice,
         totalPrice,
+        coupon_code: couponCode,
       });
-      console.log(data);
       setProductsInCart([]);
       localStorage.removeItem("cartItems");
+      localStorage.removeItem("couponCode");
+      setCouponCode("");
+      setDiscountAmount(0);
+      setCouponMessage("");
       navigate(`/orders/${data.id}`);
     } catch (ex) {
-      if (ex.response && ex.response.status == 403) logout();
-      console.log(ex.response);
+      if (ex.response && ex.response.status === 403) {
+        logout();
+      } else {
+        setError(ex.response?.data?.error || "Đã xảy ra lỗi khi đặt hàng");
+      }
     }
   };
 
@@ -138,12 +170,17 @@ export const CartProvider = ({ children }) => {
     shippingAddress,
     updateShippingAddress,
     paymentMethod,
+    updatePaymentMethod,
     totalItemsPrice,
     shippingPrice,
     taxPrice,
     totalPrice,
-    updatePaymentMethod,
     placeOrder,
+    couponCode,
+    setCouponCode,
+    couponMessage,
+    discountAmount,
+    applyCoupon,
   };
 
   return (

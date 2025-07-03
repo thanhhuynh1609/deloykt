@@ -2,6 +2,7 @@ from rest_framework import serializers
 from api.models import Brand, Category, Product, Review, ShippingAddress, Order, OrderItem, PayboxWallet, PayboxTransaction
 from django.contrib.auth.models import User
 from django.utils import timezone
+from .models import Coupon
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -86,6 +87,12 @@ class OrderSerializer(serializers.ModelSerializer):
         user = obj.user
         serializer = UserSerializer(user)
         return serializer.data
+
+
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = '__all__'
 
 
 class PayboxWalletSerializer(serializers.ModelSerializer):

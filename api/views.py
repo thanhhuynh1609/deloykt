@@ -2,13 +2,17 @@ from datetime import datetime
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from .models import Coupon
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .serializers import CouponSerializer
 import os
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets, permissions
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from api.models import Brand, Category, Order, OrderItem, Product, Review, ShippingAddress, PayboxWallet, PayboxTransaction
 from api.permissions import IsAdminUserOrReadOnly
@@ -19,10 +23,44 @@ from django.utils import timezone
 import stripe
 
 
+
 class BrandViewSet(ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     permission_classes = [IsAdminUserOrReadOnly]
+
+
+class CouponViewSet(viewsets.ModelViewSet):
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'check_coupon']:
+            return [permissions.AllowAny()]
+        return super().get_permissions()
+
+    @action(detail=False, methods=['post'], url_path='check')
+    def check_coupon(self, request):
+        code = request.data.get('code')
+        total_price = request.data.get('total_price', 0)
+
+        if not code:
+            return Response({'error': 'Mã giảm giá không được cung cấp'}, status=400)
+
+        try:
+            coupon = Coupon.objects.get(code=code)
+            if not coupon.is_valid():
+                return Response({'error': 'Mã giảm giá không hợp lệ hoặc đã hết hạn'}, status=400)
+            if total_price < coupon.min_order_amount:
+                return Response({'error': f'Đơn hàng chưa đạt mức tối thiểu {coupon.min_order_amount} VND'}, status=400)
+            return Response({
+                'message': 'Mã giảm giá hợp lệ',
+                'discount_amount': coupon.discount_amount,
+                'coupon_id': coupon.id
+            }, status=200)
+        except Coupon.DoesNotExist:
+            return Response({'error': 'Mã giảm giá không tồn tại'}, status=400)
 
 
 class CategoryViewSet(ModelViewSet):
@@ -87,22 +125,51 @@ class ReviewView(APIView):
 def placeOrder(request):
     user = request.user
     data = request.data
-
     orderItems = data['orderItems']
 
     if not orderItems or len(orderItems) == 0:
         return Response({'detail': 'No Order items'}, status=status.HTTP_400_BAD_REQUEST)
 
-    with transaction.atomic():
-        order = Order.objects.create(user=user, paymentMethod=data['paymentMethod'], taxPrice=data['taxPrice'],
-                                     shippingPrice=data['shippingPrice'], totalPrice=data['totalPrice'])
+    totalPrice = data['totalPrice']
+    coupon_code = data.get('coupon_code')
+    discount = 0
+    coupon = None
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.get(code=coupon_code)
+            if not coupon.is_valid():
+                return Response({'error': 'Mã giảm giá không hợp lệ hoặc đã hết hạn'}, status=status.HTTP_400_BAD_REQUEST)
+            if totalPrice < coupon.min_order_amount:
+                return Response(
+                    {'error': f'Đơn hàng chưa đạt mức tối thiểu {coupon.min_order_amount} VND'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            discount = coupon.discount_amount
+        except Coupon.DoesNotExist:
+            return Response({'error': 'Mã giảm giá không tồn tại'}, status=status.HTTP_400_BAD_REQUEST)
 
-        shippingAddress = ShippingAddress.objects.create(order=order, address=data['shippingAddress']['address'], city=data['shippingAddress']
-                                                         ['city'], postalCode=data['shippingAddress']['postalCode'], country=data['shippingAddress']['country'],)
+    totalPrice = max(0, totalPrice - discount)
+
+    with transaction.atomic():
+        order = Order.objects.create(
+            user=user,
+            paymentMethod=data['paymentMethod'],
+            taxPrice=data['taxPrice'],
+            shippingPrice=data['shippingPrice'],
+            totalPrice=totalPrice,
+            coupon=coupon
+        )
+
+        shippingAddress = ShippingAddress.objects.create(
+            order=order,
+            address=data['shippingAddress']['address'],
+            city=data['shippingAddress']['city'],
+            postalCode=data['shippingAddress']['postalCode'],
+            country=data['shippingAddress']['country'],
+        )
 
         for x in orderItems:
             product = Product.objects.get(id=x['id'])
-
             item = OrderItem.objects.create(
                 product=product,
                 order=order,
@@ -111,12 +178,11 @@ def placeOrder(request):
                 price=product.price,
                 image=product.image.name
             )
-
             product.countInStock -= x['qty']
             product.save()
 
         serializer = OrderSerializer(order)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class OrderViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):

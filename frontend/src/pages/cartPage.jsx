@@ -74,7 +74,7 @@ function CartPage(props) {
                     >
                       {[
                         ...Array(
-                          product.countInStock <= 10 ? product.countInStock : 10
+                          Math.max(0, Math.min(Number(product.countInStock) || 0, 10))
                         ).keys(),
                       ].map((x) => (
                         <option key={x + 1} value={x + 1}>

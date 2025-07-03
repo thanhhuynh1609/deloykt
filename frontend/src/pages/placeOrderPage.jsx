@@ -18,9 +18,11 @@ function PlacerOrderPage(props) {
     shippingPrice,
     taxPrice,
     totalPrice,
+    discountAmount,
     placeOrder
   } = useContext(CartContext);
   const navigate = useNavigate();
+  const totalAfterDiscount = totalPrice - discountAmount;
 
   if (!userInfo || !userInfo.username) navigate("/login");
   if (!shippingAddress || !shippingAddress.address) navigate("/shipping");
@@ -115,12 +117,31 @@ function PlacerOrderPage(props) {
                   <Col>{formatVND(taxPrice)}</Col>
                 </Row>
               </ListGroup.Item>
+              {discountAmount > 0 && (
+                <ListGroup.Item>
+                  <Row>
+                    <Col>Giảm giá</Col>
+                    <Col className="text-success">- {formatVND(discountAmount)}</Col>
+                  </Row>
+                </ListGroup.Item>
+              )}
               <ListGroup.Item>
+                <Row>
+                  <Col><strong>Tổng cộng</strong></Col>
+                  <Col>
+                    <strong>{formatVND(totalAfterDiscount)}</strong>
+                    {discountAmount > 0 && (
+                      <span className="text-success ms-2">(Đã áp dụng mã giảm giá)</span>
+                    )}
+                  </Col>
+                </Row>
+              </ListGroup.Item>
+              {/* <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
                   <Col>{formatVND(totalPrice)}</Col>
                 </Row>
-              </ListGroup.Item>
+              </ListGroup.Item> */}
               <ListGroup.Item>
                 <Row className="mx-1">
                   <Button

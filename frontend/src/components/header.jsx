@@ -38,6 +38,9 @@ function Header({keyword,setKeyword}) {
                   <LinkContainer to="/logout">
                     <NavDropdown.Item>Logout</NavDropdown.Item>
                   </LinkContainer>
+                  <LinkContainer to="/user/chat">
+                    <NavDropdown.Item>Chat</NavDropdown.Item>
+                  </LinkContainer>
                 </NavDropdown>
               )}
               {!userInfo && (

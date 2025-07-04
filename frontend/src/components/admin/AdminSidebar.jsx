@@ -116,12 +116,22 @@ const AdminSidebar = () => {
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link as={Link} 
-            to="/admin/coupons"
-            className={`sidebar-link ${isActive('/admin/coupons') ? 'active' : ''}`}
+            <Nav.Link as={Link}
+              to="/admin/coupons"
+              className={`sidebar-link ${isActive('/admin/coupons') ? 'active' : ''}`}
             >
               <i className="fas fa-ticket-alt me-2"></i>
               Mã giảm giá
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link
+              as={Link}
+              to="/admin/chat"
+              className={`sidebar-link ${isActive('/admin/chat') ? 'active' : ''}`}
+            >
+              <i className="fas fa-comments"></i>
+              Chat
             </Nav.Link>
           </Nav.Item>
         </div>

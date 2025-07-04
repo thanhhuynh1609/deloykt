@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator
 from decimal import Decimal
 from django.utils import timezone
 import logging;
+from django.contrib.auth.models import User
 # Create your models here.
 
 
@@ -17,6 +18,7 @@ class Category(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
 
 
 class Brand(models.Model):

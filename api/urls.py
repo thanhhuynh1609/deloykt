@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import CouponViewSet
 from rest_framework.routers import DefaultRouter
+from chat.views import chat_history
 
 from api.views import (
     BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet,
@@ -37,6 +38,8 @@ urlpatterns = [*router.urls,
     # Admin Paybox endpoints
     path('admin/paybox/wallets/', AdminPayboxWalletListView.as_view(), name='admin-paybox-wallets'),
     path('admin/paybox/transactions/', AdminPayboxTransactionListView.as_view(), name='admin-paybox-transactions'),
+
+    path('chat/messages/<str:room_name>/', chat_history),
 ]
 
 

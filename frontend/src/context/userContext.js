@@ -21,37 +21,42 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const login = async (username, password) => {
-    try {
-      const { data } = await httpService.post("/auth/jwt/create/", {
-        username,
-        password,
-      });
-      // httpService.setJwt(data.access);
-      setAuthTokens({ access: data.access, refresh: data.refresh });
-      setUserInfo({
-        username: data.username,
-        email: data.email,
+  try {
+    const { data } = await httpService.post("/auth/jwt/create/", {
+      username,
+      password,
+    });
+    setAuthTokens({ access: data.access, refresh: data.refresh });
+    localStorage.setItem(
+      "authTokens",
+      JSON.stringify({ access: data.access, refresh: data.refresh })
+    );
+
+    // Gọi tiếp API lấy thông tin user
+    httpService.setJwt(data.access); // Đảm bảo token đã set cho request tiếp theo
+    const { data: userData } = await httpService.get("/auth/users/me/");
+    setUserInfo({
+      id: userData.id,
+      username: userData.username,
+      email: userData.email,
+      isAdmin: data.isAdmin,
+    });
+    localStorage.setItem(
+      "userInfo",
+      JSON.stringify({
+        id: userData.id,
+        username: userData.username,
+        email: userData.email,
         isAdmin: data.isAdmin,
-      });
-      localStorage.setItem(
-        "authTokens",
-        JSON.stringify({ access: data.access, refresh: data.refresh })
-      );
-      localStorage.setItem(
-        "userInfo",
-        JSON.stringify({
-          username: data.username,
-          email: data.email,
-          isAdmin: data.isAdmin,
-        })
-      );
-      setError("");
-      return true;
-    } catch (ex) {
-      setError({ login: ex.response.data });
-      return false;
-    }
-  };
+      })
+    );
+    setError("");
+    return true;
+  } catch (ex) {
+    setError({ login: ex.response?.data });
+    return false;
+  }
+};
 
   const register = async (username, email, password) => {
     try {

@@ -33,6 +33,8 @@ import AdminReviews from "./pages/admin/AdminReviews";
 import AdminPaybox from "./pages/admin/AdminPaybox";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminChat from "./pages/admin/AdminChat";
+import UserChat from "./pages/UserChat";
 
 const AppContent = () => {
   const location = useLocation();
@@ -77,6 +79,7 @@ const AppContent = () => {
                       <Route path="/confirmation" element={<ConfirmationPage />} />
                       <Route path="/placeorder" element={<PlacerOrderPage />} />
                       <Route path="/cart" element={<CartPage />} />
+                      <Route path="/user/chat" element={<UserChat />} />
                     </Routes>
                   </Container>
                 ) : (
@@ -114,6 +117,11 @@ const AppContent = () => {
                     <Route path="/admin/reviews" element={
                       <ProtectedRoute adminOnly={true}>
                         <AdminReviews />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/admin/chat" element={
+                      <ProtectedRoute adminOnly={true}>
+                        <AdminChat />
                       </ProtectedRoute>
                     } />
                     <Route path="/admin/paybox" element={

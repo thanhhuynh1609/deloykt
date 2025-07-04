@@ -91,3 +91,6 @@ Nếu bạn gặp lỗi kết nối PostgreSQL, hãy kiểm tra:
 - Mật khẩu PostgreSQL trong DATABASE_URL
 - PostgreSQL đang chạy
 - Cơ sở dữ liệu 'ecommerce' đã được tạo
+
+
+uvicorn backend.asgi:application

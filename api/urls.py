@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from api.views import (
-    BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet,
+    AdminRefundRequestListView, ApproveRefundRequestView, BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet, RefundRequestView,
     ReviewView, ReviewViewSet, StripePaymentView,
     placeOrder, updateOrderToPaid, update_review,
     PayboxWalletView, PayboxTransactionListView, PayboxDepositView,
@@ -31,6 +31,11 @@ urlpatterns = [*router.urls,
     path('paybox/deposit/', PayboxDepositView.as_view(), name='paybox-deposit'),
     path('paybox/deposit/confirm/', PayboxDepositConfirmView.as_view(), name='paybox-deposit-confirm'),
     path('paybox/payment/', PayboxPaymentView.as_view(), name='paybox-payment'),
+    path('api/paybox/refund-requests/', AdminRefundRequestListView.as_view(), name='admin-paybox-refund-requests'),
+
+
+
+    path('admin/paybox/refund/<int:order_id>/approve/', ApproveRefundRequestView.as_view(), name='admin-approve-refund'),
 
     # Admin Paybox endpoints
     path('admin/paybox/wallets/', AdminPayboxWalletListView.as_view(), name='admin-paybox-wallets'),

@@ -27,7 +27,7 @@ const AdminSidebar = () => {
       <Nav className="flex-column sidebar-nav">
         <div className="nav-section">
           <small className="nav-section-title">MANAGEMENT</small>
-          
+
           <Nav.Item>
             <Nav.Link 
               as={Link} 
@@ -113,6 +113,17 @@ const AdminSidebar = () => {
             >
               <i className="fas fa-wallet"></i>
               Paybox
+            </Nav.Link>
+          </Nav.Item>
+
+          <Nav.Item>
+            <Nav.Link
+              as={Link}
+              to="/admin/refunds"
+              className={`sidebar-link ${isActive('/admin/refunds') ? 'active' : ''}`}
+            >
+              <i className="fas fa-undo-alt"></i>
+              Refund Requests
             </Nav.Link>
           </Nav.Item>
         </div>

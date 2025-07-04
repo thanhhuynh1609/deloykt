@@ -2,6 +2,9 @@ from rest_framework import serializers
 from api.models import Brand, Category, Product, Review, ShippingAddress, Order, OrderItem, PayboxWallet, PayboxTransaction
 from django.contrib.auth.models import User
 from django.utils import timezone
+from api.models import RefundRequest
+
+from api.models import RefundRequest
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -140,3 +143,26 @@ class PayboxTransactionSerializer(serializers.ModelSerializer):
             validated_data['deliveredAt'] = timezone.now()
 
         return super().update(instance, validated_data)
+
+class RefundRequestSerializer(serializers.ModelSerializer):
+    order_info = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RefundRequest
+        fields = ['id', 'order', 'order_info', 'user', 'reason', 'is_approved', 'created_at', 'approved_at']
+        read_only_fields = ['user', 'is_approved', 'created_at', 'approved_at']
+
+    def get_order_info(self, obj):
+        return {
+            'id': obj.order.id,
+            'totalPrice': obj.order.totalPrice,
+            'isDelivered': obj.order.isDelivered,
+            'isRefunded': obj.order.isRefunded,
+        }
+class RefundRequestSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    order = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = RefundRequest
+        fields = ['id', 'user', 'order', 'reason', 'is_approved', 'created_at']

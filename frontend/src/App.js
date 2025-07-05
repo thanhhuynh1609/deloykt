@@ -32,6 +32,8 @@ import AdminBrands from "./pages/admin/AdminBrands";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminPaybox from "./pages/admin/AdminPaybox";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { FavoriteProvider } from './context/favoriteContext';
+import FavoritesPage from './pages/favoritesPage';
 
 const AppContent = () => {
   const location = useLocation();
@@ -56,6 +58,7 @@ const AppContent = () => {
           <main className={isAdminRoute ? "" : "py-3"}>
             <ProductsProvider>
               <CartProvider>
+              <FavoriteProvider>
               {!isAdminRoute ? (
                 <Container>
                   <Routes>
@@ -76,6 +79,7 @@ const AppContent = () => {
                   <Route path="/confirmation" element={<ConfirmationPage />} />
                   <Route path="/placeorder" element={<PlacerOrderPage />} />
                   <Route path="/cart" element={<CartPage />} />
+                  <Route path="/favorites" element={<FavoritesPage />} />
                   </Routes>
                 </Container>
               ) : (
@@ -122,6 +126,7 @@ const AppContent = () => {
                   } />
                 </Routes>
               )}
+              </FavoriteProvider>
               </CartProvider>
             </ProductsProvider>
           </main>

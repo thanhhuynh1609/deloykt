@@ -4,10 +4,11 @@ from rest_framework.routers import DefaultRouter
 from api.views import (
     BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet,
     ReviewView, ReviewViewSet, StripePaymentView,
-    placeOrder, updateOrderToPaid, update_review,
+    placeOrder, update_order_to_paid, update_review,
     PayboxWalletView, PayboxTransactionListView, PayboxDepositView,
     PayboxDepositConfirmView, PayboxPaymentView,
-    AdminPayboxWalletListView, AdminPayboxTransactionListView
+    AdminPayboxWalletListView, AdminPayboxTransactionListView,
+    FavoriteView, check_favorite, check_purchase
 )
 
 router = DefaultRouter()
@@ -19,7 +20,7 @@ router.register('reviews', ReviewViewSet, basename='reviews')
 
 urlpatterns = [*router.urls,
     path('placeorder/', placeOrder, name='create-order'),
-    path('orders/<str:pk>/pay/', updateOrderToPaid, name="pay"),
+    path('orders/<str:pk>/pay/', update_order_to_paid, name="pay"),
     path('stripe-payment/', StripePaymentView.as_view(),
         name='stipe-payment'),
     path('products/<str:pk>/reviews/', ReviewView.as_view(), name='product-reviews'),
@@ -35,6 +36,9 @@ urlpatterns = [*router.urls,
     # Admin Paybox endpoints
     path('admin/paybox/wallets/', AdminPayboxWalletListView.as_view(), name='admin-paybox-wallets'),
     path('admin/paybox/transactions/', AdminPayboxTransactionListView.as_view(), name='admin-paybox-transactions'),
+    path('favorites/', FavoriteView.as_view(), name='favorites'),
+    path('products/<int:pk>/favorite/', check_favorite, name='check-favorite'),
+    path('products/<str:pk>/check-purchase/', check_purchase, name='check-purchase'),
 ]
 
 

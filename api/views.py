@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from api.models import Brand, Category, Order, OrderItem, Product, Review, ShippingAddress, PayboxWallet, PayboxTransaction
+from api.models import Brand, Category, Order, OrderItem, Product, Review, ShippingAddress, PayboxWallet, PayboxTransaction, Favorite
 from api.permissions import IsAdminUserOrReadOnly
 from api.serializers import BrandSerializer, CategorySerializer, OrderSerializer, ProductSerializer, ReviewSerializer, PayboxWalletSerializer, PayboxTransactionSerializer
 from django.db import transaction
@@ -35,15 +35,16 @@ class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAdminUserOrReadOnly]
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        return context
 
 
 class ReviewView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, pk):
-        data = request.data
-        user = request.user
-
         product = get_object_or_404(Product, id=pk)
         reviews = product.review_set.all()
         serializer = ReviewSerializer(reviews, many=True)
@@ -55,6 +56,20 @@ class ReviewView(APIView):
 
         product = get_object_or_404(Product, id=pk)
 
+        # Kiểm tra xem người dùng đã mua sản phẩm này chưa
+        has_purchased = OrderItem.objects.filter(
+            order__user=user,
+            product=product,
+            order__isPaid=True
+        ).exists()
+
+        if not has_purchased:
+            return Response(
+                {'detail': 'You can only review products you have purchased.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
         alreadyExists = product.review_set.filter(user=user).exists()
 
         if alreadyExists:
@@ -137,21 +152,28 @@ class ReviewViewSet(ModelViewSet):
 stripe.api_key = settings.STRIPE_API_KEY
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def updateOrderToPaid(request, pk):
-
-    payment_intent = stripe.PaymentIntent.retrieve(
-        request.data['payment_intent'])
-
-    if payment_intent.status == "succeeded":
-        order = get_object_or_404(Order, id=pk)
-        order.isPaid = True
-        order.paidAt = datetime.now()
-        order.save()
-        return Response('Payment was successful completed!')
-
-    return Response('An unexpected error occurred! Please contact our customer care.')
+def update_order_to_paid(request, pk):
+    order = get_object_or_404(Order, id=pk)
+    
+    # Kiểm tra xem đơn hàng có phải của người dùng hiện tại không
+    if order.user != request.user and not request.user.is_staff:
+        return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+    
+    # Cập nhật trạng thái đơn hàng
+    order.isPaid = True
+    order.paidAt = datetime.now()
+    order.save()
+    
+    # Cập nhật số lượng đã bán cho từng sản phẩm
+    with transaction.atomic():
+        for item in order.orderitem_set.all():
+            product = item.product
+            product.total_sold += item.qty
+            product.save()
+    
+    return Response({'detail': 'Order was paid'}, status=status.HTTP_200_OK)
 
 
 class StripePaymentView(APIView):
@@ -527,3 +549,67 @@ class AdminPayboxTransactionListView(APIView):
             return Response(serializer.data)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FavoriteView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Lấy danh sách sản phẩm yêu thích của người dùng"""
+        favorites = Favorite.objects.filter(user=request.user)
+        products = [favorite.product for favorite in favorites]
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        """Thêm sản phẩm vào danh sách yêu thích"""
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({'detail': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Kiểm tra xem đã tồn tại trong danh sách yêu thích chưa
+        favorite, created = Favorite.objects.get_or_create(user=request.user, product=product)
+        
+        if created:
+            return Response({'detail': 'Product added to favorites'}, status=status.HTTP_201_CREATED)
+        return Response({'detail': 'Product already in favorites'}, status=status.HTTP_200_OK)
+    
+    def delete(self, request):
+        """Xóa sản phẩm khỏi danh sách yêu thích"""
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({'detail': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            favorite = Favorite.objects.get(user=request.user, product_id=product_id)
+            favorite.delete()
+            return Response({'detail': 'Product removed from favorites'}, status=status.HTTP_204_NO_CONTENT)
+        except Favorite.DoesNotExist:
+            return Response({'detail': 'Product not in favorites'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# Thêm endpoint để kiểm tra sản phẩm có trong danh sách yêu thích không
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_favorite(request, pk):
+    """Kiểm tra xem sản phẩm có trong danh sách yêu thích không"""
+    is_favorite = Favorite.objects.filter(user=request.user, product_id=pk).exists()
+    return Response({'is_favorite': is_favorite})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_purchase(request, pk):
+    """Kiểm tra xem người dùng đã mua sản phẩm này chưa"""
+    user = request.user
+    product = get_object_or_404(Product, id=pk)
+    
+    has_purchased = OrderItem.objects.filter(
+        order__user=user,
+        product=product,
+        order__isPaid=True
+    ).exists()
+    
+    return Response({'has_purchased': has_purchased})

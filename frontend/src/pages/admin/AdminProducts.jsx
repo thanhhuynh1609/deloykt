@@ -22,6 +22,8 @@ const AdminProducts = () => {
     image: null
   });
   const [imagePreview, setImagePreview] = useState('');
+  const [sortField, setSortField] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
     fetchData();
@@ -158,6 +160,51 @@ const AdminProducts = () => {
     return category ? category.title : 'Unknown';
   };
 
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const sortProducts = (products, field, order) => {
+    return [...products].sort((a, b) => {
+      let valueA, valueB;
+      
+      switch (field) {
+        case 'name':
+          valueA = a.name.toLowerCase();
+          valueB = b.name.toLowerCase();
+          break;
+        case 'price':
+          valueA = Number(a.price);
+          valueB = Number(b.price);
+          break;
+        case 'countInStock':
+          valueA = Number(a.countInStock);
+          valueB = Number(b.countInStock);
+          break;
+        case 'rating':
+          valueA = Number(a.rating || 0);
+          valueB = Number(b.rating || 0);
+          break;
+        case 'total_sold':
+          valueA = Number(a.total_sold || 0);
+          valueB = Number(b.total_sold || 0);
+          break;
+        default:
+          valueA = a[field];
+          valueB = b[field];
+      }
+      
+      if (valueA < valueB) return order === 'asc' ? -1 : 1;
+      if (valueA > valueB) return order === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -190,19 +237,54 @@ const AdminProducts = () => {
                 <Table responsive hover>
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th onClick={() => handleSort('name')}>
+                        Name
+                        {sortField === 'name' && (
+                          <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                        )}
+                      </th>
                       <th>Image</th>
-                      <th>Name</th>
-                      <th>Brand</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                      <th>Stock</th>
-                      <th>Rating</th>
+                      <th onClick={() => handleSort('brand')}>
+                        Brand
+                        {sortField === 'brand' && (
+                          <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                        )}
+                      </th>
+                      <th onClick={() => handleSort('category')}>
+                        Category
+                        {sortField === 'category' && (
+                          <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                        )}
+                      </th>
+                      <th onClick={() => handleSort('price')}>
+                        Price
+                        {sortField === 'price' && (
+                          <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                        )}
+                      </th>
+                      <th onClick={() => handleSort('countInStock')}>
+                        Stock
+                        {sortField === 'countInStock' && (
+                          <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                        )}
+                      </th>
+                      <th onClick={() => handleSort('rating')}>
+                        Rating
+                        {sortField === 'rating' && (
+                          <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                        )}
+                      </th>
+                      <th onClick={() => handleSort('total_sold')}>
+                        Đã bán
+                        {sortField === 'total_sold' && (
+                          <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                        )}
+                      </th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map(product => (
+                    {sortProducts(products, sortField, sortOrder).map(product => (
                       <tr key={product.id}>
                         <td>{product.id}</td>
                         <td>
@@ -237,6 +319,13 @@ const AdminProducts = () => {
                               ({product.numReviews || 0})
                             </small>
                           </div>
+                        </td>
+                        <td>
+                          <Badge 
+                            bg="info"
+                          >
+                            {product.total_sold || 0}
+                          </Badge>
                         </td>
                         <td>
                           <div className="action-buttons">

@@ -90,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecommerce_db',       # hoặc tên DB của bạn
         'USER': 'root',               # tên user MySQL
-        'PASSWORD': 'vtat2011',   # mật khẩu MySQL
+        'PASSWORD': 'Kimthanh.123',   # mật khẩu MySQL
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {

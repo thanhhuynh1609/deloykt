@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Table, Badge, Button, Modal } from 'react-bootstrap';
 import AdminLayout from '../../components/admin/AdminLayout';
 import httpService from '../../services/httpService';
-import { formatVND } from '../../utils/currency';
 
 const AdminRefund = () => {
   const [refunds, setRefunds] = useState([]);
@@ -17,7 +16,6 @@ const AdminRefund = () => {
   const fetchRefundRequests = async () => {
     try {
       const response = await httpService.get('/api/paybox/refund-requests/');
-      console.log('Refunds fetched:', response.data);
       setRefunds(response.data);
     } catch (error) {
       console.error('Error fetching refund requests:', error);
@@ -26,22 +24,33 @@ const AdminRefund = () => {
     }
   };
 
-  const handleRefundAction = async (id, approved) => {
+  const handleRefundAction = async (orderId, approved) => {
     try {
-      await httpService.post(`/api/refunds/handle/`, {
-        id,
-        approved,
-      });
+      const url = approved
+        ? `/api/admin/paybox/refund/${orderId}/approve/`
+        : `/api/admin/paybox/refund/${orderId}/reject/`;
+      const method = approved ? 'post' : 'delete';
+      await httpService[method](url);
       fetchRefundRequests();
-      setShowModal(false);
     } catch (error) {
       console.error('Error handling refund:', error);
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
+  const handleDeleteRefund = async () => {
+    if (!selectedRefund) return;
+    try {
+      await httpService.delete(`/api/admin/paybox/refund/${selectedRefund.order.id}/delete/`);
+      fetchRefundRequests();
+    } catch (error) {
+      console.error('Error deleting refund request:', error);
+    } finally {
+      setShowModal(false);
+      setSelectedRefund(null);
+    }
   };
+
+  const formatDate = (dateString) => new Date(dateString).toLocaleString();
 
   return (
     <AdminLayout>
@@ -74,36 +83,58 @@ const AdminRefund = () => {
                     </thead>
                     <tbody>
                       {refunds.map((refund) => (
-                        <tr key={refund.id}>
+                        <tr key={`refund-${refund.id}`}>
                           <td>{refund.id}</td>
                           <td>{refund.user?.username || 'Unknown'}</td>
                           <td>#{refund.order?.id}</td>
                           <td>{refund.reason}</td>
                           <td>
-                            <Badge bg={refund.isApproved === null ? 'secondary' : refund.isApproved ? 'success' : 'danger'}>
-                              {refund.isApproved === null ? 'Pending' : refund.isApproved ? 'Approved' : 'Rejected'}
+                            <Badge bg={
+                              refund.isApproved === null
+                                ? 'secondary'
+                                : refund.isApproved
+                                ? 'success'
+                                : 'danger'
+                            }>
+                              {refund.isApproved === null
+                                ? 'Pending'
+                                : refund.isApproved
+                                ? 'Approved'
+                                : 'Rejected'}
                             </Badge>
                           </td>
                           <td>{formatDate(refund.createdAt)}</td>
                           <td>
-                            {refund.isApproved === null && (
-                              <div className="d-flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline-success"
-                                  onClick={() => handleRefundAction(refund.id, true)}
-                                >
-                                  Approve
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline-danger"
-                                  onClick={() => handleRefundAction(refund.id, false)}
-                                >
-                                  Reject
-                                </Button>
-                              </div>
-                            )}
+                            <div className="d-flex gap-2">
+                              {refund.isApproved === null && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline-success"
+                                    onClick={() => handleRefundAction(refund.order.id, true)}
+                                  >
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline-danger"
+                                    onClick={() => handleRefundAction(refund.order.id, false)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="outline-secondary"
+                                onClick={() => {
+                                  setSelectedRefund(refund);
+                                  setShowModal(true);
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -114,6 +145,24 @@ const AdminRefund = () => {
             </Card>
           </Col>
         </Row>
+
+        {/* Confirm Delete Modal */}
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Xác nhận xoá</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Bạn có chắc chắn muốn xoá yêu cầu hoàn tiền của đơn hàng #{selectedRefund?.order?.id} không?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Huỷ
+            </Button>
+            <Button variant="danger" onClick={handleDeleteRefund}>
+              Xoá
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </AdminLayout>
   );

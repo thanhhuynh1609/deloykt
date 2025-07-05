@@ -408,7 +408,8 @@ class RefundRequest(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='refund_request')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     reason = models.TextField()
-    is_approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(null=True, default=None)
+
     created_at = models.DateTimeField(auto_now_add=True)
     approved_at = models.DateTimeField(null=True, blank=True)
 

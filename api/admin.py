@@ -1,34 +1,52 @@
 from django.contrib import admin
-from api.models import *
-from api.models import RefundRequest
+from django.utils import timezone
+from .models import Product, Order, RefundRequest, PayboxWallet, PayboxTransaction
 
-# Register your models here.
-admin.site.register(Category)
-admin.site.register(Brand)
-admin.site.register(Product)
-admin.site.register(Review)
-admin.site.register(Order)
-admin.site.register(OrderItem)
-admin.site.register(ShippingAddress)
+# Action: Chấp nhận hoàn tiền
+@admin.action(description="✅ Chấp nhận hoàn tiền")
+def approve_refund(modeladmin, request, queryset):
+    for refund in queryset:
+        if refund.is_approved is None or refund.is_approved is False:
+            refund.is_approved = True
+            refund.approved_at = timezone.now()
+            refund.save()
 
+# Action: Từ chối hoàn tiền
+@admin.action(description="❌ Từ chối hoàn tiền")
+def reject_refund(modeladmin, request, queryset):
+    for refund in queryset:
+        if refund.is_approved is None or refund.is_approved is True:
+            refund.is_approved = False
+            refund.approved_at = timezone.now()
+            refund.save()
+
+@admin.register(RefundRequest)
+class RefundRequestAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'order', 'reason', 'is_approved', 'created_at', 'approved_at']
+    list_filter = ['is_approved', 'created_at']
+    search_fields = ['user__username', 'order__id', 'reason']
+    readonly_fields = ['created_at']
+    actions = [approve_refund, reject_refund]
 
 @admin.register(PayboxWallet)
 class PayboxWalletAdmin(admin.ModelAdmin):
-    list_display = ['user', 'balance', 'is_active', 'created_at', 'updated_at']
-    list_filter = ['is_active', 'created_at']
-    search_fields = ['user__username', 'user__email']
-    readonly_fields = ['created_at', 'updated_at']
-
+    list_display = ['id', 'user', 'balance']
+    search_fields = ['user__username']
 
 @admin.register(PayboxTransaction)
 class PayboxTransactionAdmin(admin.ModelAdmin):
-    list_display = ['wallet', 'transaction_type', 'amount', 'status', 'created_at']
-    list_filter = ['transaction_type', 'status', 'created_at']
-    search_fields = ['wallet__user__username', 'description', 'stripe_payment_intent_id']
-    readonly_fields = ['created_at', 'updated_at', 'balance_before', 'balance_after']
-    raw_id_fields = ['wallet', 'order']
-@admin.register(RefundRequest)
-class RefundRequestAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'order', 'reason', 'is_approved', 'created_at']
-    list_filter = ['is_approved', 'created_at']
-    search_fields = ['user__username', 'order__id', 'reason']
+    list_display = ['id', 'wallet', 'amount', 'transaction_type', 'created_at']
+    list_filter = ['transaction_type']
+    search_fields = ['wallet__user__username']
+
+# Đăng ký các model khác nếu cần
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'price']
+    search_fields = ['name']
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'isPaid', 'isDelivered', 'isRefunded', 'createdAt']
+    list_filter = ['isPaid', 'isDelivered', 'isRefunded']
+    search_fields = ['user__username']

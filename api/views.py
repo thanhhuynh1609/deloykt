@@ -562,7 +562,7 @@ class RefundRequestView(APIView):
 
     def post(self, request):
         order_id = request.data.get('order_id')
-        reason = request.data.get('reason', '')
+        reason = request.data.get('reason', '').strip()
 
         order = get_object_or_404(Order, id=order_id, user=request.user)
 
@@ -580,8 +580,8 @@ class RefundRequestView(APIView):
             user=request.user,
             reason=reason
         )
+
         return Response({'message': 'Yêu cầu hoàn tiền đã được gửi'}, status=201)
-    
 class ApproveRefundRequestView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -597,11 +597,12 @@ class ApproveRefundRequestView(APIView):
         if refund.is_approved:
             return Response({'error': 'Yêu cầu đã được duyệt'}, status=400)
 
-        wallet = PayboxWallet.objects.get(user=order.user)
+        wallet, _ = PayboxWallet.objects.get_or_create(user=order.user)
         balance_before = wallet.balance
 
         with transaction.atomic():
             wallet.add_balance(order.totalPrice)
+
             order.isRefunded = True
             order.save()
 
@@ -621,5 +622,39 @@ class ApproveRefundRequestView(APIView):
             )
 
         return Response({'message': 'Đã hoàn tiền thành công'}, status=200)
+class RejectRefundRequestView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def delete(self, request, order_id):
+        if not request.user.is_staff:
+            return Response({'error': 'Không có quyền'}, status=403)
 
+        order = get_object_or_404(Order, id=order_id)
+        refund = getattr(order, 'refund_request', None)
+
+        if not refund:
+            return Response({'error': 'Không có yêu cầu hoàn tiền'}, status=400)
+        if refund.is_approved is not None:
+            return Response({'error': 'Yêu cầu đã được xử lý'}, status=400)
+
+        refund.is_approved = False
+        refund.approved_at = timezone.now()
+        refund.save()
+
+        return Response({'message': 'Yêu cầu hoàn tiền đã bị từ chối'}, status=200)
+class DeleteRefundRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, order_id):
+        if not request.user.is_staff:
+            return Response({'error': 'Không có quyền'}, status=403)
+
+        order = get_object_or_404(Order, id=order_id)
+        refund = getattr(order, 'refund_request', None)
+
+        if not refund:
+            return Response({'error': 'Không có yêu cầu hoàn tiền'}, status=400)
+
+        refund.delete()
+
+        return Response({'message': 'Yêu cầu hoàn tiền đã bị xóa'}, status=200)

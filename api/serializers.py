@@ -145,11 +145,13 @@ class PayboxTransactionSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 class RefundRequestSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    order = serializers.PrimaryKeyRelatedField(read_only=True)
     order_info = serializers.SerializerMethodField()
 
     class Meta:
         model = RefundRequest
-        fields = ['id', 'order', 'order_info', 'user', 'reason', 'is_approved', 'created_at', 'approved_at']
+        fields = ['id', 'user', 'order', 'order_info', 'reason', 'is_approved', 'created_at', 'approved_at']
         read_only_fields = ['user', 'is_approved', 'created_at', 'approved_at']
 
     def get_order_info(self, obj):
@@ -159,10 +161,3 @@ class RefundRequestSerializer(serializers.ModelSerializer):
             'isDelivered': obj.order.isDelivered,
             'isRefunded': obj.order.isRefunded,
         }
-class RefundRequestSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
-    order = serializers.PrimaryKeyRelatedField(read_only=True)
-
-    class Meta:
-        model = RefundRequest
-        fields = ['id', 'user', 'order', 'reason', 'is_approved', 'created_at']

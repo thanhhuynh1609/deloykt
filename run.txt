@@ -93,4 +93,16 @@ Nếu bạn gặp lỗi kết nối PostgreSQL, hãy kiểm tra:
 - Cơ sở dữ liệu 'ecommerce' đã được tạo
 
 
-uvicorn backend.asgi:application
+Chạy chat:
+Cài redis-server bằng link: https://github.com/tporadowski/redis/releases (giải nén rồi chạy file redis-server để chạy server)
+- backend: python manage.py makemigrations chat
+           python manage.py migrate
+           python manage.py makemigrations 
+           python manage.py migrate
+           pip install uvicorn
+           pip install websockets
+           pip install channels
+           pip install channels channels_redis
+           chạy backend: uvicorn backend.asgi:application (k dùng runserver nữa)
+- frontend: npm install socket.io-client
+            npm start

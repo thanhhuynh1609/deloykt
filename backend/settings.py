@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'api',
     'channels',
     'chat',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [

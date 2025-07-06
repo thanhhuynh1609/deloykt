@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Container } from "react-bootstrap";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/header";
 import Footer from "./components/footer";
+
+// User pages
 import HomePage from "./pages/homePage";
-import { Route, Routes, useLocation } from "react-router-dom";
 import ProductPage from "./pages/productPage";
-import { ProductsProvider } from "./context/productsContext";
 import CartPage from "./pages/cartPage";
-import { CartProvider } from "./context/cartContext";
-import { UserProvider } from "./context/userContext";
-import { PayboxProvider } from "./context/payboxContext";
 import LoginPage from "./pages/loginPage";
 import RegisterPage from "./pages/registerPage";
 import ProfilePage from "./pages/profilePage";
@@ -17,12 +15,12 @@ import Logout from "./pages/logout";
 import ShippingPage from "./pages/shippingPage";
 import PlacerOrderPage from "./pages/placeOrderPage";
 import OrderDetailsPage from "./pages/orderDetailsPage";
-import "./App.css";
 import ConfirmationPage from "./pages/confirmationPage";
 import PaymentPage from "./pages/paymentPage";
 import SearchPage from "./pages/searchPage";
 import PayboxPage from "./pages/PayboxPage";
-// Admin imports
+
+// Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
@@ -31,25 +29,33 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminBrands from "./pages/admin/AdminBrands";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminPaybox from "./pages/admin/AdminPaybox";
+import AdminRefund from "./pages/admin/AdminRefund";
+
+// Context providers
+import { ProductsProvider } from "./context/productsContext";
+import { CartProvider } from "./context/cartContext";
+import { UserProvider } from "./context/userContext";
+import { PayboxProvider } from "./context/payboxContext";
+
+// Other components
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminCoupons from "./pages/admin/AdminCoupons";
 import AdminChat from "./pages/admin/AdminChat";
 import UserChat from "./pages/UserChat";
 
+import "./App.css";
+
 const AppContent = () => {
   const location = useLocation();
   const [keyword, setKeyword] = useState("");
   const queryParams = new URLSearchParams(window.location.search);
-  const keywordParam = queryParams.get("keyword")
-    ? queryParams.get("keyword")
-    : "";
+  const keywordParam = queryParams.get("keyword") || "";
 
   useEffect(() => {
     setKeyword(keywordParam);
-  });
+  }, [keywordParam]);
 
-  // Check if current route is admin
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
     <div>
@@ -129,6 +135,14 @@ const AppContent = () => {
                         <AdminPaybox />
                       </ProtectedRoute>
                     } />
+                    <Route
+                    path="/admin/refunds"
+                    element={
+                      <ProtectedRoute adminOnly={true}>
+                        <AdminRefund />
+                      </ProtectedRoute>
+                    }
+                  />
                     <Route path="/admin/coupons" element={
                       <ProtectedRoute adminOnly={true}
                       ><AdminCoupons />

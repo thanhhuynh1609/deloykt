@@ -9,7 +9,9 @@ from api.views import (
     placeOrder, updateOrderToPaid, update_review,
     PayboxWalletView, PayboxTransactionListView, PayboxDepositView,
     PayboxDepositConfirmView, PayboxPaymentView,
-    AdminPayboxWalletListView, AdminPayboxTransactionListView
+    AdminPayboxWalletListView, AdminPayboxTransactionListView,
+    RejectRefundRequestView, DeleteRefundRequestView,RefundRequestView,
+    AdminRefundRequestListView, ApproveRefundRequestView,
 )
 
 router = DefaultRouter()
@@ -34,6 +36,14 @@ urlpatterns = [*router.urls,
     path('paybox/deposit/', PayboxDepositView.as_view(), name='paybox-deposit'),
     path('paybox/deposit/confirm/', PayboxDepositConfirmView.as_view(), name='paybox-deposit-confirm'),
     path('paybox/payment/', PayboxPaymentView.as_view(), name='paybox-payment'),
+
+
+    path('paybox/refund-requests/', AdminRefundRequestListView.as_view(), name='admin-paybox-refund-requests'),
+    path('paybox/refund-request/', RefundRequestView.as_view(), name='refund-request'),
+    # Admin Refund APIs
+    path('admin/paybox/refund/<int:order_id>/approve/', ApproveRefundRequestView.as_view(), name='admin-approve-refund'),
+    path('admin/paybox/refund/<int:order_id>/reject/', RejectRefundRequestView.as_view(), name='admin-reject-refund'),
+    path('admin/paybox/refund/<int:order_id>/delete/', DeleteRefundRequestView.as_view(), name='admin-delete-refund'),
 
     # Admin Paybox endpoints
     path('admin/paybox/wallets/', AdminPayboxWalletListView.as_view(), name='admin-paybox-wallets'),

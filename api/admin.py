@@ -1,5 +1,6 @@
 from django.contrib import admin
 from api.models import *
+from api.models import RefundRequest
 
 # Register your models here.
 admin.site.register(Category)
@@ -26,3 +27,8 @@ class PayboxTransactionAdmin(admin.ModelAdmin):
     search_fields = ['wallet__user__username', 'description', 'stripe_payment_intent_id']
     readonly_fields = ['created_at', 'updated_at', 'balance_before', 'balance_after']
     raw_id_fields = ['wallet', 'order']
+@admin.register(RefundRequest)
+class RefundRequestAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'order', 'reason', 'is_approved', 'created_at']
+    list_filter = ['is_approved', 'created_at']
+    search_fields = ['user__username', 'order__id', 'reason']

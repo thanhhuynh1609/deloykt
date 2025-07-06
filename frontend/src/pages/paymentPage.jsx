@@ -42,11 +42,11 @@ function PaymentPage() {
       )}
       <Form onSubmit={handleSubmit}>
         <Form.Group>
-          <Form.Label as="legend">Select Method</Form.Label>
+          <Form.Label as="legend">Chọn phương thức</Form.Label>
           <Col>
             <Form.Check
               type="radio"
-              label="Stripe or Debit Card"
+              label="Stripe"
               id="stripe"
               name="paymentMethod"
               value="Stripe"
@@ -137,7 +137,7 @@ function PaymentPage() {
           )}
         </div>
         <Button type="submit" variant="primary">
-          Continue
+          Tiếp tục
         </Button>
       </Form>
     </FormContainer>

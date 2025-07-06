@@ -6,12 +6,13 @@ from chat.views import chat_history
 from api.views import (
     BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet,
     ReviewView, ReviewViewSet, StripePaymentView,
-    placeOrder, updateOrderToPaid, update_review,
+    placeOrder, update_order_to_paid, update_review,
     PayboxWalletView, PayboxTransactionListView, PayboxDepositView,
     PayboxDepositConfirmView, PayboxPaymentView,
     AdminPayboxWalletListView, AdminPayboxTransactionListView,
     RejectRefundRequestView, DeleteRefundRequestView,RefundRequestView,
     AdminRefundRequestListView, ApproveRefundRequestView,
+    FavoriteView, check_favorite, check_purchase
 )
 
 router = DefaultRouter()
@@ -24,7 +25,7 @@ router.register(r'coupons', CouponViewSet, basename='coupon')
 
 urlpatterns = [*router.urls,
     path('placeorder/', placeOrder, name='create-order'),
-    path('orders/<str:pk>/pay/', updateOrderToPaid, name="pay"),
+    path('orders/<str:pk>/pay/', update_order_to_paid, name="pay"),
     path('stripe-payment/', StripePaymentView.as_view(),
         name='stipe-payment'),
     path('products/<str:pk>/reviews/', ReviewView.as_view(), name='product-reviews'),
@@ -50,6 +51,9 @@ urlpatterns = [*router.urls,
     path('admin/paybox/transactions/', AdminPayboxTransactionListView.as_view(), name='admin-paybox-transactions'),
 
     path('chat/messages/<str:room_name>/', chat_history),
+    path('favorites/', FavoriteView.as_view(), name='favorites'),
+    path('products/<int:pk>/favorite/', check_favorite, name='check-favorite'),
+    path('products/<str:pk>/check-purchase/', check_purchase, name='check-purchase'),
 ]
 
 

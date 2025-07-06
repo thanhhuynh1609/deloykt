@@ -1,3 +1,5 @@
+
+
 main {
   min-height: 80vh;
 }
@@ -53,4 +55,25 @@ h3 {
   .carousel-caption h4 {
     font-size: 2.5vw;
   }
+}
+
+.favorite-btn {
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.favorite-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.1);
+}
+
+.favorite-btn i {
+  font-size: 1.2rem;
 }

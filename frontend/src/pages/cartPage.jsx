@@ -33,10 +33,10 @@ function CartPage(props) {
   return (
     <Row>
       <Col md={8}>
-        <h1>Shopping Cart</h1>
+        <h1>Giỏ hàng</h1>
         {productsInCart.length === 0 ? (
           <Message variant="info">
-            Your cart is empty <Link to="/">Go Back</Link>
+            Giỏ hàng của bạn đang trống <Link to="/">Tiếp tục mua sắm</Link>
           </Message>
         ) : (
           <ListGroup variant="flush">
@@ -104,10 +104,10 @@ function CartPage(props) {
         <Card>
           <ListGroup variant="flush">
             <ListGroup.Item>
-              <h2>
-                Subtotal
-                {productsInCart.reduce((acc, product) => acc + product.qty, 0)}
-                items
+              <h2 style={{ textTransform: "none" }}>
+                Tạm tính{" "}
+                {productsInCart.reduce((acc, product) => acc + product.qty, 0)}{" "}
+                sản phẩm
               </h2>
               <h4>
                 {formatVND(productsInCart
@@ -124,8 +124,9 @@ function CartPage(props) {
                   className="btn-block"
                   disabled={productsInCart.length === 0}
                   onClick={handleCheckOut}
+                  style={{ textTransform: "none" }}
                 >
-                  Proceed to Checkout
+                  Tiến hàng thanh toán
                 </Button>
               </Row>
             </ListGroup.Item>

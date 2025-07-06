@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Brand, Category, Product, Review, ShippingAddress, Order, OrderItem, PayboxWallet, PayboxTransaction
+from api.models import Brand, Category, Product, Review, ShippingAddress, Order, OrderItem, PayboxWallet, PayboxTransaction, Favorite
 from django.contrib.auth.models import User
 from django.utils import timezone
 from .models import Coupon
@@ -42,11 +42,19 @@ class BrandSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(read_only=True, many=True, source='review_set')
-
+    is_favorite = serializers.SerializerMethodField()
+    
     class Meta:
         model = Product
         fields = ('id', 'name', 'image', 'brand', 'category', 'description',
-                  'rating', 'numReviews', 'price', 'countInStock', 'createdAt', 'reviews', )
+                  'rating', 'numReviews', 'price', 'countInStock', 'createdAt', 
+                  'reviews', 'is_favorite', 'total_sold')
+    
+    def get_is_favorite(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return Favorite.objects.filter(user=request.user, product=obj).exists()
+        return False
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -4,11 +4,11 @@ import { LinkContainer } from "react-router-bootstrap";
 import UserContext from "../context/userContext";
 import { FavoriteContext } from "../context/favoriteContext";
 import SearchBox from "./searchBox";
+import "./Header.css";
 
 function Header({ keyword, setKeyword }) {
   const { userInfo, logout } = useContext(UserContext);
-  
-  // Sử dụng try-catch để tránh lỗi khi FavoriteContext chưa được khởi tạo
+
   let favorites = [];
   try {
     const favoriteContext = useContext(FavoriteContext);
@@ -18,27 +18,32 @@ function Header({ keyword, setKeyword }) {
   }
 
   return (
-    <header>
-      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
-        <Container className="">
+    <header className="header-border">
+      <Navbar bg="light" variant="light" expand="lg" collapseOnSelect>
+        <Container>
           <LinkContainer to="/">
-            <Navbar.Brand>Proshop</Navbar.Brand>
+            <Navbar.Brand className="fw-bold text-primary">TNBHStore</Navbar.Brand>
           </LinkContainer>
-          <SearchBox keyword={keyword} setKeyword={setKeyword}/>
+
+          {/* Cho SearchBox vào div để canh flex và margin */}
+          <div className="search-container">
+            <SearchBox keyword={keyword} setKeyword={setKeyword} />
+          </div>
+
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="ms-auto">
+          <Navbar.Collapse id="basic-navbar-nav" className="no-flex-grow">
+            <Nav className="ms-auto align-items-center">
               <LinkContainer to="/cart">
-                <Nav.Link>
-                  <i className="fas fa-shopping-cart" /> Cart
+                <Nav.Link className="text-dark nav-icon-link">
+                  <i className="fas fa-shopping-cart me-1" /> Giỏ hàng
                 </Nav.Link>
               </LinkContainer>
-              
+
               {userInfo && (
                 <>
                   <LinkContainer to="/favorites">
-                    <Nav.Link>
-                      <i className="fas fa-heart" /> Favorites
+                    <Nav.Link className="text-dark nav-icon-link">
+                      <i className="fas fa-heart me-1" /> Yêu thích
                       {favorites.length > 0 && (
                         <Badge pill bg="danger" className="ms-1">
                           {favorites.length}
@@ -46,22 +51,27 @@ function Header({ keyword, setKeyword }) {
                       )}
                     </Nav.Link>
                   </LinkContainer>
-                  
+
                   <LinkContainer to="/paybox">
-                    <Nav.Link>
-                      <i className="fas fa-wallet" /> Paybox
+                    <Nav.Link className="text-dark nav-icon-link">
+                      <i className="fas fa-wallet me-1" /> Paybox
                     </Nav.Link>
                   </LinkContainer>
                 </>
               )}
-              
+
               {userInfo ? (
-                <NavDropdown title={userInfo.username} id="username">
+                <NavDropdown title={userInfo.username} id="username" className="nav-dropdown-custom">
                   <LinkContainer to="/profile">
-                    <NavDropdown.Item>Profile</NavDropdown.Item>
+                    <NavDropdown.Item>Trang cá nhân</NavDropdown.Item>
                   </LinkContainer>
+                  <LinkContainer to="/user/chat">
+                    <NavDropdown.Item>Tư vấn</NavDropdown.Item>
+                  </LinkContainer>
+                  <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
                   {userInfo.isAdmin && (
                     <>
+                      <NavDropdown.Divider />
                       <LinkContainer to="/admin/users">
                         <NavDropdown.Item>Users</NavDropdown.Item>
                       </LinkContainer>
@@ -76,12 +86,11 @@ function Header({ keyword, setKeyword }) {
                       </LinkContainer>
                     </>
                   )}
-                  <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
                 </NavDropdown>
               ) : (
                 <LinkContainer to="/login">
-                  <Nav.Link>
-                    <i className="fas fa-user" /> Login
+                  <Nav.Link className="text-dark nav-icon-link">
+                    <i className="fas fa-user me-1" /> Login
                   </Nav.Link>
                 </LinkContainer>
               )}

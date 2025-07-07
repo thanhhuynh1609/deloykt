@@ -18,9 +18,11 @@ function PlacerOrderPage(props) {
     shippingPrice,
     taxPrice,
     totalPrice,
+    discountAmount,
     placeOrder
   } = useContext(CartContext);
   const navigate = useNavigate();
+  const totalAfterDiscount = totalPrice - discountAmount;
 
   if (!userInfo || !userInfo.username) navigate("/login");
   if (!shippingAddress || !shippingAddress.address) navigate("/shipping");
@@ -40,25 +42,25 @@ function PlacerOrderPage(props) {
         <Col md={8}>
           <ListGroup variant="flush">
             <ListGroup.Item>
-              <h2>Shipping</h2>
+              <h2 style={{ textTransform: "none" }}>Địa chỉ</h2>
               <p>
-                <strong>Shipping: </strong>
+                <strong>Địa chỉ: </strong>
                 {shippingAddress.address}, {shippingAddress.city},{"   "}
                 {shippingAddress.postalCode},{"   "}
                 {shippingAddress.country}
               </p>
             </ListGroup.Item>
             <ListGroup.Item>
-              <h2>Payment Method</h2>
+              <h2>Phương thức thanh toán</h2>
               <p>
-                <strong>Method: </strong>
+                <strong>Phương thức: </strong>
                 {paymentMethod}
               </p>
             </ListGroup.Item>
             <ListGroup.Item>
-              <h2>Order Items</h2>
+              <h2>Sản phẩm</h2>
               {productsInCart.length == 0 ? (
-                <Message variant="info">Your Cart is Empty</Message>
+                <Message variant="info">Giỏ hàng bạn đang trống</Message>
               ) : (
                 <ListGroup variant="flush">
                   {productsInCart.map((product) => (
@@ -95,17 +97,17 @@ function PlacerOrderPage(props) {
           <Card className="mb-3">
             <ListGroup variant="flush">
               <ListGroup.Item>
-                <h2>Order Summary</h2>
+                <h2>Tóm tắt đơn hàng</h2>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Items</Col>
+                  <Col>Sản phẩm</Col>
                   <Col>{formatVND(totalItemsPrice)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Shipping</Col>
+                  <Col>Phí ship</Col>
                   <Col>{formatVND(shippingPrice)}</Col>
                 </Row>
               </ListGroup.Item>
@@ -115,12 +117,31 @@ function PlacerOrderPage(props) {
                   <Col>{formatVND(taxPrice)}</Col>
                 </Row>
               </ListGroup.Item>
+              {discountAmount > 0 && (
+                <ListGroup.Item>
+                  <Row>
+                    <Col>Giảm giá</Col>
+                    <Col className="text-success">- {formatVND(discountAmount)}</Col>
+                  </Row>
+                </ListGroup.Item>
+              )}
               <ListGroup.Item>
+                <Row>
+                  <Col><strong>Tổng cộng</strong></Col>
+                  <Col>
+                    <strong>{formatVND(totalAfterDiscount)}</strong>
+                    {discountAmount > 0 && (
+                      <span className="text-success ms-2">(Đã áp dụng mã giảm giá)</span>
+                    )}
+                  </Col>
+                </Row>
+              </ListGroup.Item>
+              {/* <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
                   <Col>{formatVND(totalPrice)}</Col>
                 </Row>
-              </ListGroup.Item>
+              </ListGroup.Item> */}
               <ListGroup.Item>
                 <Row className="mx-1">
                   <Button
@@ -129,7 +150,7 @@ function PlacerOrderPage(props) {
                     disabled={productsInCart.length == 0}
                     onClick={handlePlaceOrder}
                   >
-                    Place Order
+                    Đặt hàng
                   </Button>
                 </Row>
               </ListGroup.Item>
@@ -138,13 +159,13 @@ function PlacerOrderPage(props) {
 
           {totalItemsPrice <= CURRENCY.FREE_SHIPPING_THRESHOLD ? (
             <Message variant="info">
-              Free shipping on minimum item value {formatVND(CURRENCY.FREE_SHIPPING_THRESHOLD)}.
+              Miễn phí vận chuyển với giá trị đơn hàng từ {formatVND(CURRENCY.FREE_SHIPPING_THRESHOLD)}.
             </Message>
           ) : (
             <Message variant="info">Free shipping on this order!</Message>
           )}
           <Message variant="info">
-            5% tax is calculated based on item value.
+            Thuế 5% tính theo giá trị sản phẩm.
           </Message>
         </Col>
       </Row>

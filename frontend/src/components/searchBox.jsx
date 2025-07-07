@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
 
-function SearchBox({keyword,setKeyword}) {
+function SearchBox({ keyword, setKeyword }) {
   const [keywordText, setKeywordText] = useState(keyword);
   const navigate = useNavigate();
 
@@ -21,19 +21,17 @@ function SearchBox({keyword,setKeyword}) {
   };
 
   return (
-    <Form onSubmit={handleSubmit} style={{ display: "flex" }} className="p-1">
+    <Form onSubmit={handleSubmit} className="d-flex search-form position-relative">
       <Form.Control
         type="text"
-        placeholder="Enter product name..."
+        placeholder="Tìm sản phẩm..."
         value={keywordText}
-        onChange={(e) => {
-          setKeywordText(e.currentTarget.value);
-        }}
-        className="mx-2"
-      ></Form.Control>
-      <Button type="submit" variant="outline-success" className="p-2">
-        Submit
-      </Button>
+        onChange={(e) => setKeywordText(e.currentTarget.value)}
+        className="me-2 search-input-with-icon"
+      />
+      <button type="submit" className="search-icon-btn">
+        <i className="fas fa-search"></i>
+      </button>
     </Form>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Row, Col, ListGroup, Image, Card, Button, Alert } from "react-bootstrap";
+import { Row, Col, ListGroup, Image, Card, Button, Alert, Modal, Form } from "react-bootstrap";
 import httpService from "../services/httpService";
 import UserContext from "../context/userContext";
 import PayboxContext from "../context/payboxContext";
@@ -10,12 +10,16 @@ import StripePaymentWrapper from "../components/stripePaymentWrapper";
 import { formatVND } from "../utils/currency";
 
 function OrderDetailsPage(props) {
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("paybox"); // Mặc định chọn Paybox
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("paybox");
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState({});
+  const [refundMessage, setRefundMessage] = useState("");
   const [error, setError] = useState("");
   const [payboxLoading, setPayboxLoading] = useState(false);
   const [payboxMessage, setPayboxMessage] = useState("");
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundReason, setRefundReason] = useState("");
+
   const { userInfo, logout } = useContext(UserContext);
   const { wallet, payWithPaybox, hasSufficientBalance, formatVND: formatPayboxVND } = useContext(PayboxContext);
   const { id } = useParams();
@@ -29,8 +33,8 @@ function OrderDetailsPage(props) {
         const { data } = await httpService.get(`/api/orders/${id}/`);
         setOrderDetails(data);
       } catch (ex) {
-        if (ex.response && ex.response.status == 403) logout();
-        if (ex.response && ex.response.status == 404)
+        if (ex.response && ex.response.status === 403) logout();
+        else if (ex.response && ex.response.status === 404)
           setError("No such order exists for this user!");
         else setError(ex.message);
       }
@@ -45,11 +49,8 @@ function OrderDetailsPage(props) {
       setPayboxMessage("");
 
       await payWithPaybox(id);
-
-      // Refresh order details
       const { data } = await httpService.get(`/api/orders/${id}/`);
       setOrderDetails(data);
-
       setPayboxMessage("Thanh toán thành công!");
     } catch (ex) {
       const errorMessage = ex.response?.data?.error || "Không thể thanh toán bằng ví Paybox";
@@ -59,145 +60,125 @@ function OrderDetailsPage(props) {
     }
   };
 
+  const submitRefundRequest = async () => {
+    try {
+      if (!refundReason.trim()) {
+        setRefundMessage("Lý do hoàn tiền không được để trống!");
+        return;
+      }
+
+      await httpService.post("/api/paybox/refund-request/", {
+        order_id: orderDetails.id,
+        reason: refundReason,
+      });
+
+      setRefundMessage("Đã gửi yêu cầu hoàn tiền thành công!");
+      const updated = await httpService.get(`/api/orders/${id}/`);
+      setOrderDetails(updated.data);
+      setShowRefundModal(false);
+      setRefundReason("");
+    } catch (ex) {
+      const error = ex.response?.data?.error || "Không thể gửi yêu cầu hoàn tiền!";
+      setRefundMessage(error);
+    }
+  };
+
   return (
     <div>
       {loading ? (
         <Loader />
-      ) : error != "" ? (
+      ) : error !== "" ? (
         <Message variant="danger">{error}</Message>
       ) : (
         <Row>
           <Col md={8}>
             <ListGroup variant="flush">
               <ListGroup.Item>
-                <h2>Shipping</h2>
-                <p>
-                  <strong>Name: </strong> {orderDetails.user.username}
-                </p>
-                <p>
-                  <strong>Email: </strong>{" "}
+                <h2>Đặt hàng</h2>
+                <p><strong>Tên:</strong> {orderDetails.user.username}</p>
+                <p><strong>Email:</strong>{" "}
                   <Link href={`mailto:${orderDetails.user.email}`}>
                     {orderDetails.user.email}
                   </Link>
                 </p>
-                <p>
-                  <strong>Shipping: </strong>
-                  {orderDetails.shippingAddress.address},{" "}
-                  {orderDetails.shippingAddress.city},{"   "}
-                  {orderDetails.shippingAddress.postalCode},{"   "}
-                  {orderDetails.shippingAddress.country}
-                </p>
-                <p>
+                <p><strong>Địa chỉ:</strong> {orderDetails.shippingAddress.address}, {orderDetails.shippingAddress.city}, {orderDetails.shippingAddress.postalCode}, {orderDetails.shippingAddress.country}</p>
+                <div>
                   {orderDetails.isDelivered ? (
-                    <Message variant="success">
-                      Delivered at {orderDetails.deliveredAt}.
-                    </Message>
+                    <Message variant="success">Đã giao {orderDetails.deliveredAt}.</Message>
                   ) : (
-                    <Message variant="warning">Not Delivered!</Message>
+                      <Message variant="warning">Chưa giao</Message>
                   )}
-                </p>
+                </div>
               </ListGroup.Item>
+
               <ListGroup.Item>
-                <h2>Payment Method</h2>
-                <p>
-                  <strong>Method: </strong>
-                  {orderDetails.paymentMethod}
-                </p>
-                <p>
+                <h2>Phương thức thanh toán</h2>
+                <p><strong>Phương thức:</strong> {orderDetails.paymentMethod}</p>
+                <div>
                   {orderDetails.isPaid ? (
-                    <Message variant="success">
-                      Paid at {orderDetails.paidAt}.
-                    </Message>
+                    <Message variant="success">Thanh toán lúc {orderDetails.paidAt}.</Message>
                   ) : (
-                    <Message variant="warning">Not Paid!</Message>
+                    <Message variant="warning">Chưa thanh toán</Message>
                   )}
-                </p>
+                </div>
               </ListGroup.Item>
+
               <ListGroup.Item>
-                <h2>Order Items</h2>
-                {
-                  <ListGroup variant="flush">
-                    {orderDetails.orderItems.map((product) => (
-                      <ListGroup.Item key={product.id}>
-                        <Row>
-                          <Col sm={3} md={2}>
-                            <Image
-                              src={product.image}
-                              alt={product.productName}
-                              fluid
-                              rounded
-                            />
-                          </Col>
-                          <Col sm={5} md={6}>
-                            <Link
-                              to={`/product/${product.id}`}
-                              className="text-decoration-none"
-                            >
-                              {product.productName}
-                            </Link>
-                          </Col>
-                          <Col sm={3} md={4}>
-                            {product.qty} X {formatVND(product.price)} = {formatVND(product.qty * product.price)}
-                          </Col>
-                        </Row>
-                      </ListGroup.Item>
-                    ))}
-                  </ListGroup>
-                }
+                <h2>Sản phẩm</h2>
+                <ListGroup variant="flush">
+                  {orderDetails.orderItems.map((product) => (
+                    <ListGroup.Item key={product.id}>
+                      <Row>
+                        <Col sm={3} md={2}>
+                          <Image src={product.image} alt={product.productName} fluid rounded />
+                        </Col>
+                        <Col sm={5} md={6}>
+                          <Link to={`/product/${product.id}`} className="text-decoration-none">
+                            {product.productName}
+                          </Link>
+                        </Col>
+                        <Col sm={3} md={4}>
+                          {product.qty} x {formatVND(product.price)} = {formatVND(product.qty * product.price)}
+                        </Col>
+                      </Row>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
               </ListGroup.Item>
             </ListGroup>
           </Col>
+
           <Col md={4}>
             <Card className="mb-3">
               <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <h2>Order Summary</h2>
-                </ListGroup.Item>
+                <ListGroup.Item><h2>Tóm tắt đơn hàng</h2></ListGroup.Item>
                 <ListGroup.Item>
                   <Row>
-                    <Col>Items</Col>
-                    <Col>
-                      {formatVND(orderDetails.totalPrice -
-                        orderDetails.taxPrice -
-                        orderDetails.shippingPrice)}
-                    </Col>
+                    <Col>Sản phẩm</Col>
+                    <Col>{formatVND(orderDetails.totalPrice - orderDetails.taxPrice - orderDetails.shippingPrice)}</Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <Row>
-                    <Col>Shipping</Col>
-                    <Col>{formatVND(orderDetails.shippingPrice)}</Col>
-                  </Row>
+                  <Row><Col>Địa chỉ</Col><Col>{formatVND(orderDetails.shippingPrice)}</Col></Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <Row>
-                    <Col>Tax</Col>
-                    <Col>{formatVND(orderDetails.taxPrice)}</Col>
-                  </Row>
+                  <Row><Col>Tax</Col><Col>{formatVND(orderDetails.taxPrice)}</Col></Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <Row>
-                    <Col>Total</Col>
-                    <Col>{formatVND(orderDetails.totalPrice)}</Col>
-                  </Row>
+                  <Row><Col>Tổng cộng</Col><Col>{formatVND(orderDetails.totalPrice)}</Col></Row>
                 </ListGroup.Item>
               </ListGroup>
             </Card>
+
             <Row className="p-2">
               {!orderDetails.isPaid && (
                 <div>
-                  {/* Paybox Payment Messages */}
                   {payboxMessage && (
-                    <Alert
-                      variant={payboxMessage.includes("thành công") ? "success" : "danger"}
-                      className="mb-3"
-                    >
+                    <Alert variant={payboxMessage.includes("thành công") ? "success" : "danger"} className="mb-3">
                       {payboxMessage}
                     </Alert>
                   )}
 
-                  {/* Paybox Payment Option */}
-                  {/* Chọn phương thức thanh toán */}
                   <Card className="mb-3">
                     <Card.Body className="p-2">
                       <div className="d-flex gap-3">
@@ -205,28 +186,22 @@ function OrderDetailsPage(props) {
                           variant={selectedPaymentMethod === "paybox" ? "primary" : "outline-primary"}
                           onClick={() => setSelectedPaymentMethod("paybox")}
                         >
-                          <i className="fas fa-wallet me-2"></i>
-                          Ví Paybox
+                          <i className="fas fa-wallet me-2"></i>Ví Paybox
                         </Button>
                         <Button
                           variant={selectedPaymentMethod === "stripe" ? "primary" : "outline-primary"}
                           onClick={() => setSelectedPaymentMethod("stripe")}
                         >
-                          <i className="fas fa-credit-card me-2"></i>
-                          Thẻ tín dụng/ghi nợ
+                          <i className="fas fa-credit-card me-2"></i>Thẻ tín dụng/ghi nợ
                         </Button>
                       </div>
                     </Card.Body>
                   </Card>
 
-                  {/* Paybox Payment Option */}
                   {selectedPaymentMethod === "paybox" && wallet && (
                     <Card className="mb-3">
                       <Card.Header>
-                        <h6 className="mb-0">
-                          <i className="fas fa-wallet me-2"></i>
-                          Thanh toán bằng ví Paybox
-                        </h6>
+                        <h6 className="mb-0"><i className="fas fa-wallet me-2"></i>Thanh toán bằng ví Paybox</h6>
                       </Card.Header>
                       <Card.Body>
                         <div className="mb-3">
@@ -245,8 +220,7 @@ function OrderDetailsPage(props) {
                           >
                             {payboxLoading ? (
                               <>
-                                <i className="fas fa-spinner fa-spin me-2"></i>
-                                Đang xử lý...
+                                <i className="fas fa-spinner fa-spin me-2"></i>Đang xử lý...
                               </>
                             ) : (
                               <>
@@ -256,35 +230,23 @@ function OrderDetailsPage(props) {
                             )}
                           </Button>
                         ) : (
-                          <div>
+                          <>
                             <Alert variant="warning" className="mb-2">
-                              <small>
-                                <i className="fas fa-exclamation-triangle me-1"></i>
-                                Số dư không đủ để thanh toán đơn hàng này
-                              </small>
+                              <small><i className="fas fa-exclamation-triangle me-1"></i>Số dư không đủ để thanh toán đơn hàng này</small>
                             </Alert>
-                            <Button
-                              variant="outline-primary"
-                              href="/paybox"
-                              className="w-100"
-                            >
-                              <i className="fas fa-plus me-2"></i>
-                              Nạp thêm tiền vào ví
+                            <Button variant="outline-primary" href="/paybox" className="w-100">
+                              <i className="fas fa-plus me-2"></i>Nạp thêm tiền vào ví
                             </Button>
-                          </div>
+                          </>
                         )}
                       </Card.Body>
                     </Card>
                   )}
 
-                  {/* Stripe Payment Option */}
                   {selectedPaymentMethod === "stripe" && (
                     <Card>
                       <Card.Header>
-                        <h6 className="mb-0">
-                          <i className="fas fa-credit-card me-2"></i>
-                          Thanh toán bằng thẻ tín dụng/ghi nợ
-                        </h6>
+                        <h6 className="mb-0"><i className="fas fa-credit-card me-2"></i>Thanh toán bằng thẻ tín dụng/ghi nợ</h6>
                       </Card.Header>
                       <Card.Body className="p-0">
                         <StripePaymentWrapper id={orderDetails.id} />
@@ -293,8 +255,49 @@ function OrderDetailsPage(props) {
                   )}
                 </div>
               )}
+
+              {orderDetails.isPaid && !orderDetails.isRefunded && !orderDetails.refund_request && (
+                <Button variant="outline-danger" onClick={() => setShowRefundModal(true)} className="w-100 mt-3">
+                  <i className="fas fa-undo-alt me-2"></i>Yêu cầu hoàn tiền
+                </Button>
+              )}
+
+              {refundMessage && (
+                <Alert variant={refundMessage.includes("thành công") ? "success" : "danger"} className="mt-2">
+                  {refundMessage}
+                </Alert>
+              )}
             </Row>
           </Col>
+
+          <Modal show={showRefundModal} onHide={() => setShowRefundModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Yêu cầu hoàn tiền</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form>
+                <Form.Group controlId="refundReason">
+                  <Form.Label>Lý do hoàn tiền</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={refundReason}
+                    onChange={(e) => setRefundReason(e.target.value)}
+                    placeholder="Vui lòng nhập lý do..."
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowRefundModal(false)}>
+                Hủy
+              </Button>
+              <Button variant="danger" onClick={submitRefundRequest}>
+                Gửi yêu cầu
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
         </Row>
       )}
     </div>

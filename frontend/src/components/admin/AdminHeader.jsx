@@ -23,7 +23,7 @@ const AdminHeader = () => {
           <button className="sidebar-toggle">
             <i className="fas fa-bars"></i>
           </button>
-          
+
           <div className="logo">
             <i className="fas fa-circle" style={{ color: '#00BCD4' }}></i>
             <span className="logo-text">Pluto</span>
@@ -36,6 +36,13 @@ const AdminHeader = () => {
 
         <div className="header-right">
           <Nav className="header-nav">
+            <Nav.Item className="nav-item-icon">
+              <Nav.Link as={Link} to="/admin/refunds" className="nav-icon">
+                <i className="fas fa-undo-alt"></i>
+                {/* <Badge bg="warning">2</Badge>  // Nếu bạn muốn badge số lượng */}
+              </Nav.Link>
+            </Nav.Item>
+
             <Nav.Item className="nav-item-icon">
               <Nav.Link href="#" className="nav-icon">
                 <i className="fas fa-bell"></i>

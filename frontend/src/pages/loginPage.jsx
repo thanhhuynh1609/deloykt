@@ -3,34 +3,32 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import Message from "../components/message";
 import UserContext from "../context/userContext";
-import FormContainer from "../components/formContainer";
+import "../styles/loginPage.css";
 
-function LoginPage(props) {
+function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { userInfo, login, error } = useContext(UserContext);
   const navigate = useNavigate();
-  const [searchParams,setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect')
     ? "/" + searchParams.get('redirect')
     : "/";
 
   useEffect(() => {
     if (userInfo && userInfo.username) {
-      // Redirect admin users to admin dashboard
       if (userInfo.isAdmin) {
         navigate('/admin');
       } else {
         navigate(redirect);
       }
     }
-  }, []);
+  }, [userInfo, navigate, redirect]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const status = await login(username, password);
     if (status) {
-      // Check if user is admin after successful login
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       if (userInfo && userInfo.isAdmin) {
         navigate('/admin');
@@ -41,59 +39,93 @@ function LoginPage(props) {
   };
 
   return (
-    <FormContainer>
-      <h1>Sign In</h1>
-      {error.login && error.login.detail && (
-        <Message variant="danger">
-          <h4>{error.login.detail}</h4>
-        </Message>
-      )}
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="username" className="my-2">
-          <Form.Label>Username</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter Username"
-            value={username}
-            onChange={(e) => {
-              setUsername(e.currentTarget.value);
-            }}
-          ></Form.Control>
-          <Form.Text>
-            {error.login && error.login.username && (
-              <Message variant="danger">{error.login.username}</Message>
-            )}
-          </Form.Text>
-        </Form.Group>
-        <Form.Group controlId="password" className="my-2">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.currentTarget.value);
-            }}
-          ></Form.Control>
-          <Form.Text>
-            {error.login && error.login.password && (
-              <Message variant="danger">{error.login.password}</Message>
-            )}
-          </Form.Text>
-        </Form.Group>
-        <Button type="submit" variant="primary" className="my-2">
-          Sign In
-        </Button>
-      </Form>
-      <Row className="py-3">
-        <Col>
-          New Customer?
-          <Link to={redirect ? `/register?redirect=${redirect}` : "/register"}>
-            Register
-          </Link>
-        </Col>
-      </Row>
-    </FormContainer>
+    <div className="login-page">
+      <div className="login-container">
+        <div className="breadcrumb-nav">
+          <Link to="/">Home</Link> / <span>Account</span>
+        </div>
+        
+        <div className="auth-tabs">
+          <div className="auth-tab active">
+            <Link to="/login">SIGN IN</Link>
+          </div>
+          <div className="auth-tab">
+            <Link to={redirect ? `/register?redirect=${redirect}` : "/register"}>
+              CREATE ACCOUNT
+            </Link>
+          </div>
+        </div>
+        
+        <div className="auth-content">
+          <div className="auth-benefits">
+            <p>Sign in to access your account, track orders, save products to your wishlist, and enjoy a personalized shopping experience.</p>
+          </div>
+          
+          {error.login && error.login.detail && (
+            <Message variant="danger">
+              <h4>{error.login.detail}</h4>
+            </Message>
+          )}
+          
+          <Form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                className="form-control"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              {error.login && error.login.username && (
+                <Message variant="danger">{error.login.username}</Message>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label" htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                className="form-control"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {error.login && error.login.password && (
+                <Message variant="danger">{error.login.password}</Message>
+              )}
+            </div>
+            
+            <div className="forgot-password">
+              <Link to="/forgot-password">Forgot your password?</Link>
+            </div>
+            
+            <button type="submit" className="auth-button btn-primary">
+              SIGN IN
+            </button>
+            
+            <div className="auth-separator">
+              <span>OR</span>
+            </div>
+            
+            <div className="social-login">
+              <button type="button" className="btn social-btn google">
+                <i className="fab fa-google"></i> Sign in with Google
+              </button>
+              <button type="button" className="btn social-btn facebook">
+                <i className="fab fa-facebook-f"></i> Sign in with Facebook
+              </button>
+            </div>
+            
+            <div className="auth-info">
+              <p>By signing in, you agree to our <a href="/terms">Terms of Use</a> and <a href="/privacy">Privacy Policy</a>.</p>
+            </div>
+          </Form>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -62,7 +62,7 @@ function ConfirmationPage(props) {
             <Message variant="info">{message}</Message>
           )}
           <LinkContainer to={`/orders/${id}`}>
-            <Button variant="primary">Track Order</Button>
+            <Button variant="primary">Xem đơn hàng</Button>
           </LinkContainer>
         </div>
       )}

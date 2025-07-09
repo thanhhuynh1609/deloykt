@@ -39,10 +39,10 @@ function ShippingPage(props) {
   return (
     <FormContainer>
       <CheckoutSteps step1 step2 />
-      <h1>Shipping Address</h1>
+      <h1 style={{ textTransform: "none" }}>Địa chỉ giao hàng</h1>
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="address" className="my-2">
-          <Form.Label>Address</Form.Label>
+          <Form.Label>Đường, xã/phường</Form.Label>
           <Form.Control
             required
             type="text"
@@ -54,7 +54,7 @@ function ShippingPage(props) {
           ></Form.Control>
         </Form.Group>
         <Form.Group controlId="city" className="my-2">
-          <Form.Label>City</Form.Label>
+          <Form.Label>Thành phố</Form.Label>
           <Form.Control
             required
             type="text"
@@ -66,7 +66,7 @@ function ShippingPage(props) {
           ></Form.Control>
         </Form.Group>
         <Form.Group controlId="postalCode" className="my-2">
-          <Form.Label>Postal Code</Form.Label>
+          <Form.Label>Mã vùng</Form.Label>
           <Form.Control
             required
             type="text"
@@ -78,7 +78,7 @@ function ShippingPage(props) {
           ></Form.Control>
         </Form.Group>
         <Form.Group controlId="Country" className="my-2">
-          <Form.Label>Country</Form.Label>
+          <Form.Label>Quốc gia</Form.Label>
           <Form.Control
             required
             type="text"
@@ -89,8 +89,8 @@ function ShippingPage(props) {
             }}
           ></Form.Control>
         </Form.Group>
-        <Button type="submit" variant="primary" className="my-2">
-          Continue
+        <Button type="submit" variant="primary" className="my-2" style={{ textTransform: "none" }}>
+          Tiếp tục
         </Button>
       </Form>
     </FormContainer>

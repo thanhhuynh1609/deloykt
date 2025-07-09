@@ -2,25 +2,25 @@ from datetime import datetime
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from .models import Coupon
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .serializers import CouponSerializer
 import os
-from rest_framework import generics
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets, permissions
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from api import permissions
-from api.models import Brand, Category, Order, OrderItem, Product, RefundRequest, Review, ShippingAddress, PayboxWallet, PayboxTransaction
+from api.models import Brand, Category, Order, OrderItem, Product, Review, ShippingAddress, PayboxWallet, PayboxTransaction, RefundRequest, Favorite
 from api.permissions import IsAdminUserOrReadOnly
-from api.serializers import BrandSerializer, CategorySerializer, OrderSerializer, ProductSerializer, RefundRequestSerializer, ReviewSerializer, PayboxWalletSerializer, PayboxTransactionSerializer
+from api.serializers import BrandSerializer, CategorySerializer, OrderSerializer, ProductSerializer, ReviewSerializer, PayboxWalletSerializer, PayboxTransactionSerializer
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 import stripe
-
-from api.models import RefundRequest
 
 
 
@@ -28,6 +28,39 @@ class BrandViewSet(ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     permission_classes = [IsAdminUserOrReadOnly]
+
+
+class CouponViewSet(viewsets.ModelViewSet):
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'check_coupon']:
+            return [permissions.AllowAny()]
+        return super().get_permissions()
+
+    @action(detail=False, methods=['post'], url_path='check')
+    def check_coupon(self, request):
+        code = request.data.get('code')
+        total_price = request.data.get('total_price', 0)
+
+        if not code:
+            return Response({'error': 'Mã giảm giá không được cung cấp'}, status=400)
+
+        try:
+            coupon = Coupon.objects.get(code=code)
+            if not coupon.is_valid():
+                return Response({'error': 'Mã giảm giá không hợp lệ hoặc đã hết hạn'}, status=400)
+            if total_price < coupon.min_order_amount:
+                return Response({'error': f'Đơn hàng chưa đạt mức tối thiểu {coupon.min_order_amount} VND'}, status=400)
+            return Response({
+                'message': 'Mã giảm giá hợp lệ',
+                'discount_amount': coupon.discount_amount,
+                'coupon_id': coupon.id
+            }, status=200)
+        except Coupon.DoesNotExist:
+            return Response({'error': 'Mã giảm giá không tồn tại'}, status=400)
 
 
 class CategoryViewSet(ModelViewSet):
@@ -40,15 +73,16 @@ class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAdminUserOrReadOnly]
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        return context
 
 
 class ReviewView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, pk):
-        data = request.data
-        user = request.user
-
         product = get_object_or_404(Product, id=pk)
         reviews = product.review_set.all()
         serializer = ReviewSerializer(reviews, many=True)
@@ -60,6 +94,20 @@ class ReviewView(APIView):
 
         product = get_object_or_404(Product, id=pk)
 
+        # Kiểm tra xem người dùng đã mua sản phẩm này chưa
+        has_purchased = OrderItem.objects.filter(
+            order__user=user,
+            product=product,
+            order__isPaid=True
+        ).exists()
+
+        if not has_purchased:
+            return Response(
+                {'detail': 'You can only review products you have purchased.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
         alreadyExists = product.review_set.filter(user=user).exists()
 
         if alreadyExists:
@@ -92,22 +140,51 @@ class ReviewView(APIView):
 def placeOrder(request):
     user = request.user
     data = request.data
-
     orderItems = data['orderItems']
 
     if not orderItems or len(orderItems) == 0:
         return Response({'detail': 'No Order items'}, status=status.HTTP_400_BAD_REQUEST)
 
-    with transaction.atomic():
-        order = Order.objects.create(user=user, paymentMethod=data['paymentMethod'], taxPrice=data['taxPrice'],
-                                     shippingPrice=data['shippingPrice'], totalPrice=data['totalPrice'])
+    totalPrice = data['totalPrice']
+    coupon_code = data.get('coupon_code')
+    discount = 0
+    coupon = None
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.get(code=coupon_code)
+            if not coupon.is_valid():
+                return Response({'error': 'Mã giảm giá không hợp lệ hoặc đã hết hạn'}, status=status.HTTP_400_BAD_REQUEST)
+            if totalPrice < coupon.min_order_amount:
+                return Response(
+                    {'error': f'Đơn hàng chưa đạt mức tối thiểu {coupon.min_order_amount} VND'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            discount = coupon.discount_amount
+        except Coupon.DoesNotExist:
+            return Response({'error': 'Mã giảm giá không tồn tại'}, status=status.HTTP_400_BAD_REQUEST)
 
-        shippingAddress = ShippingAddress.objects.create(order=order, address=data['shippingAddress']['address'], city=data['shippingAddress']
-                                                         ['city'], postalCode=data['shippingAddress']['postalCode'], country=data['shippingAddress']['country'],)
+    totalPrice = max(0, totalPrice - discount)
+
+    with transaction.atomic():
+        order = Order.objects.create(
+            user=user,
+            paymentMethod=data['paymentMethod'],
+            taxPrice=data['taxPrice'],
+            shippingPrice=data['shippingPrice'],
+            totalPrice=totalPrice,
+            coupon=coupon
+        )
+
+        shippingAddress = ShippingAddress.objects.create(
+            order=order,
+            address=data['shippingAddress']['address'],
+            city=data['shippingAddress']['city'],
+            postalCode=data['shippingAddress']['postalCode'],
+            country=data['shippingAddress']['country'],
+        )
 
         for x in orderItems:
             product = Product.objects.get(id=x['id'])
-
             item = OrderItem.objects.create(
                 product=product,
                 order=order,
@@ -116,12 +193,11 @@ def placeOrder(request):
                 price=product.price,
                 image=product.image.name
             )
-
             product.countInStock -= x['qty']
             product.save()
 
         serializer = OrderSerializer(order)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class OrderViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):
@@ -144,19 +220,40 @@ stripe.api_key = settings.STRIPE_API_KEY
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def updateOrderToPaid(request, pk):
+def update_order_to_paid(request, pk):
+    try:
+        # Lấy PaymentIntent từ Stripe
+        payment_intent = stripe.PaymentIntent.retrieve(request.data.get('payment_intent'))
 
-    payment_intent = stripe.PaymentIntent.retrieve(
-        request.data['payment_intent'])
+        if payment_intent.status == "succeeded":
+            order = get_object_or_404(Order, id=pk)
 
-    if payment_intent.status == "succeeded":
-        order = get_object_or_404(Order, id=pk)
-        order.isPaid = True
-        order.paidAt = datetime.now()
-        order.save()
-        return Response('Payment was successful completed!')
+            # Kiểm tra xem đơn hàng có phải của user hoặc admin không
+            if order.user != request.user and not request.user.is_staff:
+                return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
-    return Response('An unexpected error occurred! Please contact our customer care.')
+            # Cập nhật trạng thái đơn hàng
+            order.isPaid = True
+            order.paidAt = datetime.now()
+            order.save()
+
+            # Cập nhật số lượng total_sold cho từng sản phẩm
+            with transaction.atomic():
+                for item in order.orderitem_set.all():
+                    product = item.product
+                    product.total_sold += item.qty
+                    product.save()
+
+            return Response({'detail': 'Thanh toán thành công, đơn hàng của bạn đã được cập nhật!'}, status=status.HTTP_200_OK)
+
+        else:
+            return Response({'detail': 'Payment not successful yet.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    except stripe.error.StripeError as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class StripePaymentView(APIView):
@@ -533,6 +630,8 @@ class AdminPayboxTransactionListView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+
+
 class AdminRefundRequestListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -625,6 +724,7 @@ class ApproveRefundRequestView(APIView):
 class RejectRefundRequestView(APIView):
     permission_classes = [IsAuthenticated]
 
+
     def delete(self, request, order_id):
         if not request.user.is_staff:
             return Response({'error': 'Không có quyền'}, status=403)
@@ -658,3 +758,103 @@ class DeleteRefundRequestView(APIView):
         refund.delete()
 
         return Response({'message': 'Yêu cầu hoàn tiền đã bị xóa'}, status=200)
+
+
+    def delete(self, request, order_id):
+        if not request.user.is_staff:
+            return Response({'error': 'Không có quyền'}, status=403)
+
+
+        order = get_object_or_404(Order, id=order_id)
+        refund = getattr(order, 'refund_request', None)
+
+        if not refund:
+            return Response({'error': 'Không có yêu cầu hoàn tiền'}, status=400)
+        if refund.is_approved is not None:
+            return Response({'error': 'Yêu cầu đã được xử lý'}, status=400)
+
+        refund.is_approved = False
+        refund.approved_at = timezone.now()
+        refund.save()
+
+        return Response({'message': 'Yêu cầu hoàn tiền đã bị từ chối'}, status=200)
+class DeleteRefundRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, order_id):
+        if not request.user.is_staff:
+            return Response({'error': 'Không có quyền'}, status=403)
+
+        order = get_object_or_404(Order, id=order_id)
+        refund = getattr(order, 'refund_request', None)
+
+        if not refund:
+            return Response({'error': 'Không có yêu cầu hoàn tiền'}, status=400)
+
+        refund.delete()
+
+        return Response({'message': 'Yêu cầu hoàn tiền đã bị xóa'}, status=200)
+
+class FavoriteView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Lấy danh sách sản phẩm yêu thích của người dùng"""
+        favorites = Favorite.objects.filter(user=request.user)
+        products = [favorite.product for favorite in favorites]
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        """Thêm sản phẩm vào danh sách yêu thích"""
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({'detail': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Kiểm tra xem đã tồn tại trong danh sách yêu thích chưa
+        favorite, created = Favorite.objects.get_or_create(user=request.user, product=product)
+        
+        if created:
+            return Response({'detail': 'Product added to favorites'}, status=status.HTTP_201_CREATED)
+        return Response({'detail': 'Product already in favorites'}, status=status.HTTP_200_OK)
+    
+    def delete(self, request):
+        """Xóa sản phẩm khỏi danh sách yêu thích"""
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({'detail': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            favorite = Favorite.objects.get(user=request.user, product_id=product_id)
+            favorite.delete()
+            return Response({'detail': 'Product removed from favorites'}, status=status.HTTP_204_NO_CONTENT)
+        except Favorite.DoesNotExist:
+            return Response({'detail': 'Product not in favorites'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# Thêm endpoint để kiểm tra sản phẩm có trong danh sách yêu thích không
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_favorite(request, pk):
+    """Kiểm tra xem sản phẩm có trong danh sách yêu thích không"""
+    is_favorite = Favorite.objects.filter(user=request.user, product_id=pk).exists()
+    return Response({'is_favorite': is_favorite})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_purchase(request, pk):
+    """Kiểm tra xem người dùng đã mua sản phẩm này chưa"""
+    user = request.user
+    product = get_object_or_404(Product, id=pk)
+    
+    has_purchased = OrderItem.objects.filter(
+        order__user=user,
+        product=product,
+        order__isPaid=True
+    ).exists()
+    
+    return Response({'has_purchased': has_purchased})
+

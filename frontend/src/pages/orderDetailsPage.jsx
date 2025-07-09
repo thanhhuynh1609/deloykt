@@ -67,8 +67,7 @@ function OrderDetailsPage(props) {
         return;
       }
 
-      const { data } = await httpService.post("/api/paybox/refund-request/", {
-
+      await httpService.post("/api/paybox/refund-request/", {
         order_id: orderDetails.id,
         reason: refundReason,
       });
@@ -95,37 +94,37 @@ function OrderDetailsPage(props) {
           <Col md={8}>
             <ListGroup variant="flush">
               <ListGroup.Item>
-                <h2>Shipping</h2>
-                <p><strong>Name:</strong> {orderDetails.user.username}</p>
+                <h2>Đặt hàng</h2>
+                <p><strong>Tên:</strong> {orderDetails.user.username}</p>
                 <p><strong>Email:</strong>{" "}
                   <Link href={`mailto:${orderDetails.user.email}`}>
                     {orderDetails.user.email}
                   </Link>
                 </p>
-                <p><strong>Shipping:</strong> {orderDetails.shippingAddress.address}, {orderDetails.shippingAddress.city}, {orderDetails.shippingAddress.postalCode}, {orderDetails.shippingAddress.country}</p>
-                <p>
+                <p><strong>Địa chỉ:</strong> {orderDetails.shippingAddress.address}, {orderDetails.shippingAddress.city}, {orderDetails.shippingAddress.postalCode}, {orderDetails.shippingAddress.country}</p>
+                <div>
                   {orderDetails.isDelivered ? (
-                    <Message variant="success">Delivered at {orderDetails.deliveredAt}.</Message>
+                    <Message variant="success">Đã giao {orderDetails.deliveredAt}.</Message>
                   ) : (
-                    <Message variant="warning">Not Delivered!</Message>
+                      <Message variant="warning">Chưa giao</Message>
                   )}
-                </p>
+                </div>
               </ListGroup.Item>
 
               <ListGroup.Item>
-                <h2>Payment Method</h2>
-                <p><strong>Method:</strong> {orderDetails.paymentMethod}</p>
-                <p>
+                <h2>Phương thức thanh toán</h2>
+                <p><strong>Phương thức:</strong> {orderDetails.paymentMethod}</p>
+                <div>
                   {orderDetails.isPaid ? (
-                    <Message variant="success">Paid at {orderDetails.paidAt}.</Message>
+                    <Message variant="success">Thanh toán lúc {orderDetails.paidAt}.</Message>
                   ) : (
-                    <Message variant="warning">Not Paid!</Message>
+                    <Message variant="warning">Chưa thanh toán</Message>
                   )}
-                </p>
+                </div>
               </ListGroup.Item>
 
               <ListGroup.Item>
-                <h2>Order Items</h2>
+                <h2>Sản phẩm</h2>
                 <ListGroup variant="flush">
                   {orderDetails.orderItems.map((product) => (
                     <ListGroup.Item key={product.id}>
@@ -152,21 +151,21 @@ function OrderDetailsPage(props) {
           <Col md={4}>
             <Card className="mb-3">
               <ListGroup variant="flush">
-                <ListGroup.Item><h2>Order Summary</h2></ListGroup.Item>
+                <ListGroup.Item><h2>Tóm tắt đơn hàng</h2></ListGroup.Item>
                 <ListGroup.Item>
                   <Row>
-                    <Col>Items</Col>
+                    <Col>Sản phẩm</Col>
                     <Col>{formatVND(orderDetails.totalPrice - orderDetails.taxPrice - orderDetails.shippingPrice)}</Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <Row><Col>Shipping</Col><Col>{formatVND(orderDetails.shippingPrice)}</Col></Row>
+                  <Row><Col>Địa chỉ</Col><Col>{formatVND(orderDetails.shippingPrice)}</Col></Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <Row><Col>Tax</Col><Col>{formatVND(orderDetails.taxPrice)}</Col></Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <Row><Col>Total</Col><Col>{formatVND(orderDetails.totalPrice)}</Col></Row>
+                  <Row><Col>Tổng cộng</Col><Col>{formatVND(orderDetails.totalPrice)}</Col></Row>
                 </ListGroup.Item>
               </ListGroup>
             </Card>

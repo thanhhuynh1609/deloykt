@@ -6,37 +6,52 @@ import { useNavigate } from "react-router-dom";
 import CartContext from "../context/cartContext";
 import PayboxContext from "../context/payboxContext";
 
-function PaymentPage(props) {
-  const { shippingAddress, paymentMethod:method, updatePaymentMethod, totalPrice } = useContext(CartContext);
+function PaymentPage() {
+  const {
+    shippingAddress,
+    paymentMethod,
+    updatePaymentMethod,
+    totalPrice,
+    couponCode,
+    setCouponCode,
+    couponMessage,
+    discountAmount,
+    applyCoupon,
+    error
+  } = useContext(CartContext);
   const { wallet, formatVND, hasSufficientBalance } = useContext(PayboxContext);
-  const [paymentMethod, setPaymentMethod] = useState(method);
+  const [localPaymentMethod, setLocalPaymentMethod] = useState(paymentMethod);
   const navigate = useNavigate();
+  const totalAfterDiscount = totalPrice - discountAmount;
 
   if (!shippingAddress || !shippingAddress.address) navigate("/shipping");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    updatePaymentMethod(paymentMethod)
+    updatePaymentMethod(localPaymentMethod);
     navigate("/placeorder");
   };
 
   return (
     <FormContainer>
       <CheckoutSteps step1 step2 step3 />
+      {error && (
+        <Alert variant="danger" className="mt-2">
+          {error}
+        </Alert>
+      )}
       <Form onSubmit={handleSubmit}>
         <Form.Group>
-          <Form.Label as="legend">Select Method</Form.Label>
+          <Form.Label as="legend">Chọn phương thức</Form.Label>
           <Col>
             <Form.Check
               type="radio"
-              label="Stripe or Debit Card"
+              label="Stripe"
               id="stripe"
               name="paymentMethod"
               value="Stripe"
-              onChange={(e) => {
-                setPaymentMethod(e.currentTarget.value);
-              }}
-              checked={"Stripe" == paymentMethod}
+              onChange={(e) => setLocalPaymentMethod(e.currentTarget.value)}
+              checked={localPaymentMethod === "Stripe"}
             ></Form.Check>
 
             <Form.Check
@@ -54,14 +69,12 @@ function PaymentPage(props) {
               id="paybox"
               name="paymentMethod"
               value="Paybox"
-              onChange={(e) => {
-                setPaymentMethod(e.currentTarget.value);
-              }}
-              checked={"Paybox" == paymentMethod}
+              onChange={(e) => setLocalPaymentMethod(e.currentTarget.value)}
+              checked={localPaymentMethod === "Paybox"}
               disabled={!wallet || !hasSufficientBalance(totalPrice)}
             ></Form.Check>
 
-            {paymentMethod === "Paybox" && wallet && !hasSufficientBalance(totalPrice) && (
+            {localPaymentMethod === "Paybox" && wallet && !hasSufficientBalance(totalPrice) && (
               <Alert variant="warning" className="mt-2">
                 <small>
                   <i className="fas fa-exclamation-triangle me-1"></i>
@@ -78,20 +91,53 @@ function PaymentPage(props) {
                 </small>
               </Alert>
             )}
-            {/* <Form.Check
-              type="radio"
-              label="Cash on Delivery"
-              id="cod"
-              value="Cash on Delivery"
-              onChange={(e) => {
-                setPaymentMethod(e.currentTarget.value);
-              }}
-              checked={"Cash on Delivery" == paymentMethod}
-            ></Form.Check> */}
           </Col>
         </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Mã giảm giá</Form.Label>
+          <div className="d-flex">
+            <Form.Control
+              type="text"
+              placeholder="Nhập mã giảm giá"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              style={{ maxWidth: 200 }}
+            />
+            <Button
+              variant="outline-primary"
+              className="ms-2"
+              onClick={() => applyCoupon(couponCode)}
+              disabled={!couponCode}
+              type="button"
+            >
+              Áp dụng
+            </Button>
+          </div>
+          {couponMessage && (
+            <div className="mt-2">
+              <small className={couponMessage.includes("hợp lệ") ? "text-success" : "text-danger"}>
+                {couponMessage}
+              </small>
+              {discountAmount > 0 && (
+                <small className="text-success d-block">
+                  Giảm: {formatVND(discountAmount)}
+                </small>
+              )}
+            </div>
+          )}
+        </Form.Group>
+        <div className="mb-3">
+          <strong>
+            Tổng cộng: {formatVND(totalAfterDiscount)}
+          </strong>
+          {discountAmount > 0 && (
+            <small className="text-success d-block">
+              (Đã giảm {formatVND(discountAmount)})
+            </small>
+          )}
+        </div>
         <Button type="submit" variant="primary">
-          Continue
+          Tiếp tục
         </Button>
       </Form>
     </FormContainer>

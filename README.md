@@ -1,39 +1,108 @@
-# Ecommerce website
-Fully functional e-commerce website with back-end using Django and front-end using React. Integrated with Stripe for payments and used React-bootstrap components for styling. Project is live at: [https://proshop-web.vercel.app](https://proshop-web.vercel.app).
+# Hướng dẫn chi tiết chạy dự án với PostgreSQL
 
-## Demo video
-https://user-images.githubusercontent.com/84830429/222736252-235eb893-a296-430f-9c7f-123fc31cedd6.mp4
+## 1. Cài đặt PostgreSQL
+1. Tải và cài đặt PostgreSQL từ [trang chủ PostgreSQL](https://www.postgresql.org/download/)
+2. Trong quá trình cài đặt, tạo mật khẩu cho người dùng `postgres`
+3. Sau khi cài đặt, mở pgAdmin hoặc psql để tạo cơ sở dữ liệu mới:
+   ```
+   CREATE DATABASE ecommerce;
+   ```
 
-## Instructions
-To run this project locally on your machine,
-1. Clone this repository.
-2. Make sure you have python and node installed.
-3. Open this project and run following cmd to install dependencies:
+## 2. Cài đặt môi trường Python
+1. Đảm bảo Python đã được cài đặt (phiên bản 3.8 theo Pipfile)
+2. Tạo môi trường ảo:
+   ```
+   python -m venv venv
+   ```
+3. Kích hoạt môi trường ảo:
+   - Windows: `venv\Scripts\activate`
+   - Linux/Mac: `source venv/bin/activate`
+
+## 3. Cài đặt các phụ thuộc
 ```
-pip3 install requirements.txt
+pip install -r requirements.txt
 ```
-4. Create a .env file with contents as .env.example file.
+Hoặc sử dụng Pipfile:
 ```
-SECRET_KEY=
-DEBUG=
-STRIPE_API_KEY=
-DATABASE_URL=
+pip install pipenv
+pipenv install
 ```
-In case you do not want to provide a database url, uncomment line 87 to 92 in settings.py file.
-https://github.com/VaibhavArora314/drf-react-ecommerce/blob/d31c3537eeaf6fe894a4a3be0b6b3ac6f47dbe9b/backend/settings.py#L87-L92
-Also comment line 94 in same file.
-https://github.com/VaibhavArora314/drf-react-ecommerce/blob/d31c3537eeaf6fe894a4a3be0b6b3ac6f47dbe9b/backend/settings.py#L94
-5. Now run following cmds to create and run migrations.
+
+## 4. Tạo file .env
+Tạo file `.env` trong thư mục gốc của dự án với nội dung:
+
+```` path=.env mode=EDIT
+SECRET_KEY=your_random_secret_key
+DEBUG=True
+STRIPE_API_KEY=your_stripe_api_key
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/ecommerce
+````
+
+Thay thế:
+- `your_random_secret_key` bằng một chuỗi ngẫu nhiên
+- `your_password` bằng mật khẩu PostgreSQL của bạn
+- `your_stripe_api_key` bằng API key từ tài khoản Stripe (nếu cần thanh toán)
+
+## 5. Kiểm tra cấu hình cơ sở dữ liệu
+Đảm bảo dòng sau trong `backend/settings.py` không bị comment:
+
+````python path=backend/settings.py mode=EXCERPT
+DATABASES = {'default': dj_database_url.config(default=os.environ['DATABASE_URL'], engine='django.db.backends.postgresql')}
+````
+
+## 6. Tạo và áp dụng migrations
 ```
-python3 manage.py makemigrations
-python3 manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
 ```
-6. Now turn on the server using
+
+## 7. Tạo tài khoản admin (tùy chọn)
 ```
-python3 manage.py runserver
+python manage.py createsuperuser
 ```
-Now the application is running at port 8000 by default i.e. ```http://127.0.0.1:8000```.
+
+## 8. Chạy máy chủ Django
+```
+python manage.py runserver
+```
+Ứng dụng sẽ chạy tại `http://127.0.0.1:8000`
+
+## 9. Cài đặt và chạy frontend React
+1. Đảm bảo Node.js đã được cài đặt
+2. Di chuyển đến thư mục frontend:
+   ```
+   cd frontend
+   ```
+3. Cài đặt các phụ thuộc:
+   ```
+   npm install
+   ```
+4. Chạy ứng dụng React:
+   ```
+   npm start
+   ```
+   Frontend sẽ chạy tại `http://localhost:3000`
+
+## 10. Kiểm tra kết nối
+- Truy cập `http://127.0.0.1:8000/admin` để kiểm tra trang admin Django
+- Truy cập `http://localhost:3000` để xem giao diện người dùng React
+
+Nếu bạn gặp lỗi kết nối PostgreSQL, hãy kiểm tra:
+- Mật khẩu PostgreSQL trong DATABASE_URL
+- PostgreSQL đang chạy
+- Cơ sở dữ liệu 'ecommerce' đã được tạo
 
 
-### Credits:
-[Django with React | An Ecommerce Website](https://www.udemy.com/course/django-with-react-an-ecommerce-website/).
+Chạy chat:
+Cài redis-server bằng link: https://github.com/tporadowski/redis/releases (giải nén rồi chạy file redis-server để chạy server)
+- backend: python manage.py makemigrations chat
+           python manage.py migrate
+           python manage.py makemigrations 
+           python manage.py migrate
+           pip install uvicorn
+           pip install websockets
+           pip install channels
+           pip install channels channels_redis
+           chạy backend: uvicorn backend.asgi:application (k dùng runserver nữa)
+- frontend: npm install socket.io-client
+            npm start

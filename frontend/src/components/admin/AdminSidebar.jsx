@@ -29,9 +29,9 @@ const AdminSidebar = () => {
           <small className="nav-section-title">MANAGEMENT</small>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin" 
+            <Nav.Link
+              as={Link}
+              to="/admin"
               className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
             >
               <i className="fas fa-tachometer-alt"></i>
@@ -40,9 +40,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/products" 
+            <Nav.Link
+              as={Link}
+              to="/admin/products"
               className={`sidebar-link ${isActive('/admin/products') ? 'active' : ''}`}
             >
               <i className="fas fa-box"></i>
@@ -51,9 +51,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/categories" 
+            <Nav.Link
+              as={Link}
+              to="/admin/categories"
               className={`sidebar-link ${isActive('/admin/categories') ? 'active' : ''}`}
             >
               <i className="fas fa-tags"></i>
@@ -62,9 +62,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/brands" 
+            <Nav.Link
+              as={Link}
+              to="/admin/brands"
               className={`sidebar-link ${isActive('/admin/brands') ? 'active' : ''}`}
             >
               <i className="fas fa-trademark"></i>
@@ -73,9 +73,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/orders" 
+            <Nav.Link
+              as={Link}
+              to="/admin/orders"
               className={`sidebar-link ${isActive('/admin/orders') ? 'active' : ''}`}
             >
               <i className="fas fa-shopping-cart"></i>
@@ -84,9 +84,9 @@ const AdminSidebar = () => {
           </Nav.Item>
 
           <Nav.Item>
-            <Nav.Link 
-              as={Link} 
-              to="/admin/users" 
+            <Nav.Link
+              as={Link}
+              to="/admin/users"
               className={`sidebar-link ${isActive('/admin/users') ? 'active' : ''}`}
             >
               <i className="fas fa-users"></i>
@@ -119,6 +119,28 @@ const AdminSidebar = () => {
           <Nav.Item>
             <Nav.Link
               as={Link}
+              to="/admin/coupons"
+              className={`sidebar-link ${isActive('/admin/coupons') ? 'active' : ''}`}
+            >
+              <i className="fas fa-ticket-alt me-2"></i>
+              Mã giảm giá
+            </Nav.Link>
+          </Nav.Item>
+
+          <Nav.Item>
+            <Nav.Link
+              as={Link}
+              to="/admin/chat"
+              className={`sidebar-link ${isActive('/admin/chat') ? 'active' : ''}`}
+            >
+              <i className="fas fa-comments"></i>
+              Chat
+            </Nav.Link>
+          </Nav.Item>
+
+          <Nav.Item>
+            <Nav.Link
+              as={Link}
               to="/admin/refunds"
               className={`sidebar-link ${isActive('/admin/refunds') ? 'active' : ''}`}
             >
@@ -126,6 +148,7 @@ const AdminSidebar = () => {
               Refund Requests
             </Nav.Link>
           </Nav.Item>
+
         </div>
       </Nav>
     </div>

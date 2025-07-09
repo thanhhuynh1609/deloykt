@@ -1,104 +1,128 @@
 import React, { useState, useContext } from "react";
-import ProductsContext from "../context/productsContext";
-import UserContext from "../context/userContext";
-import Message from "./message";
+import { Form, Button, ListGroup, Row, Col, Alert } from "react-bootstrap";
 import Rating from "./rating";
+import UserContext from "../context/userContext";
 import httpService from "../services/httpService";
-import { Form, ListGroup, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import Message from "./message";
+import "../styles/reviewsList.css";
 
 function ReviewsList({ product }) {
-  const [reviews, setReviews] = useState(
-    product && product.reviews ? product.reviews : []
-  );
-  const [rating, setRating] = useState("");
-  const [error, setError] = useState("");
-  const [comment, setComment] = useState("");
   const { userInfo } = useContext(UserContext);
-  const { loadProducts, productsLoaded } = useContext(ProductsContext);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [reviews, setReviews] = useState(product.reviews || []);
 
-  const createReviewHandler = async (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    console.log("Creating a review");
-    try {
-      const { data } = await httpService.post(
-        `/api/products/${product.id}/reviews/`,
-        {
-          rating: Number(rating),
-          comment,
-        }
-      );
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
-      setReviews([data, ...reviews]);
-      if (productsLoaded) loadProducts(true);
+    try {
+      const { data } = await httpService.post(`/api/products/${product.id}/reviews/`, {
+        rating,
+        comment,
+      });
+      setReviews([...reviews, data]);
+      setRating(0);
+      setComment("");
+      setSuccess("Đánh giá của bạn đã được gửi thành công!");
     } catch (ex) {
-      if (ex.response && ex.response.data && ex.response.data.detail)
-        setError(ex.response.data.detail);
-      else setError(ex.message);
+      setError(
+        ex.response && ex.response.data.detail
+          ? ex.response.data.detail
+          : "Đã xảy ra lỗi khi gửi đánh giá"
+      );
     }
+    setLoading(false);
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('vi-VN', options);
   };
 
   return (
-    <div>
-      <h4>Reviews</h4>
-      {reviews.length === 0 && <Message variant="info">No reviews</Message>}
-      <ListGroup variant="flush">
-        {reviews.map((review) => (
-          <ListGroup.Item className="mb-2" key={review.id}>
-            <strong>{review.name}</strong>
-            <Rating value={review.rating} text={``} color={"#f8e825"} />
-            <p>{review.createdAt.substring(0, 10)}</p>
-            <p>{review.comment}</p>
-          </ListGroup.Item>
-        ))}
-        <ListGroup.Item>
-          <h4>Write a Review</h4>
-          {userInfo && userInfo.username ? (
-            <Form onSubmit={createReviewHandler}>
-              {error && <Message variant="danger">{error}</Message>}
-              <Form.Group controlId="rating" className="py-2">
-                <Form.Label>Rating</Form.Label>
-                <Form.Control
-                  as="select"
-                  value={rating}
-                  onChange={(e) => {
-                    setRating(e.currentTarget.value);
-                  }}
-                >
-                  <option value="">Select a rating..</option>
-                  <option value="1">1 - Poor</option>
-                  <option value="2">2 - Fair</option>
-                  <option value="3">3 - Good</option>
-                  <option value="4">4 - Very Good</option>
-                  <option value="5">5 - Excellent</option>
-                </Form.Control>
-              </Form.Group>
-              <Form.Group controlId="comment" className="py-2">
-                <Form.Label>Review</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows="5"
-                  value={comment}
-                  onChange={(e) => {
-                    setComment(e.currentTarget.value);
-                  }}
-                ></Form.Control>
-              </Form.Group>
-              <Button
-                className="my-2"
-                type="submit"
-                disabled={rating == "" || comment == ""}
-              >
-                Submit
-              </Button>
-            </Form>
-          ) : (
-            <Message variant="info">
-              Please <Link to="/login">Login</Link> to write a review.
-            </Message>
-          )}
-        </ListGroup.Item>
-      </ListGroup>
+    <div className="reviews-container">
+      {reviews.length === 0 ? (
+        <Alert variant="info">Chưa có đánh giá nào cho sản phẩm này</Alert>
+      ) : (
+        <div className="reviews-list">
+          {reviews.map((review) => (
+            <div key={review.id} className="review-item">
+              <div className="review-header">
+                <div className="reviewer-info">
+                  <div className="reviewer-avatar">
+                    {review.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="reviewer-details">
+                    <h5>{review.name}</h5>
+                    <p className="review-date">{formatDate(review.createdAt)}</p>
+                  </div>
+                </div>
+                <div className="review-rating">
+                  <Rating value={review.rating} color="#f8e825" />
+                </div>
+              </div>
+              <div className="review-content">
+                <p>{review.comment}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="review-form-container">
+        <h4>Viết đánh giá</h4>
+        {success && <Message variant="success">{success}</Message>}
+        {error && <Message variant="danger">{error}</Message>}
+        
+        {userInfo ? (
+          <Form onSubmit={submitHandler}>
+            <Form.Group controlId="rating" className="mb-3">
+              <Form.Label>Đánh giá</Form.Label>
+              <div className="rating-select">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div 
+                    key={star} 
+                    className={`rating-star ${rating >= star ? 'active' : ''}`}
+                    onClick={() => setRating(star)}
+                  >
+                    <i className="fas fa-star"></i>
+                  </div>
+                ))}
+              </div>
+            </Form.Group>
+
+            <Form.Group controlId="comment" className="mb-3">
+              <Form.Label>Bình luận</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này"
+              ></Form.Control>
+            </Form.Group>
+
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={loading}
+              className="submit-review-btn"
+            >
+              {loading ? "Đang gửi..." : "Gửi đánh giá"}
+            </Button>
+          </Form>
+        ) : (
+          <Message variant="info">
+            Vui lòng <a href="/login">đăng nhập</a> để viết đánh giá
+          </Message>
+        )}
+      </div>
     </div>
   );
 }

@@ -10,11 +10,12 @@ function ConfirmationPage(props) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [queryParams,] = useSearchParams()
+  const [queryParams] = useSearchParams();
   const id = queryParams.get("id");
   const payment_intent = (new URLSearchParams(window.location.search)).get("payment_intent");
   const success = queryParams.get("success");
-  console.log(id,payment_intent,success)
+
+  console.log(id, payment_intent, success);
 
   useEffect(() => {
     if (!success) {
@@ -24,7 +25,7 @@ function ConfirmationPage(props) {
     }
 
     if (!id || !payment_intent) {
-      setError("Parameters not passed currectly!");
+      setError("Parameters not passed correctly!");
       setLoading(false);
       return;
     }
@@ -34,15 +35,20 @@ function ConfirmationPage(props) {
         const { data } = await httpService.post(`/api/orders/${id}/pay/`, {
           payment_intent,
         });
-        setMessage(data);
+        if (data && data.detail) {
+          setMessage(data.detail);
+        } else {
+          setError("Unexpected response format.");
+        }
       } catch (ex) {
         console.log(ex);
+        setError("Something went wrong while updating payment status.");
       }
       setLoading(false);
     };
 
     fetchPaymentStatus();
-  }, [id, payment_intent, success]); // ✅ Thêm dependency array
+  }, [id, payment_intent, success]);
 
   return (
     <div>

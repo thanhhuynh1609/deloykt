@@ -561,3 +561,138 @@
 
 
 
+/* Override Main Banner to support background image */
+.main-banner {
+ 
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  color: #fff;
+}
+
+
+.main-banner .banner-content-wrapper {
+  position: relative;
+  z-index: 2;
+}
+.main-banner h1 {
+  font-weight: 1000;               /* Đậm nhất có thể */
+  font-size: 32px;                /* To chiều cao */
+  letter-spacing: -1px;           /* Gọn, mạnh mẽ */
+  text-transform: uppercase;      /* Viết hoa toàn bộ */
+  font-family: 'Arial Black', sans-serif;  /* Font đậm nếu không dùng Google Font */
+  flex-shrink: 0;     /* Tăng size nếu muốn */
+}
+.main-banner p {
+  color: #4a4a4a;          /* Màu xám đậm */
+  font-size: 1.1rem;
+}
+.main-banner .btn {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+}
+.stats-row h5,
+.stats-row small {
+  color: #6c757d; /* Bootstrap màu xám trung tính */
+}
+.banner-description {
+  color: #4a4a4a; /* Xám đậm */
+}
+.stats-row-custom {
+  max-width: 700px;
+  margin: 2rem auto 0 auto; /* căn giữa và tạo khoảng cách */
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+}
+/* Top Selling Custom Styles */
+.products-section .product-price del {
+  font-size: 0.95rem;
+  color: #999;
+  margin-left: 8px;
+}
+
+.products-section .product-price span {
+  font-size: 0.9rem;
+  color: #e53935;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.products-section .product-rating {
+  font-size: 0.9rem;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.products-section .product-rating span {
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.products-section .product-rating .stars {
+  color: #ffc107;
+  font-size: 0.95rem;
+}
+
+.products-section .btn.view-all {
+  margin-top: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  padding: 8px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.products-section .btn.view-all:hover {
+  background-color: #f5f5f5;
+  color: #000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.products-section .section-header.text-center {
+  display: block;
+  text-align: center;
+  border-bottom: none;
+  margin-bottom: 30px;
+}
+
+.products-section .section-header.text-center h2 {
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+/* Optional: border blue if selected (hover effect or logic-based) */
+.product-card.selected {
+  border: 2px solid #2196f3;
+}
+.testimonial-section .card {
+  transition: transform 0.2s ease;
+}
+.testimonial-section .card:hover {
+  transform: translateY(-5px);
+}
+.newsletter-section input[type="email"] {
+  border-radius: 50px;
+}

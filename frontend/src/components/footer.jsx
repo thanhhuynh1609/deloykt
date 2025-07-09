@@ -41,7 +41,7 @@ function Footer(props) {
                 TNBHStore
               </h6>
               <p>
-                Chào mừng bạn đến với TNBHStore — nơi cung cấp những sản phẩm chất lượng với giá tốt nhất. Chúng tôi luôn sẵn sàng phục vụ và hỗ trợ bạn mọi lúc mọi nơi.
+                Chào mừng bạn đến với TNB.com — nơi cung cấp những sản phẩm chất lượng với giá tốt nhất. Chúng tôi luôn sẵn sàng phục vụ và hỗ trợ bạn mọi lúc mọi nơi.
               </p>
             </MDBCol>
 

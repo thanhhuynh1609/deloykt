@@ -210,6 +210,7 @@ class RefundRequest(models.Model):
     class Meta:
         verbose_name = "Refund Request"
         verbose_name_plural = "Refund Requests"
+
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

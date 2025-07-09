@@ -1,19 +1,19 @@
+from os import path
 from django.urls import path
-from .views import CouponViewSet
 from rest_framework.routers import DefaultRouter
-from chat.views import chat_history
-
 from api.views import (
-    BrandViewSet, CategoryViewSet, OrderViewSet, ProductViewSet,
+    BrandViewSet, CategoryViewSet, CouponViewSet, OrderViewSet, ProductViewSet,
     ReviewView, ReviewViewSet, StripePaymentView,
     placeOrder, update_order_to_paid, update_review,
     PayboxWalletView, PayboxTransactionListView, PayboxDepositView,
     PayboxDepositConfirmView, PayboxPaymentView,
     AdminPayboxWalletListView, AdminPayboxTransactionListView,
-    RejectRefundRequestView, DeleteRefundRequestView,RefundRequestView,
+    RejectRefundRequestView, DeleteRefundRequestView, RefundRequestView,
     AdminRefundRequestListView, ApproveRefundRequestView,
     FavoriteView, check_favorite, check_purchase
 )
+from chat.views import chat_history
+
 
 router = DefaultRouter()
 router.register('brands', BrandViewSet, basename='brands')
@@ -41,10 +41,12 @@ urlpatterns = [*router.urls,
 
     path('paybox/refund-requests/', AdminRefundRequestListView.as_view(), name='admin-paybox-refund-requests'),
     path('paybox/refund-request/', RefundRequestView.as_view(), name='refund-request'),
+
     # Admin Refund APIs
     path('admin/paybox/refund/<int:order_id>/approve/', ApproveRefundRequestView.as_view(), name='admin-approve-refund'),
     path('admin/paybox/refund/<int:order_id>/reject/', RejectRefundRequestView.as_view(), name='admin-reject-refund'),
     path('admin/paybox/refund/<int:order_id>/delete/', DeleteRefundRequestView.as_view(), name='admin-delete-refund'),
+
 
     # Admin Paybox endpoints
     path('admin/paybox/wallets/', AdminPayboxWalletListView.as_view(), name='admin-paybox-wallets'),

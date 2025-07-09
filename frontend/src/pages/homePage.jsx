@@ -44,24 +44,55 @@ function HomePage() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
-  return (
+    return (
     <AdminRedirect>
       <div className="home-page">
-        {/* Main Banner */}
-        <div className="main-banner">
-          <Container>
-            <Row className="align-items-center">
-              <Col md={6} className="banner-content">
-                <h1>Mua sắm thông minh, trải nghiệm tuyệt vời</h1>
-                <p>Khám phá hàng ngàn sản phẩm chất lượng với giá ưu đãi hấp dẫn</p>
-                <Link to="/search" className="btn btn-primary">KHÁM PHÁ NGAY</Link>
-              </Col>
-              <Col md={6} className="banner-image">
-                <img src="/images/banner-products.jpg" alt="Sản phẩm nổi bật" className="img-fluid" />
-              </Col>
-            </Row>
-          </Container>
-        </div>
+        {/* Main Banner mới */}
+       <div
+  className="main-banner hero-banner"
+  style={{
+    backgroundImage: `url(${process.env.PUBLIC_URL}/images/Rectangle2.png)`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    color: '#fff',
+    position: 'relative',
+  }}
+>
+  {/* overlay duy nhất */}
+
+  <Container className="position-relative z-2">
+    <div className="banner-content-wrapper text-start">
+      <h1 className="display-4 fw-bold">
+        FIND CLOTHES <br /> THAT MATCHES <br />YOUR STYLE
+      </h1>
+      <p className="banner-description mt-3 fs-5">
+  Browse through our diverse range of meticulously crafted garments,<br />
+  designed to bring out your individuality and cater to your sense of style.
+</p>
+
+      <Link to="/search" className="btn btn-light rounded-pill px-4 py-2 mt-3">
+        SHOP NOW
+        </Link>
+       <Row className="stats-row stats-row-custom mt-5">
+  <Col xs={4} className="text-center">
+    <h5 className="fw-bold stat-number">200+</h5>
+    <small className="stat-label">International Brands</small>
+  </Col>
+  <Col xs={4} className="text-center">
+    <h5 className="fw-bold stat-number">2,000+</h5>
+    <small className="stat-label">High-Quality Products</small>
+  </Col>
+  <Col xs={4} className="text-center">
+    <h5 className="fw-bold stat-number">30,000+</h5>
+    <small className="stat-label">Happy Customers</small>
+  </Col>
+</Row>
+
+    </div>
+  </Container>
+</div>
+
 
         {/* Category Icons */}
         <Container className="category-icons-container">
@@ -121,106 +152,106 @@ function HomePage() {
           </Container>
         </section>
 
-        {/* Promotional Banners */}
-        <section className="promo-banners">
-          <Container>
-            <Row>
-              <Col md={6} className="mb-4">
-                <div className="promo-banner">
-                  <div className="promo-content">
-                    <h3>Mua sắm thực phẩm dễ dàng cùng chúng tôi</h3>
-                    <Link to="/search" className="btn btn-sm btn-light">Mua Ngay</Link>
-                  </div>
-                  <img src="/images/grocery-banner.jpg" alt="Mua sắm thực phẩm" />
-                </div>
-              </Col>
-              <Col md={6} className="mb-4">
-                <div className="promo-banner">
-                  <div className="promo-content">
-                    <h3>Nhận các sản phẩm thiết yếu hàng ngày</h3>
-                    <Link to="/search" className="btn btn-sm btn-light">Mua Ngay</Link>
-                  </div>
-                  <img src="/images/essentials-banner.jpg" alt="Sản phẩm thiết yếu" />
-                </div>
-              </Col>
+    
+{/* Browse by Dress Style */}
+<section className="dress-style-section py-5" style={{ backgroundColor: "#f2f2f2", borderRadius: "20px", margin: "40px 0" }}>
+  <Container>
+    <div style={{
+      borderRadius: "12px",
+      overflow: "hidden",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+      maxWidth: "100%",
+      margin: "0 auto"
+    }}>
+      <img 
+        src="/images/Frame60.png" 
+        alt="Dress Style" 
+        style={{ width: "100%", height: "auto", display: "block" }} 
+      />
+    </div>
+  </Container>
+</section>
+
+
+
+     {/* Top Rated Products */}
+<section className="products-section bg-light">
+  <Container>
+    <div className="section-header">
+      <h2>Sản Phẩm Đánh Giá Cao</h2>
+      <Link to="/search?sort=rating-desc" className="view-all">Xem Tất Cả</Link>
+    </div>
+    <Row>
+      {topRatedProducts.slice(0, 4).map(product => (
+        <Col key={product.id} xs={6} md={4} lg={3} className="mb-4">
+          <Card className="product-card">
+            {product.rating >= 4.5 && (
+              <div className="product-badge">
+                <Badge bg="success">Đánh Giá Cao</Badge>
+              </div>
+            )}
+            <Link to={`/products/${product.id}`}>
+              <Card.Img variant="top" src={product.image} alt={product.name} />
+            </Link>
+            <Card.Body>
+              <Link to={`/products/${product.id}`} className="product-name">
+                {product.name}
+              </Link>
+              <div className="product-price">
+                {formatPrice(product.price)}
+              </div>
+              <div className="product-rating">
+                <i className="fas fa-star"></i> {product.rating || 0} | Đã bán {product.total_sold || 0}
+              </div>
+              <Link to={`/products/${product.id}`} className="btn btn-sm btn-outline-primary w-100 mt-2">
+                Xem Chi Tiết
+              </Link>
+            </Card.Body>
+          </Card>
+        </Col>
+      ))}
             </Row>
           </Container>
         </section>
 
-        {/* Top Rated Products */}
-        <section className="products-section bg-light">
-          <Container>
-            <div className="section-header">
-              <h2>Sản Phẩm Đánh Giá Cao</h2>
-              <Link to="/search?sort=rating-desc" className="view-all">Xem Tất Cả</Link>
+       {/* New Arrivals */}
+<section className="products-section">
+  <Container>
+    <div className="section-header">
+      <h2>Sản Phẩm Mới</h2>
+      <Link to="/search" className="view-all">Xem Tất Cả</Link>
+    </div>
+    <Row>
+      {newProducts.slice(0, 4).map(product => (
+        <Col key={product.id} xs={6} md={4} lg={3} className="mb-4">
+          <Card className="product-card">
+            <div className="product-badge">
+              <Badge bg="primary">Mới</Badge>
             </div>
-            <Row>
-              {topRatedProducts.slice(0, 4).map(product => (
-                <Col key={product.id} xs={6} md={4} lg={3} className="mb-4">
-                  <Card className="product-card">
-                    {product.rating >= 4.5 && (
-                      <div className="product-badge">
-                        <Badge bg="success">Đánh Giá Cao</Badge>
-                      </div>
-                    )}
-                    <Link to={`/products/${product.id}`}>
-                      <Card.Img variant="top" src={product.image} alt={product.name} />
-                    </Link>
-                    <Card.Body>
-                      <Link to={`/products/${product.id}`} className="product-name">
-                        {product.name}
-                      </Link>
-                      <div className="product-price">
-                        {formatPrice(product.price)}
-                      </div>
-                      <div className="product-rating">
-                        <i className="fas fa-star"></i> {product.rating || 0}
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </Container>
-        </section>
+            <Link to={`/products/${product.id}`}>
+              <Card.Img variant="top" src={product.image} alt={product.name} />
+            </Link>
+            <Card.Body>
+              <Link to={`/products/${product.id}`} className="product-name">
+                {product.name}
+              </Link>
+              <div className="product-price">
+                {formatPrice(product.price)}
+              </div>
+              <div className="product-rating">
+                <i className="fas fa-star"></i> {product.rating || 0} | Đã bán {product.total_sold || 0}
+              </div>
+              <Link to={`/products/${product.id}`} className="btn btn-sm btn-outline-primary w-100 mt-2">
+                Xem Chi Tiết
+              </Link>
+            </Card.Body>
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  </Container>
+</section>
 
-        {/* New Arrivals */}
-        <section className="products-section">
-          <Container>
-            <div className="section-header">
-              <h2>Sản Phẩm Mới</h2>
-              <Link to="/search" className="view-all">Xem Tất Cả</Link>
-            </div>
-            <Row>
-              {newProducts.slice(0, 4).map(product => (
-                <Col key={product.id} xs={6} md={4} lg={3} className="mb-4">
-                  <Card className="product-card">
-                    <div className="product-badge">
-                      <Badge bg="primary">Mới</Badge>
-                    </div>
-                    <Link to={`/products/${product.id}`}>
-                      <Card.Img variant="top" src={product.image} alt={product.name} />
-                    </Link>
-                    <Card.Body>
-                      <Link to={`/products/${product.id}`} className="product-name">
-                        {product.name}
-                      </Link>
-                      <div className="product-price">
-                        {formatPrice(product.price)}
-                      </div>
-                      <div className="product-rating">
-                        <i className="fas fa-star"></i> {product.rating || 0}
-                      </div>
-                      <Link to={`/products/${product.id}`} className="btn btn-sm btn-outline-primary w-100 mt-2">
-                        Xem Chi Tiết
-                      </Link>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </Container>
-        </section>
 
         {/* Featured Brands */}
         <section className="brands-section">
@@ -242,80 +273,83 @@ function HomePage() {
           </Container>
         </section>
 
-        {/* Blog Posts */}
-        <section className="blog-section">
-          <Container>
-            <div className="section-header">
-              <h2>Tin Tức Cửa Hàng</h2>
-            </div>
-            <Row>
-              <Col md={3} className="mb-4">
-                <Card className="blog-card">
-                  <Card.Img variant="top" src="/images/blog1.jpg" alt="Bài viết blog" />
-                  <Card.Body>
-                    <Card.Title>Mẹo cho thói quen ăn uống lành mạnh</Card.Title>
-                    <Card.Text>
-                      Tìm hiểu cách duy trì chế độ ăn uống cân bằng với các sản phẩm của chúng tôi.
-                    </Card.Text>
-                    <Link to="#" className="read-more">Đọc Thêm</Link>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={3} className="mb-4">
-                <Card className="blog-card">
-                  <Card.Img variant="top" src="/images/blog2.jpg" alt="Bài viết blog" />
-                  <Card.Body>
-                    <Card.Title>Mẹo nấu ăn từ đầu bếp của chúng tôi</Card.Title>
-                    <Card.Text>
-                      Mẹo nấu ăn chuyên nghiệp để làm các món ăn ngon tại nhà.
-                    </Card.Text>
-                    <Link to="#" className="read-more">Đọc Thêm</Link>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={3} className="mb-4">
-                <Card className="blog-card">
-                  <Card.Img variant="top" src="/images/blog3.jpg" alt="Bài viết blog" />
-                  <Card.Body>
-                    <Card.Title>Cách tiết kiệm tiền khi mua sắm</Card.Title>
-                    <Card.Text>
-                      Chiến lược mua sắm thông minh để tối đa hóa ngân sách của bạn.
-                    </Card.Text>
-                    <Link to="#" className="read-more">Đọc Thêm</Link>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={3} className="mb-4">
-                <Card className="blog-card">
-                  <Card.Img variant="top" src="/images/blog4.jpg" alt="Bài viết blog" />
-                  <Card.Body>
-                    <Card.Title>Sản phẩm theo mùa bạn nên thử</Card.Title>
-                    <Card.Text>
-                      Khám phá những sản phẩm theo mùa tốt nhất hiện có.
-                    </Card.Text>
-                    <Link to="#" className="read-more">Đọc Thêm</Link>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </Container>
-        </section>
+      {/* Customer Reviews */}
+<section className="testimonial-section py-5">
+  <Container>
+    <div className="section-header text-center mb-4">
+      <h2 className="fw-bold">OUR HAPPY CUSTOMERS</h2>
+    </div>
+    <Row className="justify-content-center">
+      <Col md={4} className="mb-4">
+        <Card className="h-100 p-3 shadow-sm border">
+          <div className="d-flex align-items-center mb-2">
+            <h5 className="mb-0 fw-bold">Sarah M.</h5>
+            <i className="fas fa-check-circle text-success ms-2"></i>
+          </div>
+          <div className="text-warning mb-2">
+            ★★★★★
+          </div>
+          <p className="mb-0">
+            "I'm blown away by the quality and style of the clothes I received from Shop.co. From casual wear to elegant dresses, every piece I've bought has <strong>exceeded my expectations</strong>."
+          </p>
+        </Card>
+      </Col>
+      <Col md={4} className="mb-4">
+        <Card className="h-100 p-3 shadow-sm border">
+          <div className="d-flex align-items-center mb-2">
+            <h5 className="mb-0 fw-bold">Alex K.</h5>
+          </div>
+          <div className="text-warning mb-2">
+            ★★★★★
+          </div>
+          <p className="mb-0">
+            "Finding clothes that align with my personal style used to be a challenge until I discovered Shop.co..."
+          </p>
+        </Card>
+      </Col>
+      <Col md={4} className="mb-4">
+        <Card className="h-100 p-3 shadow-sm border">
+          <div className="d-flex align-items-center mb-2">
+            <h5 className="mb-0 fw-bold">James L.</h5>
+            <i className="fas fa-check-circle text-success ms-2"></i>
+          </div>
+          <div className="text-warning mb-2">
+            ★★★★★
+          </div>
+          <p className="mb-0">
+            "As someone who's always on the lookout for unique fashion pieces, I'm thrilled to have stumbled upon Shop.co..."
+          </p>
+        </Card>
+      </Col>
+    </Row>
+  </Container>
+</section>
 
-        {/* Newsletter */}
-        <section className="newsletter-section">
-          <Container>
-            <Row className="justify-content-center">
-              <Col md={8} className="text-center">
-                <h3>Đăng ký nhận bản tin của chúng tôi để được giảm 5%</h3>
-                <p>Nhận thông tin cập nhật mới nhất về sản phẩm mới và khuyến mãi sắp tới</p>
-                <div className="newsletter-form">
-                  <input type="email" placeholder="Địa chỉ email của bạn" />
-                  <Button variant="primary">Đăng Ký</Button>
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </section>
+
+       {/* Newsletter Section */}
+<section className="newsletter-section bg-dark text-white py-5">
+  <Container>
+    <Row className="justify-content-center text-center">
+      <Col lg={8}>
+        <h3 className="fw-bold text-uppercase">
+          Stay up to date about <br /> our latest offers
+        </h3>
+        <div className="d-flex justify-content-center mt-4 gap-2 flex-column flex-sm-row">
+          <input
+            type="email"
+            className="form-control rounded-pill px-3"
+            placeholder="Enter your email address"
+            style={{ maxWidth: '300px' }}
+          />
+          <Button variant="light" className="rounded-pill px-4">
+            Subscribe to Newsletter
+          </Button>
+        </div>
+      </Col>
+    </Row>
+  </Container>
+</section>
+
       </div>
     </AdminRedirect>
   );

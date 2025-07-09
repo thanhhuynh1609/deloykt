@@ -4,7 +4,6 @@ import {
   Row,
   Col,
   Image,
-  ListGroup,
   Button,
   Card,
   Form,
@@ -12,7 +11,6 @@ import {
   Breadcrumb,
   Tabs,
   Tab,
-  Badge,
 } from "react-bootstrap";
 import Rating from "../components/rating";
 import ProductsContext from "../context/productsContext";
@@ -21,20 +19,23 @@ import Message from "../components/message";
 import CartContext from "../context/cartContext";
 import ReviewsList from "../components/reviewsList";
 import { formatVND } from "../utils/currency";
-import { FavoriteContext } from '../context/favoriteContext';
-import UserContext from '../context/userContext';
+import { FavoriteContext } from "../context/favoriteContext";
+import UserContext from "../context/userContext";
 import "../styles/productPage.css";
 
 function ProductPage(props) {
   const { id } = useParams();
   const { error, loadProduct } = useContext(ProductsContext);
   const { addItemToCart } = useContext(CartContext);
-  const { isFavorite, addToFavorites, removeFromFavorites } = useContext(FavoriteContext);
+  const { isFavorite, addToFavorites, removeFromFavorites } =
+    useContext(FavoriteContext);
   const { userInfo } = useContext(UserContext);
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,7 +46,7 @@ function ProductPage(props) {
       window.scrollTo(0, 0);
     };
     fetchData();
-  }, [id]);
+  }, [id, loadProduct]);
 
   const addToCartHandler = () => {
     addItemToCart(Number(id), Number(qty));
@@ -54,10 +55,10 @@ function ProductPage(props) {
 
   const handleFavoriteToggle = () => {
     if (!userInfo) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
-    
+
     if (isFavorite(product.id)) {
       removeFromFavorites(product.id);
     } else {
@@ -70,11 +71,49 @@ function ProductPage(props) {
   };
 
   // Giả lập nhiều hình ảnh sản phẩm
-  const productImages = product.image ? [
-    product.image,
-    product.image,
-    product.image
-  ] : [];
+  const productImages = product.image
+    ? [product.image, product.image, product.image, product.image]
+    : [];
+
+  // Giả lập dữ liệu màu sắc và kích cỡ
+  const availableColors = [
+    { name: "Đen", value: "black", color: "#000000" },
+    { name: "Trắng", value: "white", color: "#FFFFFF" },
+    { name: "Xanh dương", value: "blue", color: "#007bff" },
+    { name: "Đỏ", value: "red", color: "#dc3545" },
+    { name: "Xám", value: "gray", color: "#6c757d" },
+  ];
+
+  const availableSizes = ["S", "M", "L", "XL", "XXL"];
+
+  // FAQ data
+  const faqData = [
+    {
+      question: "Sản phẩm này có bảo hành không?",
+      answer:
+        "Có, sản phẩm được bảo hành 12 tháng từ ngày mua hàng. Bảo hành bao gồm lỗi do nhà sản xuất.",
+    },
+    {
+      question: "Thời gian giao hàng là bao lâu?",
+      answer:
+        "Thời gian giao hàng từ 2-5 ngày làm việc tùy theo khu vực. Nội thành Hà Nội và TP.HCM giao trong 1-2 ngày.",
+    },
+    {
+      question: "Có thể đổi trả sản phẩm không?",
+      answer:
+        "Bạn có thể đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng với điều kiện sản phẩm còn nguyên vẹn.",
+    },
+    {
+      question: "Làm sao để chọn size phù hợp?",
+      answer:
+        "Bạn có thể tham khảo bảng size chi tiết trong phần mô tả sản phẩm hoặc liên hệ tư vấn viên để được hỗ trợ.",
+    },
+    {
+      question: "Sản phẩm có giống hình ảnh không?",
+      answer:
+        "Chúng tôi cam kết hình ảnh sản phẩm 100% thật. Màu sắc có thể chênh lệch nhẹ do màn hình hiển thị.",
+    },
+  ];
 
   if (loading) return <Loader />;
   if (error) return <Message variant="danger">{error}</Message>;
@@ -85,8 +124,12 @@ function ProductPage(props) {
         <Container>
           {/* Breadcrumb */}
           <Breadcrumb className="product-breadcrumb">
-            <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/" }}>Trang chủ</Breadcrumb.Item>
-            <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/search" }}>Sản phẩm</Breadcrumb.Item>
+            <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/" }}>
+              Trang chủ
+            </Breadcrumb.Item>
+            <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/search" }}>
+              Sản phẩm
+            </Breadcrumb.Item>
             <Breadcrumb.Item active>{product.name}</Breadcrumb.Item>
           </Breadcrumb>
 
@@ -95,21 +138,27 @@ function ProductPage(props) {
             <Col lg={5} md={6}>
               <div className="product-images">
                 <div className="main-image">
-                  <Image 
-                    src={productImages[selectedImage] || product.image} 
-                    alt={product.name} 
-                    fluid 
+                  <Image
+                    src={productImages[selectedImage] || product.image}
+                    alt={product.name}
+                    fluid
                   />
                 </div>
                 {productImages.length > 1 && (
                   <div className="thumbnail-images">
                     {productImages.map((img, index) => (
-                      <div 
-                        key={index} 
-                        className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
+                      <div
+                        key={index}
+                        className={`thumbnail ${
+                          selectedImage === index ? "active" : ""
+                        }`}
                         onClick={() => handleImageClick(index)}
                       >
-                        <Image src={img} alt={`${product.name} - ${index + 1}`} fluid />
+                        <Image
+                          src={img}
+                          alt={`${product.name} - ${index + 1}`}
+                          fluid
+                        />
                       </div>
                     ))}
                   </div>
@@ -121,7 +170,7 @@ function ProductPage(props) {
             <Col lg={7} md={6}>
               <div className="product-info">
                 <h1 className="product-title">{product.name}</h1>
-                
+
                 <div className="product-meta">
                   <div className="product-rating-wrapper">
                     <Rating
@@ -129,33 +178,119 @@ function ProductPage(props) {
                       text={`${product.numReviews} đánh giá`}
                       color={"#f8e825"}
                     />
-                    <span className="rating-value">{product.rating ? Number(product.rating).toFixed(1) : "0.0"}</span>
+                    <span className="rating-value">
+                      {product.rating
+                        ? Number(product.rating).toFixed(1)
+                        : "0.0"}
+                    </span>
                   </div>
                   <div className="product-sold">
-                    <i className="fas fa-shopping-cart"></i> Đã bán {product.total_sold || 0}
+                    <i className="fas fa-shopping-cart"></i> Đã bán{" "}
+                    {product.total_sold || 0}
                   </div>
                 </div>
 
                 <div className="product-price">
-                  <span className="current-price">{formatVND(product.price)}</span>
+                  <span className="current-price">
+                    {formatVND(product.price)}
+                  </span>
                   {product.oldPrice && (
-                    <span className="old-price">{formatVND(product.oldPrice)}</span>
+                    <>
+                      <span className="old-price">
+                        {formatVND(product.oldPrice)}
+                      </span>
+                      <span className="discount-badge">
+                        -
+                        {Math.round(
+                          ((product.oldPrice - product.price) /
+                            product.oldPrice) *
+                            100
+                        )}
+                        %
+                      </span>
+                    </>
                   )}
+                </div>
+
+                <div className="product-description-short">
+                  <p>
+                    {product.description
+                      ? product.description.substring(0, 150) + "..."
+                      : "Sản phẩm chất lượng cao, được nhiều khách hàng tin tưởng và lựa chọn."}
+                  </p>
+                </div>
+
+                {/* Color Selection */}
+                <div className="product-options">
+                  <div className="option-group">
+                    <span className="option-label">Màu sắc:</span>
+                    <div className="color-options">
+                      {availableColors.map((color) => (
+                        <div
+                          key={color.value}
+                          className={`color-option ${
+                            selectedColor === color.value ? "selected" : ""
+                          }`}
+                          onClick={() => setSelectedColor(color.value)}
+                          title={color.name}
+                        >
+                          <div
+                            className="color-circle"
+                            style={{
+                              backgroundColor: color.color,
+                              border:
+                                color.value === "white"
+                                  ? "1px solid #ddd"
+                                  : "none",
+                            }}
+                          ></div>
+                          <span className="color-name">{color.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Size Selection */}
+                  <div className="option-group">
+                    <span className="option-label">Kích cỡ:</span>
+                    <div className="size-options">
+                      {availableSizes.map((size) => (
+                        <button
+                          key={size}
+                          className={`size-option ${
+                            selectedSize === size ? "selected" : ""
+                          }`}
+                          onClick={() => setSelectedSize(size)}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="product-status">
                   <span className="status-label">Trạng thái:</span>
-                  <span className={`status-value ${product.countInStock > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                    {product.countInStock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                  <span
+                    className={`status-value ${
+                      product.countInStock > 0 ? "in-stock" : "out-of-stock"
+                    }`}
+                  >
+                    {product.countInStock > 0 ? "Còn hàng" : "Hết hàng"}
                   </span>
+                  {product.countInStock > 0 && (
+                    <span className="stock-count">
+                      ({product.countInStock} sản phẩm có sẵn)
+                    </span>
+                  )}
                 </div>
 
                 {product.countInStock > 0 && (
                   <div className="product-quantity">
                     <span className="quantity-label">Số lượng:</span>
                     <div className="quantity-control">
-                      <Button 
-                        variant="outline-secondary" 
+                      <Button
+                        variant="outline-secondary"
                         className="qty-btn"
                         onClick={() => qty > 1 && setQty(qty - 1)}
                       >
@@ -166,7 +301,11 @@ function ProductPage(props) {
                         value={qty}
                         onChange={(e) => {
                           const value = parseInt(e.target.value);
-                          if (!isNaN(value) && value > 0 && value <= product.countInStock) {
+                          if (
+                            !isNaN(value) &&
+                            value > 0 &&
+                            value <= product.countInStock
+                          ) {
                             setQty(value);
                           }
                         }}
@@ -174,10 +313,12 @@ function ProductPage(props) {
                         max={product.countInStock}
                         readOnly
                       />
-                      <Button 
-                        variant="outline-secondary" 
+                      <Button
+                        variant="outline-secondary"
                         className="qty-btn"
-                        onClick={() => qty < product.countInStock && setQty(qty + 1)}
+                        onClick={() =>
+                          qty < product.countInStock && setQty(qty + 1)
+                        }
                       >
                         <i className="fas fa-plus"></i>
                       </Button>
@@ -186,32 +327,38 @@ function ProductPage(props) {
                 )}
 
                 <div className="product-actions">
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     className="btn-add-to-cart"
                     onClick={addToCartHandler}
                     disabled={product.countInStock === 0}
                   >
                     <i className="fas fa-shopping-cart"></i> Thêm vào giỏ hàng
                   </Button>
-                  <Button 
-                    variant="outline-secondary" 
-                    className="btn-buy-now"
-                    onClick={() => {
-                      addToCartHandler();
-                      navigate('/shipping');
-                    }}
-                    disabled={product.countInStock === 0}
-                  >
-                    Mua ngay
-                  </Button>
-                  <Button 
-                    variant="outline-danger" 
-                    className="btn-favorite"
-                    onClick={handleFavoriteToggle}
-                  >
-                    <i className={`${isFavorite(product.id) ? 'fas' : 'far'} fa-heart`}></i>
-                  </Button>
+                  <div className="product-actions-secondary">
+                    <Button
+                      variant="outline-secondary"
+                      className="btn-buy-now"
+                      onClick={() => {
+                        addToCartHandler();
+                        navigate("/shipping");
+                      }}
+                      disabled={product.countInStock === 0}
+                    >
+                      Mua ngay
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      className="btn-favorite"
+                      onClick={handleFavoriteToggle}
+                    >
+                      <i
+                        className={`${
+                          isFavorite(product.id) ? "fas" : "far"
+                        } fa-heart`}
+                      ></i>
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="product-delivery">
@@ -237,24 +384,125 @@ function ProductPage(props) {
           <Row className="mt-5">
             <Col>
               <Tabs defaultActiveKey="description" className="product-tabs">
-                <Tab eventKey="description" title="Mô tả sản phẩm">
+                <Tab eventKey="description" title="Thông tin sản phẩm">
                   <div className="product-description">
-                    <p>{product.description || 'Không có mô tả cho sản phẩm này.'}</p>
+                    <h4>Mô tả chi tiết</h4>
+                    <p>
+                      {product.description ||
+                        "Sản phẩm chất lượng cao, được sản xuất từ những nguyên liệu tốt nhất. Thiết kế hiện đại, phù hợp với xu hướng thời trang hiện tại. Đảm bảo độ bền và tính thẩm mỹ cao."}
+                    </p>
+
+                    <h5>Thông số kỹ thuật</h5>
+                    <ul>
+                      <li>Chất liệu: Cotton cao cấp</li>
+                      <li>Xuất xứ: Việt Nam</li>
+                      <li>Bảo hành: 12 tháng</li>
+                      <li>Hướng dẫn bảo quản: Giặt máy ở nhiệt độ thường</li>
+                    </ul>
+
+                    <h5>Ưu điểm nổi bật</h5>
+                    <ul>
+                      <li>✓ Chất lượng cao, bền đẹp</li>
+                      <li>✓ Thiết kế hiện đại, thời trang</li>
+                      <li>✓ Giá cả hợp lý</li>
+                      <li>✓ Dịch vụ hậu mãi tốt</li>
+                    </ul>
                   </div>
                 </Tab>
-                <Tab eventKey="reviews" title={`Đánh giá (${product.numReviews})`}>
+                <Tab
+                  eventKey="reviews"
+                  title={`Đánh giá & Nhận xét (${product.numReviews})`}
+                >
                   <div className="product-reviews">
                     <div className="reviews-summary">
                       <div className="rating-average">
-                        <h3>{product.rating ? Number(product.rating).toFixed(1) : "0.0"}</h3>
+                        <h3>
+                          {product.rating
+                            ? Number(product.rating).toFixed(1)
+                            : "0.0"}
+                        </h3>
                         <Rating
                           value={product.rating}
                           text={`${product.numReviews} đánh giá`}
                           color={"#f8e825"}
                         />
+                        <p className="rating-text">
+                          Trung bình từ {product.numReviews} đánh giá
+                        </p>
+                      </div>
+                      <div className="rating-breakdown">
+                        <div className="rating-bar">
+                          <span>5 sao</span>
+                          <div className="bar">
+                            <div
+                              className="fill"
+                              style={{ width: "60%" }}
+                            ></div>
+                          </div>
+                          <span>60%</span>
+                        </div>
+                        <div className="rating-bar">
+                          <span>4 sao</span>
+                          <div className="bar">
+                            <div
+                              className="fill"
+                              style={{ width: "25%" }}
+                            ></div>
+                          </div>
+                          <span>25%</span>
+                        </div>
+                        <div className="rating-bar">
+                          <span>3 sao</span>
+                          <div className="bar">
+                            <div
+                              className="fill"
+                              style={{ width: "10%" }}
+                            ></div>
+                          </div>
+                          <span>10%</span>
+                        </div>
+                        <div className="rating-bar">
+                          <span>2 sao</span>
+                          <div className="bar">
+                            <div className="fill" style={{ width: "3%" }}></div>
+                          </div>
+                          <span>3%</span>
+                        </div>
+                        <div className="rating-bar">
+                          <span>1 sao</span>
+                          <div className="bar">
+                            <div className="fill" style={{ width: "2%" }}></div>
+                          </div>
+                          <span>2%</span>
+                        </div>
                       </div>
                     </div>
-                    <ReviewsList product={product}/>
+                    <ReviewsList product={product} />
+                  </div>
+                </Tab>
+                <Tab eventKey="faq" title="Câu hỏi thường gặp">
+                  <div className="product-faq">
+                    <h4>Câu hỏi thường gặp</h4>
+                    <div className="faq-list">
+                      {faqData.map((faq, index) => (
+                        <div key={index} className="faq-item">
+                          <div className="faq-question">
+                            <i className="fas fa-question-circle"></i>
+                            <strong>{faq.question}</strong>
+                          </div>
+                          <div className="faq-answer">
+                            <i className="fas fa-check-circle"></i>
+                            {faq.answer}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="faq-contact">
+                      <p>
+                        Không tìm thấy câu trả lời?{" "}
+                        <a href="/contact">Liên hệ với chúng tôi</a>
+                      </p>
+                    </div>
                   </div>
                 </Tab>
               </Tabs>
@@ -274,14 +522,18 @@ function ProductPage(props) {
                           <Card.Img variant="top" src={product.image} />
                         </Link>
                         <Card.Body>
-                          <Link to={`/products/${product.id}`} className="product-name">
+                          <Link
+                            to={`/products/${product.id}`}
+                            className="product-name"
+                          >
                             {product.name}
                           </Link>
                           <div className="product-price">
                             {formatVND(product.price)}
                           </div>
                           <div className="product-rating">
-                            <i className="fas fa-star"></i> {product.rating || 0}
+                            <i className="fas fa-star"></i>{" "}
+                            {product.rating || 0}
                           </div>
                         </Card.Body>
                       </Card>

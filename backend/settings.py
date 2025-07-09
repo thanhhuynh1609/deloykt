@@ -99,9 +99,9 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecommerce_db',       # hoặc tên DB của bạn
+        'NAME': 'kien_tapp',       # hoặc tên DB của bạn
         'USER': 'root',               # tên user MySQL
-        'PASSWORD': 'Kimthanh.123',   # mật khẩu MySQL
+        'PASSWORD': '123456',   # mật khẩu MySQL
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {

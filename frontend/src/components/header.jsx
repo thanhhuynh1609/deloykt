@@ -134,13 +134,7 @@ function Header({ keyword, setKeyword }) {
           <Navbar.Toggle aria-controls="main-navbar" />
           <Navbar.Collapse id="main-navbar">
             {/* Menu Center */}
-            <Nav className="mx-auto align-items-center">
-              <Nav.Link className="text-dark">Shop</Nav.Link>
-              <Nav.Link className="text-dark">On Sale</Nav.Link>
-              <Nav.Link className="text-dark">New Arrivals</Nav.Link>
-              <Nav.Link className="text-dark">Brands</Nav.Link>
-            </Nav>
-
+           
             {/* Search Box */}
             <div className="search-container">
               <SearchBox keyword={keyword} setKeyword={setKeyword} />

@@ -26,7 +26,10 @@ function ChatBox({ userId, currentUserId, token, userName, isAdmin }) {
 
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+      bottomRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest", // 💥 CHÌA KHOÁ ở đây!
+      });
     }
   }, [messages]);
 

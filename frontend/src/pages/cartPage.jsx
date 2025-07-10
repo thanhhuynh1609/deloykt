@@ -1,11 +1,10 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Row,
   Col,
   ListGroup,
   Image,
-  Form,
   Button,
   Card,
 } from "react-bootstrap";
@@ -13,7 +12,7 @@ import Message from "../components/message";
 import CartContext from "../context/cartContext";
 import { formatVND } from "../utils/currency";
 
-function CartPage(props) {
+function CartPage() {
   const { error, productsInCart, updateItemQty, removeFromCart } =
     useContext(CartContext);
 
@@ -23,7 +22,7 @@ function CartPage(props) {
     navigate("/login?redirect=shipping");
   };
 
-  if (error != "")
+  if (error !== "")
     return (
       <Message variant="danger">
         <h4>{error}</h4>
@@ -33,102 +32,97 @@ function CartPage(props) {
   return (
     <Row>
       <Col md={8}>
-        <h1>Giỏ hàng</h1>
+        <h2 className="mb-4">🛒 Giỏ hàng</h2>
         {productsInCart.length === 0 ? (
           <Message variant="info">
-            Giỏ hàng của bạn đang trống <Link to="/">Tiếp tục mua sắm</Link>
+            Giỏ hàng của bạn đang trống. <Link to="/">Tiếp tục mua sắm</Link>
           </Message>
         ) : (
           <ListGroup variant="flush">
             {productsInCart.map((product) => (
-              <ListGroup.Item key={product.id}>
-                <Row>
-                  <Col md={2}>
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fluid
-                      rounded
-                    />
-                  </Col>
-                  <Col xs={9} md={3}>
-                    <Link
-                      to={`/products/${product.id}`}
-                      className="text-decoration-none"
-                    >
-                      {product.name}
-                    </Link>
-                  </Col>
-                  <Col xs={3} md={2}>
-                    {formatVND(product.price)}
-                  </Col>
-                  <Col xs={6} md={3}>
-                    <Form.Select
-                      value={product.qty}
-                      onChange={(e) => {
-                        updateItemQty(
-                          product.id,
-                          Number(e.currentTarget.value)
-                        );
-                      }}
-                    >
-                      {[
-                        ...Array(
-                          Math.max(0, Math.min(Number(product.countInStock) || 0, 10))
-                        ).keys(),
-                      ].map((x) => (
-                        <option key={x + 1} value={x + 1}>
-                          {x + 1}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Col>
-                  <Col className="ms-auto" xs={2}>
-                    <Button
-                      type="button"
-                      variant="light"
-                      onClick={() => {
-                        removeFromCart(product.id);
-                      }}
-                    >
-                      <i className="fas fa-trash"></i>
-                    </Button>
-                  </Col>
-                </Row>
+              <ListGroup.Item key={product.id} className="d-flex align-items-center">
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fluid
+                  roundedCircle
+                  style={{ width: "60px", height: "60px", objectFit: "cover", marginRight: "12px" }}
+                />
+                <div className="flex-grow-1">
+                  <Link
+                    to={`/products/${product.id}`}
+                    className="text-decoration-none fw-semibold"
+                  >
+                    {product.name}
+                  </Link>
+                  <div className="text-muted">{formatVND(product.price)}</div>
+                </div>
+                <div className="d-flex align-items-center">
+                  <Button
+                    variant="light"
+                    size="sm"
+                    disabled={product.qty <= 1}
+                    onClick={() => updateItemQty(product.id, product.qty - 1)}
+                    className="border rounded-circle me-2"
+                  >
+                    <i className="fas fa-minus"></i>
+                  </Button>
+
+                  <span className="fw-bold">{product.qty}</span>
+
+                  <Button
+                    variant="light"
+                    size="sm"
+                    disabled={product.qty >= product.countInStock}
+                    onClick={() => updateItemQty(product.id, product.qty + 1)}
+                    className="border rounded-circle ms-2"
+                  >
+                    <i className="fas fa-plus"></i>
+                  </Button>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="light"
+                  size="sm"
+                  className="ms-3"
+                  onClick={() => removeFromCart(product.id)}
+                >
+                  <i className="fas fa-trash"></i>
+                </Button>
               </ListGroup.Item>
             ))}
           </ListGroup>
         )}
       </Col>
+
       <Col md={4}>
-        <Card>
+        <Card className="shadow-sm">
           <ListGroup variant="flush">
             <ListGroup.Item>
-              <h2 style={{ textTransform: "none" }}>
-                Tạm tính{" "}
-                {productsInCart.reduce((acc, product) => acc + product.qty, 0)}{" "}
-                sản phẩm
-              </h2>
-              <h4>
-                {formatVND(productsInCart
-                  .reduce(
+              <h5 className="fw-bold mb-3">
+                Tạm tính: {productsInCart.reduce((acc, product) => acc + product.qty, 0)} sản phẩm
+              </h5>
+              <h4 className="text-primary">
+                {formatVND(
+                  productsInCart.reduce(
                     (acc, product) => acc + product.qty * product.price,
                     0
-                  ))}
+                  )
+                )}
               </h4>
             </ListGroup.Item>
             <ListGroup.Item>
-              <Row className="px-2">
-                <Button
-                  type="button"
-                  className="btn-block"
-                  disabled={productsInCart.length === 0}
-                  onClick={handleCheckOut}
-                  style={{ textTransform: "none" }}
-                >
-                  Tiến hàng thanh toán
-                </Button>
-              </Row>
+              <Button
+                type="button"
+                className="w-100"
+                disabled={productsInCart.length === 0}
+                onClick={handleCheckOut}
+                style={{ textTransform: "none" }}
+                variant="success"
+              >
+                Tiến hành thanh toán
+              </Button>
             </ListGroup.Item>
           </ListGroup>
         </Card>

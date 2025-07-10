@@ -128,7 +128,7 @@ function Header({ keyword, setKeyword }) {
         <Container>
           {/* Logo */}
           <LinkContainer to="/">
-            <Navbar.Brand className="navbar-brand text-dark">TNB.COM</Navbar.Brand>
+            <Navbar.Brand className="navbar-brand text-dark">TNBH.COM</Navbar.Brand>
           </LinkContainer>
 
           <Navbar.Toggle aria-controls="main-navbar" />

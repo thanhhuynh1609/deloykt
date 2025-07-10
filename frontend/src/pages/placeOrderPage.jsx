@@ -8,7 +8,7 @@ import CartContext from "../context/cartContext";
 import FormContainer from "../components/formContainer";
 import { CURRENCY, formatVND } from "../utils/currency";
 
-function PlacerOrderPage(props) {
+function PlacerOrderPage() {
   const { userInfo } = useContext(UserContext);
   const {
     productsInCart,
@@ -19,8 +19,9 @@ function PlacerOrderPage(props) {
     taxPrice,
     totalPrice,
     discountAmount,
-    placeOrder
+    placeOrder,
   } = useContext(CartContext);
+
   const navigate = useNavigate();
   const totalAfterDiscount = totalPrice - discountAmount;
 
@@ -29,8 +30,7 @@ function PlacerOrderPage(props) {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    const id = await placeOrder();
-
+    await placeOrder();
   };
 
   return (
@@ -38,54 +38,48 @@ function PlacerOrderPage(props) {
       <FormContainer>
         <CheckoutSteps step1 step2 step3 step4 />
       </FormContainer>
+
       <Row>
         <Col md={8}>
-          <ListGroup variant="flush">
+          <ListGroup variant="flush" className="mb-4">
             <ListGroup.Item>
-              <h2 style={{ textTransform: "none" }}>Địa chỉ</h2>
-              <p>
-                <strong>Địa chỉ: </strong>
-                {shippingAddress.address}, {shippingAddress.city},{"   "}
-                {shippingAddress.postalCode},{"   "}
-                {shippingAddress.country}
+              <h4>📍 Địa chỉ nhận hàng</h4>
+              <p className="mb-1">
+                <strong>Địa chỉ:</strong>{" "}
+                {`${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.postalCode}, ${shippingAddress.country}`}
               </p>
             </ListGroup.Item>
+
             <ListGroup.Item>
-              <h2>Phương thức thanh toán</h2>
-              <p>
-                <strong>Phương thức: </strong>
-                {paymentMethod}
+              <h4>💳 Phương thức thanh toán</h4>
+              <p className="mb-1">
+                <strong>Phương thức:</strong> {paymentMethod}
               </p>
             </ListGroup.Item>
+
             <ListGroup.Item>
-              <h2>Sản phẩm</h2>
-              {productsInCart.length == 0 ? (
-                <Message variant="info">Giỏ hàng bạn đang trống</Message>
+              <h4>🛒 Sản phẩm trong đơn</h4>
+              {productsInCart.length === 0 ? (
+                <Message variant="info">Giỏ hàng của bạn đang trống.</Message>
               ) : (
                 <ListGroup variant="flush">
                   {productsInCart.map((product) => (
-                    <ListGroup.Item key={product.id}>
-                      <Row>
-                        <Col sm={3} md={2}>
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            fluid
-                            rounded
-                          />
-                        </Col>
-                        <Col sm={5} md={6}>
-                          <Link
-                            to={`/product/${product.id}`}
-                            className="text-decoration-none"
-                          >
-                            {product.name}
-                          </Link>
-                        </Col>
-                        <Col sm={3} md={4}>
-                          {product.qty} X {formatVND(product.price)} = {formatVND(product.qty * product.price)}
-                        </Col>
-                      </Row>
+                    <ListGroup.Item key={product.id} className="d-flex align-items-center">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        rounded
+                        style={{ width: "60px", height: "60px", objectFit: "cover", marginRight: "12px" }}
+                      />
+                      <div className="flex-grow-1">
+                        <Link to={`/product/${product.id}`} className="text-decoration-none fw-semibold">
+                          {product.name}
+                        </Link>
+                        <div className="text-muted small">
+                          {product.qty} × {formatVND(product.price)} ={" "}
+                          <span className="fw-semibold">{formatVND(product.qty * product.price)}</span>
+                        </div>
+                      </div>
                     </ListGroup.Item>
                   ))}
                 </ListGroup>
@@ -93,30 +87,35 @@ function PlacerOrderPage(props) {
             </ListGroup.Item>
           </ListGroup>
         </Col>
+
         <Col md={4}>
-          <Card className="mb-3">
+          <Card className="shadow-sm mb-3">
             <ListGroup variant="flush">
               <ListGroup.Item>
-                <h2>Tóm tắt đơn hàng</h2>
+                <h4>Tóm tắt đơn hàng</h4>
               </ListGroup.Item>
+
               <ListGroup.Item>
                 <Row>
                   <Col>Sản phẩm</Col>
                   <Col>{formatVND(totalItemsPrice)}</Col>
                 </Row>
               </ListGroup.Item>
+
               <ListGroup.Item>
                 <Row>
-                  <Col>Phí ship</Col>
+                  <Col>Phí vận chuyển</Col>
                   <Col>{formatVND(shippingPrice)}</Col>
                 </Row>
               </ListGroup.Item>
+
               <ListGroup.Item>
                 <Row>
-                  <Col>Tax</Col>
+                  <Col>Thuế (5%)</Col>
                   <Col>{formatVND(taxPrice)}</Col>
                 </Row>
               </ListGroup.Item>
+
               {discountAmount > 0 && (
                 <ListGroup.Item>
                   <Row>
@@ -125,48 +124,41 @@ function PlacerOrderPage(props) {
                   </Row>
                 </ListGroup.Item>
               )}
+
               <ListGroup.Item>
                 <Row>
                   <Col><strong>Tổng cộng</strong></Col>
                   <Col>
-                    <strong>{formatVND(totalAfterDiscount)}</strong>
+                    <strong className="text-primary">{formatVND(totalAfterDiscount)}</strong>
                     {discountAmount > 0 && (
-                      <span className="text-success ms-2">(Đã áp dụng mã giảm giá)</span>
+                      <div className="text-success small">(Đã áp dụng mã giảm giá)</div>
                     )}
                   </Col>
                 </Row>
               </ListGroup.Item>
-              {/* <ListGroup.Item>
-                <Row>
-                  <Col>Total</Col>
-                  <Col>{formatVND(totalPrice)}</Col>
-                </Row>
-              </ListGroup.Item> */}
+
               <ListGroup.Item>
-                <Row className="mx-1">
-                  <Button
-                    type="button"
-                    className="btn-block"
-                    disabled={productsInCart.length == 0}
-                    onClick={handlePlaceOrder}
-                  >
-                    Đặt hàng
-                  </Button>
-                </Row>
+                <Button
+                  type="button"
+                  variant="success"
+                  className="w-100 fw-bold py-2"
+                  disabled={productsInCart.length === 0}
+                  onClick={handlePlaceOrder}
+                >
+                  Đặt hàng
+                </Button>
               </ListGroup.Item>
             </ListGroup>
           </Card>
 
-          {totalItemsPrice <= CURRENCY.FREE_SHIPPING_THRESHOLD ? (
-            <Message variant="info">
-              Miễn phí vận chuyển với giá trị đơn hàng từ {formatVND(CURRENCY.FREE_SHIPPING_THRESHOLD)}.
-            </Message>
-          ) : (
-            <Message variant="info">Free shipping on this order!</Message>
-          )}
           <Message variant="info">
-            Thuế 5% tính theo giá trị sản phẩm.
+            {totalItemsPrice <= CURRENCY.FREE_SHIPPING_THRESHOLD ? (
+              <>Miễn phí vận chuyển với đơn hàng từ {formatVND(CURRENCY.FREE_SHIPPING_THRESHOLD)}.</>
+            ) : (
+              "Đơn hàng này được miễn phí vận chuyển!"
+            )}
           </Message>
+          <Message variant="info">Thuế 5% tính trên giá trị sản phẩm.</Message>
         </Col>
       </Row>
     </div>

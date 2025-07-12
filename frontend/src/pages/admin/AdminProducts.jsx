@@ -9,6 +9,8 @@ const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [sizes, setSizes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -19,8 +21,10 @@ const AdminProducts = () => {
     countInStock: '',
     brand: '',
     category: '',
-    image: null
+    image: null,
+    has_variants: false
   });
+  const [variants, setVariants] = useState([]);
   const [imagePreview, setImagePreview] = useState('');
   const [sortField, setSortField] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -31,15 +35,19 @@ const AdminProducts = () => {
 
   const fetchData = async () => {
     try {
-      const [productsRes, categoriesRes, brandsRes] = await Promise.all([
+      const [productsRes, categoriesRes, brandsRes, colorsRes, sizesRes] = await Promise.all([
         httpService.get('/api/products/'),
         httpService.get('/api/category/'),
-        httpService.get('/api/brands/')
+        httpService.get('/api/brands/'),
+        httpService.get('/api/colors/'),
+        httpService.get('/api/sizes/')
       ]);
 
       setProducts(productsRes.data);
       setCategories(categoriesRes.data);
       setBrands(brandsRes.data);
+      setColors(colorsRes.data);
+      setSizes(sizesRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -47,7 +55,7 @@ const AdminProducts = () => {
     }
   };
 
-  const handleShowModal = (product = null) => {
+  const handleShowModal = async (product = null) => {
     if (product) {
       setEditingProduct(product);
       setFormData({
@@ -57,8 +65,31 @@ const AdminProducts = () => {
         countInStock: product.countInStock || '',
         brand: product.brand || '',
         category: product.category || '',
-        image: null
+        image: null,
+        has_variants: product.has_variants || false
       });
+
+      // Load variants nếu có
+      if (product.has_variants) {
+        try {
+          const variantsRes = await httpService.get(`/api/product-variants/?product=${product.id}`);
+          const formattedVariants = variantsRes.data.map(variant => ({
+            id: variant.id,
+            color: variant.color.id,
+            size: variant.size.id,
+            price: variant.price,
+            stock_quantity: variant.stock_quantity,
+            isNew: false
+          }));
+          setVariants(formattedVariants);
+        } catch (error) {
+          console.error('Error loading variants:', error);
+          setVariants([]);
+        }
+      } else {
+        setVariants([]);
+      }
+
       setImagePreview(product.image || '');
     } else {
       setEditingProduct(null);
@@ -69,8 +100,10 @@ const AdminProducts = () => {
         countInStock: '',
         brand: '',
         category: '',
-        image: null
+        image: null,
+        has_variants: false
       });
+      setVariants([]);
       setImagePreview('');
     }
     setShowModal(true);
@@ -79,11 +112,12 @@ const AdminProducts = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingProduct(null);
+    setVariants([]);
     setImagePreview('');
   };
 
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files, type, checked } = e.target;
     if (name === 'image') {
       const file = files[0];
       setFormData(prev => ({
@@ -99,12 +133,46 @@ const AdminProducts = () => {
         };
         reader.readAsDataURL(file);
       }
+    } else if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+
+      // Reset variants khi tắt has_variants
+      if (name === 'has_variants' && !checked) {
+        setVariants([]);
+      }
     } else {
       setFormData(prev => ({
         ...prev,
         [name]: value
       }));
     }
+  };
+
+  // Thêm biến thể mới
+  const addVariant = () => {
+    setVariants(prev => [...prev, {
+      id: Date.now(), // temporary ID
+      color: '',
+      size: '',
+      price: '',
+      stock_quantity: '',
+      isNew: true
+    }]);
+  };
+
+  // Xóa biến thể
+  const removeVariant = (index) => {
+    setVariants(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Cập nhật biến thể
+  const updateVariant = (index, field, value) => {
+    setVariants(prev => prev.map((variant, i) =>
+      i === index ? { ...variant, [field]: value } : variant
+    ));
   };
 
   const handleSubmit = async (e) => {
@@ -117,20 +185,66 @@ const AdminProducts = () => {
       formDataToSend.append('countInStock', formData.countInStock);
       formDataToSend.append('brand', formData.brand);
       formDataToSend.append('category', formData.category);
+      formDataToSend.append('has_variants', formData.has_variants);
 
       if (formData.image) {
         formDataToSend.append('image', formData.image);
       }
 
+      let productResponse;
       if (editingProduct) {
-        await httpService.put(`/api/products/${editingProduct.id}/`, formDataToSend, {
+        productResponse = await httpService.put(`/api/products/${editingProduct.id}/`, formDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
-        await httpService.post('/api/products/', formDataToSend, {
+        productResponse = await httpService.post('/api/products/', formDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
+
+      // Nếu có biến thể, lưu biến thể
+      if (formData.has_variants && variants.length > 0) {
+        const productId = editingProduct ? editingProduct.id : productResponse.data.id;
+
+        // Xóa biến thể cũ nếu đang edit
+        if (editingProduct) {
+          try {
+            const existingVariants = await httpService.get(`/api/product-variants/?product=${productId}`);
+            for (const variant of existingVariants.data) {
+              await httpService.delete(`/api/product-variants/${variant.id}/`);
+            }
+          } catch (error) {
+            console.error('Error deleting existing variants:', error);
+          }
+        }
+
+        // Thêm biến thể mới
+        for (const variant of variants) {
+          if (variant.color && variant.size && variant.price && variant.stock_quantity) {
+            try {
+              console.log('Creating variant:', {
+                product: productId,
+                color_id: parseInt(variant.color),
+                size_id: parseInt(variant.size),
+                price: parseFloat(variant.price),
+                stock_quantity: parseInt(variant.stock_quantity)
+              });
+
+              await httpService.post('/api/product-variants/', {
+                product: productId,
+                color_id: parseInt(variant.color),
+                size_id: parseInt(variant.size),
+                price: parseFloat(variant.price),
+                stock_quantity: parseInt(variant.stock_quantity)
+              });
+            } catch (error) {
+              console.error('Error creating variant:', error);
+              console.error('Variant data:', variant);
+            }
+          }
+        }
+      }
+
       fetchData();
       handleCloseModal();
     } catch (error) {
@@ -300,16 +414,41 @@ const AdminProducts = () => {
                           <small className="text-muted">
                             {product.description?.substring(0, 50)}...
                           </small>
+                          {product.has_variants && (
+                            <div className="mt-1">
+                              <Badge bg="secondary" className="me-1">
+                                <i className="fas fa-tags me-1"></i>
+                                Có biến thể
+                              </Badge>
+                            </div>
+                          )}
                         </td>
                         <td>{getBrandName(product.brand)}</td>
                         <td>{getCategoryName(product.category)}</td>
-                        <td>{formatVND(product.price)}</td>
                         <td>
-                          <Badge 
-                            bg={product.countInStock > 0 ? 'success' : 'danger'}
+                          {product.has_variants ? (
+                            <div>
+                              <span className="text-muted">Từ </span>
+                              {formatVND(product.min_price || product.price)}
+                            </div>
+                          ) : (
+                            formatVND(product.price)
+                          )}
+                        </td>
+                        <td>
+                          <Badge
+                            bg={product.has_variants ?
+                              (product.total_stock > 0 ? 'success' : 'danger') :
+                              (product.countInStock > 0 ? 'success' : 'danger')
+                            }
                           >
-                            {product.countInStock}
+                            {product.has_variants ? product.total_stock : product.countInStock}
                           </Badge>
+                          {product.has_variants && (
+                            <div>
+                              <small className="text-muted">Tổng biến thể</small>
+                            </div>
+                          )}
                         </td>
                         <td>
                           <div className="d-flex align-items-center">
@@ -454,6 +593,109 @@ const AdminProducts = () => {
                   onChange={handleInputChange}
                 />
               </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Check
+                  type="checkbox"
+                  name="has_variants"
+                  label="Sản phẩm có biến thể (màu sắc, kích cỡ)"
+                  checked={formData.has_variants}
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+
+              {/* Quản lý biến thể */}
+              {formData.has_variants && (
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h6>Biến thể sản phẩm</h6>
+                    <Button variant="outline-primary" size="sm" onClick={addVariant}>
+                      <i className="fas fa-plus me-1"></i>
+                      Thêm biến thể
+                    </Button>
+                  </div>
+
+                  {variants.map((variant, index) => (
+                    <div key={variant.id || index} className="border rounded p-3 mb-3">
+                      <Row>
+                        <Col md={3}>
+                          <Form.Group>
+                            <Form.Label>Màu sắc</Form.Label>
+                            <Form.Select
+                              value={variant.color}
+                              onChange={(e) => updateVariant(index, 'color', e.target.value)}
+                              required
+                            >
+                              <option value="">Chọn màu</option>
+                              {colors.map(color => (
+                                <option key={color.id} value={color.id}>
+                                  {color.name}
+                                </option>
+                              ))}
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={3}>
+                          <Form.Group>
+                            <Form.Label>Kích cỡ</Form.Label>
+                            <Form.Select
+                              value={variant.size}
+                              onChange={(e) => updateVariant(index, 'size', e.target.value)}
+                              required
+                            >
+                              <option value="">Chọn size</option>
+                              {sizes.map(size => (
+                                <option key={size.id} value={size.id}>
+                                  {size.name}
+                                </option>
+                              ))}
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={2}>
+                          <Form.Group>
+                            <Form.Label>Giá (VND)</Form.Label>
+                            <Form.Control
+                              type="number"
+                              value={variant.price}
+                              onChange={(e) => updateVariant(index, 'price', e.target.value)}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={2}>
+                          <Form.Group>
+                            <Form.Label>Tồn kho</Form.Label>
+                            <Form.Control
+                              type="number"
+                              value={variant.stock_quantity}
+                              onChange={(e) => updateVariant(index, 'stock_quantity', e.target.value)}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={2} className="d-flex align-items-end">
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => removeVariant(index)}
+                            className="mb-3"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </Button>
+                        </Col>
+                      </Row>
+                    </div>
+                  ))}
+
+                  {variants.length === 0 && (
+                    <div className="text-center text-muted py-3">
+                      <i className="fas fa-info-circle me-2"></i>
+                      Chưa có biến thể nào. Nhấn "Thêm biến thể" để bắt đầu.
+                    </div>
+                  )}
+                </div>
+              )}
 
               <Form.Group className="mb-3">
                 <Form.Label>Product Image</Form.Label>

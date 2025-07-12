@@ -51,11 +51,41 @@ class ProductVariantSerializer(serializers.ModelSerializer):
     size = SizeSerializer(read_only=True)
     color_id = serializers.IntegerField(write_only=True)
     size_id = serializers.IntegerField(write_only=True)
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True)
 
     class Meta:
         model = ProductVariant
-        fields = ('id', 'color', 'size', 'color_id', 'size_id', 'price', 'stock_quantity', 'sku', 'image')
+        fields = ('id', 'product', 'color', 'size', 'color_id', 'size_id', 'price', 'stock_quantity', 'sku', 'image')
         read_only_fields = ('sku',)
+
+    def validate(self, data):
+        # Kiểm tra product có tồn tại
+        if 'product' not in data:
+            raise serializers.ValidationError("Product is required")
+
+        # Kiểm tra color_id và size_id
+        if 'color_id' not in data:
+            raise serializers.ValidationError("Color is required")
+        if 'size_id' not in data:
+            raise serializers.ValidationError("Size is required")
+
+        return data
+
+    def create(self, validated_data):
+        # Lấy color và size objects
+        color_id = validated_data.pop('color_id')
+        size_id = validated_data.pop('size_id')
+
+        try:
+            color = Color.objects.get(id=color_id)
+            size = Size.objects.get(id=size_id)
+        except (Color.DoesNotExist, Size.DoesNotExist):
+            raise serializers.ValidationError("Invalid color or size")
+
+        validated_data['color'] = color
+        validated_data['size'] = size
+
+        return super().create(validated_data)
 
 
 class BrandSerializer(serializers.ModelSerializer):

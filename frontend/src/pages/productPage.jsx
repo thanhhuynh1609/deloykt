@@ -62,6 +62,76 @@ function ProductPage(props) {
     fetchData();
   }, [id, loadProduct]);
 
+  // Function để lấy sizes có sẵn cho màu đã chọn
+  const getAvailableSizesForColor = () => {
+    if (!product.has_variants || !selectedColor || !product.variants) {
+      return product.has_variants ? (product.available_sizes || []).map(size => ({
+        name: size.name,
+        available: true
+      })) : [];
+    }
+
+    // Lấy tất cả sizes và kiểm tra availability
+    const allSizes = (product.available_sizes || []).map(size => {
+      const variantForColorAndSize = product.variants.find(variant =>
+        variant.color.name === selectedColor && variant.size.name === size.name
+      );
+
+      return {
+        name: size.name,
+        available: variantForColorAndSize && variantForColorAndSize.stock_quantity > 0
+      };
+    });
+
+    return allSizes;
+  };
+
+  // Function để lấy colors có sẵn cho size đã chọn
+  const getAvailableColorsForSize = () => {
+    if (!product.has_variants || !selectedSize || !product.variants) {
+      return product.has_variants ? (product.available_colors || []).map(color => ({
+        ...color,
+        available: true
+      })) : [];
+    }
+
+    // Lấy tất cả colors và kiểm tra availability
+    const allColors = (product.available_colors || []).map(color => {
+      const variantForColorAndSize = product.variants.find(variant =>
+        variant.color.name === color.name && variant.size.name === selectedSize
+      );
+
+      return {
+        ...color,
+        available: variantForColorAndSize && variantForColorAndSize.stock_quantity > 0
+      };
+    });
+
+    return allColors;
+  };
+
+  // Effect để reset size khi chọn màu mới (nếu size không có sẵn)
+  useEffect(() => {
+    if (selectedColor && selectedSize) {
+      const availableSizesForNewColor = getAvailableSizesForColor();
+      const sizeStillAvailable = availableSizesForNewColor.find(s => s.name === selectedSize && s.available);
+      if (!sizeStillAvailable) {
+        setSelectedSize(""); // Reset size nếu không có sẵn cho màu mới
+      }
+    }
+  }, [selectedColor]);
+
+  // Effect để reset color khi chọn size mới (nếu color không có sẵn)
+  useEffect(() => {
+    if (selectedSize && selectedColor) {
+      const availableColorsForNewSize = getAvailableColorsForSize();
+      const colorStillAvailable = availableColorsForNewSize.find(c => c.name === selectedColor && c.available);
+      if (!colorStillAvailable) {
+        setSelectedColor(""); // Reset color nếu không có sẵn cho size mới
+      }
+    }
+  }, [selectedSize]);
+
   // Effect để cập nhật biến thể khi chọn màu sắc và size
   useEffect(() => {
     const updateVariant = async () => {
@@ -75,6 +145,11 @@ function ProductPage(props) {
             setSelectedVariant(variant);
             setCurrentPrice(variant.price);
             setCurrentStock(variant.stock_quantity);
+          } else {
+            // Nếu không tìm thấy biến thể, reset thông tin
+            setSelectedVariant(null);
+            setCurrentPrice(product.min_price || product.price);
+            setCurrentStock(0);
           }
         }
       }
@@ -119,14 +194,15 @@ function ProductPage(props) {
     ? [product.image, product.image, product.image, product.image]
     : [];
 
-  // Lấy dữ liệu màu sắc và kích cỡ từ API
-  const availableColors = product.has_variants ? (product.available_colors || []).map(color => ({
+  // Lấy dữ liệu màu sắc và kích cỡ từ API với thông tin availability
+  const availableColors = product.has_variants ? getAvailableColorsForSize().map(color => ({
     name: color.name,
     value: color.name.toLowerCase(),
-    color: color.hex_code
+    color: color.hex_code,
+    available: color.available
   })) : [];
 
-  const availableSizes = product.has_variants ? (product.available_sizes || []).map(size => size.name) : [];
+  const availableSizes = getAvailableSizesForColor();
 
   // FAQ data
   const faqData = [
@@ -279,9 +355,22 @@ function ProductPage(props) {
                               key={color.value}
                               className={`color-option ${
                                 selectedColor === color.name ? "selected" : ""
-                              }`}
-                              onClick={() => setSelectedColor(color.name)}
-                              title={color.name}
+                              } ${!color.available ? "unavailable" : ""}`}
+                              onClick={() => {
+                                if (color.available) {
+                                  // Nếu click vào màu đã chọn, bỏ chọn
+                                  if (selectedColor === color.name) {
+                                    setSelectedColor("");
+                                  } else {
+                                    setSelectedColor(color.name);
+                                  }
+                                }
+                              }}
+                              title={color.available ? color.name : `${color.name} (Hết hàng)`}
+                              style={{
+                                cursor: color.available ? "pointer" : "not-allowed",
+                                opacity: color.available ? 1 : 0.5
+                              }}
                             >
                               <div
                                 className="color-circle"
@@ -291,9 +380,13 @@ function ProductPage(props) {
                                     color.name === "Trắng"
                                       ? "1px solid #ddd"
                                       : "none",
+                                  opacity: color.available ? 1 : 0.6
                                 }}
                               ></div>
                               <span className="color-name">{color.name}</span>
+                              {!color.available && (
+                                <small className="text-muted d-block">(Hết hàng)</small>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -307,13 +400,33 @@ function ProductPage(props) {
                         <div className="size-options">
                           {availableSizes.map((size) => (
                             <button
-                              key={size}
+                              key={size.name}
                               className={`size-option ${
-                                selectedSize === size ? "selected" : ""
-                              }`}
-                              onClick={() => setSelectedSize(size)}
+                                selectedSize === size.name ? "selected" : ""
+                              } ${!size.available ? "unavailable" : ""}`}
+                              onClick={() => {
+                                if (size.available) {
+                                  // Nếu click vào size đã chọn, bỏ chọn
+                                  if (selectedSize === size.name) {
+                                    setSelectedSize("");
+                                  } else {
+                                    setSelectedSize(size.name);
+                                  }
+                                }
+                              }}
+                              disabled={!size.available}
+                              title={size.available ? size.name : `Size ${size.name} (Hết hàng)`}
+                              style={{
+                                opacity: size.available ? 1 : 0.5,
+                                cursor: size.available ? "pointer" : "not-allowed"
+                              }}
                             >
-                              {size}
+                              {size.name}
+                              {!size.available && (
+                                <small className="d-block text-muted" style={{fontSize: "0.7rem"}}>
+                                  (Hết hàng)
+                                </small>
+                              )}
                             </button>
                           ))}
                         </div>

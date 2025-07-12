@@ -257,6 +257,36 @@
   font-style: italic;
 }
 
+/* Unavailable Options Styles */
+.color-option.unavailable {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+}
+
+.color-option.unavailable:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.size-option.unavailable {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-color: #dee2e6;
+}
+
+.size-option.unavailable:hover {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-color: #dee2e6;
+  transform: none;
+}
+
+.size-option:disabled {
+  pointer-events: none;
+}
+
 .product-status {
   margin-bottom: 20px;
   display: flex;

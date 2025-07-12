@@ -3,6 +3,7 @@ import { Container } from "react-bootstrap";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/header";
 import Footer from "./components/footer";
+import { ToastContainer } from "react-toastify";
 
 // User pages
 import HomePage from "./pages/homePage";
@@ -61,6 +62,7 @@ const AppContent = () => {
 
   return (
     <div>
+       <ToastContainer position="top-right" autoClose={3000} />
       <UserProvider>
         <PayboxProvider>
           {!isAdminRoute && <Header keyword={keyword} setKeyword={setKeyword} />}

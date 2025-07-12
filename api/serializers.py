@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Brand, Category, Product, Review, ShippingAddress, Order, OrderItem, PayboxWallet, PayboxTransaction, Favorite
+from api.models import Brand, Category, Product, Review, ShippingAddress, Order, OrderItem, PayboxWallet, PayboxTransaction, Favorite, Color, Size, ProductVariant
 from django.contrib.auth.models import User
 from django.utils import timezone
 from .models import Coupon
@@ -34,6 +34,30 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'description', 'featured_product', 'image')
 
 
+class ColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = ('id', 'name', 'hex_code')
+
+
+class SizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Size
+        fields = ('id', 'name', 'order')
+
+
+class ProductVariantSerializer(serializers.ModelSerializer):
+    color = ColorSerializer(read_only=True)
+    size = SizeSerializer(read_only=True)
+    color_id = serializers.IntegerField(write_only=True)
+    size_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = ProductVariant
+        fields = ('id', 'color', 'size', 'color_id', 'size_id', 'price', 'stock_quantity', 'sku', 'image')
+        read_only_fields = ('sku',)
+
+
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
@@ -43,18 +67,42 @@ class BrandSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(read_only=True, many=True, source='review_set')
     is_favorite = serializers.SerializerMethodField()
-    
+    variants = ProductVariantSerializer(read_only=True, many=True)
+    available_colors = serializers.SerializerMethodField()
+    available_sizes = serializers.SerializerMethodField()
+    min_price = serializers.SerializerMethodField()
+    total_stock = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = ('id', 'name', 'image', 'brand', 'category', 'description',
-                  'rating', 'numReviews', 'price', 'countInStock', 'createdAt', 
-                  'reviews', 'is_favorite', 'total_sold')
-    
+                  'rating', 'numReviews', 'price', 'countInStock', 'createdAt',
+                  'reviews', 'is_favorite', 'total_sold', 'has_variants', 'variants',
+                  'available_colors', 'available_sizes', 'min_price', 'total_stock')
+
     def get_is_favorite(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return Favorite.objects.filter(user=request.user, product=obj).exists()
         return False
+
+    def get_available_colors(self, obj):
+        if obj.has_variants:
+            colors = Color.objects.filter(productvariant__product=obj).distinct()
+            return ColorSerializer(colors, many=True).data
+        return []
+
+    def get_available_sizes(self, obj):
+        if obj.has_variants:
+            sizes = Size.objects.filter(productvariant__product=obj).distinct().order_by('order', 'name')
+            return SizeSerializer(sizes, many=True).data
+        return []
+
+    def get_min_price(self, obj):
+        return obj.get_min_price()
+
+    def get_total_stock(self, obj):
+        return obj.get_total_stock()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -70,9 +118,22 @@ class ShippingAddressSerializer(serializers.ModelSerializer):
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    color_name = serializers.CharField(read_only=True)
+    size_name = serializers.CharField(read_only=True)
+    variant_info = serializers.SerializerMethodField()
+
     class Meta:
         model = OrderItem
         fields = '__all__'
+
+    def get_variant_info(self, obj):
+        if obj.color_name and obj.size_name:
+            return f"{obj.color_name} - {obj.size_name}"
+        elif obj.color_name:
+            return obj.color_name
+        elif obj.size_name:
+            return obj.size_name
+        return None
 
 
 class OrderSerializer(serializers.ModelSerializer):

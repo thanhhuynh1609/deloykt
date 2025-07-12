@@ -242,6 +242,21 @@
   color: white;
 }
 
+/* Variant Info Styles */
+.variant-info {
+  font-size: 0.9rem;
+  color: #666;
+  margin-left: 10px;
+}
+
+.variant-warning {
+  margin-top: 8px;
+}
+
+.variant-warning small {
+  font-style: italic;
+}
+
 .product-status {
   margin-bottom: 20px;
   display: flex;

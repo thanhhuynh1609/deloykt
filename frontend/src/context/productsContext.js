@@ -45,11 +45,22 @@ export const ProductsProvider = ({ children }) => {
     }
   };
 
+  const getProductVariant = async (productId, colorId, sizeId) => {
+    try {
+      const { data } = await httpService.get(`/api/products/${productId}/variants/${colorId}/${sizeId}/`);
+      return data;
+    } catch (ex) {
+      setError(ex.message);
+      return null;
+    }
+  };
+
   const contextData = {
     products,
     error,
     loadProducts,
     loadProduct,
+    getProductVariant,
     // productsLoaded,
     brands,
     categories,

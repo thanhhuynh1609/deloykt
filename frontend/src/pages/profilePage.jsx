@@ -363,7 +363,7 @@ function ProfilePage(props) {
                     className="profile-avatar"
                     onError={(e) => {
                       console.log("Avatar load error, falling back to sample");
-                      e.target.src = "/image/sample.";
+                      e.target.src = "/image/sample.png";
                     }}
                   />
                   <input

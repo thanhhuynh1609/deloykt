@@ -228,12 +228,19 @@ const AdminOrders = () => {
                       <tr key={index}>
                         <td>
                           <div className="d-flex align-items-center">
-                            <img 
-                              src={item.image || '/api/placeholder/40/40'} 
+                            <img
+                              src={item.image || '/api/placeholder/40/40'}
                               alt={item.productName}
                               className="order-item-image me-2"
                             />
-                            {item.productName}
+                            <div>
+                              {item.productName}
+                              {item.variant_info && (
+                                <div className="text-muted small">
+                                  <i className="fas fa-tag"></i> {item.variant_info}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td>{item.qty}</td>

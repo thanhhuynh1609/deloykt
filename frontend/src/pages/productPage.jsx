@@ -22,10 +22,11 @@ import { formatVND } from "../utils/currency";
 import { FavoriteContext } from "../context/favoriteContext";
 import UserContext from "../context/userContext";
 import "../styles/productPage.css";
+import { toast } from "react-toastify";
 
 function ProductPage(props) {
   const { id } = useParams();
-  const { error, loadProduct } = useContext(ProductsContext);
+  const { error, loadProduct, getProductVariant } = useContext(ProductsContext);
   const { addItemToCart } = useContext(CartContext);
   const { isFavorite, addToFavorites, removeFromFavorites } =
     useContext(FavoriteContext);
@@ -36,21 +37,64 @@ function ProductPage(props) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [currentPrice, setCurrentPrice] = useState(0);
+  const [currentStock, setCurrentStock] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       const productData = await loadProduct(id);
       setProduct(productData);
+
+      // Khởi tạo giá và tồn kho
+      if (productData.has_variants) {
+        setCurrentPrice(productData.min_price || productData.price);
+        setCurrentStock(productData.total_stock || 0);
+      } else {
+        setCurrentPrice(productData.price);
+        setCurrentStock(productData.countInStock);
+      }
+
       setLoading(false);
       window.scrollTo(0, 0);
     };
     fetchData();
   }, [id, loadProduct]);
 
+  // Effect để cập nhật biến thể khi chọn màu sắc và size
+  useEffect(() => {
+    const updateVariant = async () => {
+      if (product.has_variants && selectedColor && selectedSize) {
+        const colorObj = product.available_colors?.find(c => c.name === selectedColor);
+        const sizeObj = product.available_sizes?.find(s => s.name === selectedSize);
+
+        if (colorObj && sizeObj) {
+          const variant = await getProductVariant(product.id, colorObj.id, sizeObj.id);
+          if (variant) {
+            setSelectedVariant(variant);
+            setCurrentPrice(variant.price);
+            setCurrentStock(variant.stock_quantity);
+          }
+        }
+      }
+    };
+
+    updateVariant();
+  }, [selectedColor, selectedSize, product, getProductVariant]);
+
   const addToCartHandler = () => {
-    addItemToCart(Number(id), Number(qty));
-    navigate(`/cart`);
+    const cartItem = {
+      id: Number(id),
+      qty: Number(qty),
+      variant_id: selectedVariant?.id || null,
+      color: selectedColor || null,
+      size: selectedSize || null
+    };
+
+    addItemToCart(cartItem);
+    toast.success("Đã thêm vào giỏ hàng!");
+    // navigate(`/cart`);
   };
 
   const handleFavoriteToggle = () => {
@@ -75,16 +119,14 @@ function ProductPage(props) {
     ? [product.image, product.image, product.image, product.image]
     : [];
 
-  // Giả lập dữ liệu màu sắc và kích cỡ
-  const availableColors = [
-    { name: "Đen", value: "black", color: "#000000" },
-    { name: "Trắng", value: "white", color: "#FFFFFF" },
-    { name: "Xanh dương", value: "blue", color: "#007bff" },
-    { name: "Đỏ", value: "red", color: "#dc3545" },
-    { name: "Xám", value: "gray", color: "#6c757d" },
-  ];
+  // Lấy dữ liệu màu sắc và kích cỡ từ API
+  const availableColors = product.has_variants ? (product.available_colors || []).map(color => ({
+    name: color.name,
+    value: color.name.toLowerCase(),
+    color: color.hex_code
+  })) : [];
 
-  const availableSizes = ["S", "M", "L", "XL", "XXL"];
+  const availableSizes = product.has_variants ? (product.available_sizes || []).map(size => size.name) : [];
 
   // FAQ data
   const faqData = [
@@ -192,8 +234,13 @@ function ProductPage(props) {
 
                 <div className="product-price">
                   <span className="current-price">
-                    {formatVND(product.price)}
+                    {formatVND(currentPrice)}
                   </span>
+                  {product.has_variants && selectedColor && selectedSize && (
+                    <span className="variant-info">
+                      {selectedColor} - {selectedSize}
+                    </span>
+                  )}
                   {product.oldPrice && (
                     <>
                       <span className="old-price">
@@ -202,7 +249,7 @@ function ProductPage(props) {
                       <span className="discount-badge">
                         -
                         {Math.round(
-                          ((product.oldPrice - product.price) /
+                          ((product.oldPrice - currentPrice) /
                             product.oldPrice) *
                             100
                         )}
@@ -221,71 +268,84 @@ function ProductPage(props) {
                 </div>
 
                 {/* Color Selection */}
-                <div className="product-options">
-                  <div className="option-group">
-                    <span className="option-label">Màu sắc:</span>
-                    <div className="color-options">
-                      {availableColors.map((color) => (
-                        <div
-                          key={color.value}
-                          className={`color-option ${
-                            selectedColor === color.value ? "selected" : ""
-                          }`}
-                          onClick={() => setSelectedColor(color.value)}
-                          title={color.name}
-                        >
-                          <div
-                            className="color-circle"
-                            style={{
-                              backgroundColor: color.color,
-                              border:
-                                color.value === "white"
-                                  ? "1px solid #ddd"
-                                  : "none",
-                            }}
-                          ></div>
-                          <span className="color-name">{color.name}</span>
+                {product.has_variants && (
+                  <div className="product-options">
+                    {availableColors.length > 0 && (
+                      <div className="option-group">
+                        <span className="option-label">Màu sắc:</span>
+                        <div className="color-options">
+                          {availableColors.map((color) => (
+                            <div
+                              key={color.value}
+                              className={`color-option ${
+                                selectedColor === color.name ? "selected" : ""
+                              }`}
+                              onClick={() => setSelectedColor(color.name)}
+                              title={color.name}
+                            >
+                              <div
+                                className="color-circle"
+                                style={{
+                                  backgroundColor: color.color,
+                                  border:
+                                    color.name === "Trắng"
+                                      ? "1px solid #ddd"
+                                      : "none",
+                                }}
+                              ></div>
+                              <span className="color-name">{color.name}</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
+                    )}
 
-                  {/* Size Selection */}
-                  <div className="option-group">
-                    <span className="option-label">Kích cỡ:</span>
-                    <div className="size-options">
-                      {availableSizes.map((size) => (
-                        <button
-                          key={size}
-                          className={`size-option ${
-                            selectedSize === size ? "selected" : ""
-                          }`}
-                          onClick={() => setSelectedSize(size)}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
+                    {/* Size Selection */}
+                    {availableSizes.length > 0 && (
+                      <div className="option-group">
+                        <span className="option-label">Kích cỡ:</span>
+                        <div className="size-options">
+                          {availableSizes.map((size) => (
+                            <button
+                              key={size}
+                              className={`size-option ${
+                                selectedSize === size ? "selected" : ""
+                              }`}
+                              onClick={() => setSelectedSize(size)}
+                            >
+                              {size}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
 
                 <div className="product-status">
                   <span className="status-label">Trạng thái:</span>
                   <span
                     className={`status-value ${
-                      product.countInStock > 0 ? "in-stock" : "out-of-stock"
+                      currentStock > 0 ? "in-stock" : "out-of-stock"
                     }`}
                   >
-                    {product.countInStock > 0 ? "Còn hàng" : "Hết hàng"}
+                    {currentStock > 0 ? "Còn hàng" : "Hết hàng"}
                   </span>
-                  {product.countInStock > 0 && (
+                  {currentStock > 0 && (
                     <span className="stock-count">
-                      ({product.countInStock} sản phẩm có sẵn)
+                      ({currentStock} sản phẩm có sẵn)
                     </span>
+                  )}
+                  {product.has_variants && (!selectedColor || !selectedSize) && (
+                    <div className="variant-warning">
+                      <small className="text-warning">
+                        Vui lòng chọn màu sắc và kích cỡ để xem tồn kho
+                      </small>
+                    </div>
                   )}
                 </div>
 
-                {product.countInStock > 0 && (
+                {currentStock > 0 && (
                   <div className="product-quantity">
                     <span className="quantity-label">Số lượng:</span>
                     <div className="quantity-control">
@@ -304,20 +364,20 @@ function ProductPage(props) {
                           if (
                             !isNaN(value) &&
                             value > 0 &&
-                            value <= product.countInStock
+                            value <= currentStock
                           ) {
                             setQty(value);
                           }
                         }}
                         min="1"
-                        max={product.countInStock}
+                        max={currentStock}
                         readOnly
                       />
                       <Button
                         variant="outline-secondary"
                         className="qty-btn"
                         onClick={() =>
-                          qty < product.countInStock && setQty(qty + 1)
+                          qty < currentStock && setQty(qty + 1)
                         }
                       >
                         <i className="fas fa-plus"></i>
@@ -331,7 +391,10 @@ function ProductPage(props) {
                     variant="primary"
                     className="btn-add-to-cart"
                     onClick={addToCartHandler}
-                    disabled={product.countInStock === 0}
+                    disabled={
+                      currentStock === 0 ||
+                      (product.has_variants && (!selectedColor || !selectedSize))
+                    }
                   >
                     <i className="fas fa-shopping-cart"></i> Thêm vào giỏ hàng
                   </Button>
@@ -343,7 +406,10 @@ function ProductPage(props) {
                         addToCartHandler();
                         navigate("/shipping");
                       }}
-                      disabled={product.countInStock === 0}
+                      disabled={
+                        currentStock === 0 ||
+                        (product.has_variants && (!selectedColor || !selectedSize))
+                      }
                     >
                       Mua ngay
                     </Button>

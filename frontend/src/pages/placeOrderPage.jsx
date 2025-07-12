@@ -64,7 +64,7 @@ function PlacerOrderPage() {
               ) : (
                 <ListGroup variant="flush">
                   {productsInCart.map((product) => (
-                    <ListGroup.Item key={product.id} className="d-flex align-items-center">
+                    <ListGroup.Item key={product.uniqueKey || product.id} className="d-flex align-items-center">
                       <Image
                         src={product.image}
                         alt={product.name}
@@ -75,6 +75,14 @@ function PlacerOrderPage() {
                         <Link to={`/product/${product.id}`} className="text-decoration-none fw-semibold">
                           {product.name}
                         </Link>
+                        {(product.color || product.size) && (
+                          <div className="text-muted small">
+                            <i className="fas fa-tag"></i>{" "}
+                            {product.color && <span>Màu: {product.color}</span>}
+                            {product.color && product.size && <span> | </span>}
+                            {product.size && <span>Size: {product.size}</span>}
+                          </div>
+                        )}
                         <div className="text-muted small">
                           {product.qty} × {formatVND(product.price)} ={" "}
                           <span className="fw-semibold">{formatVND(product.qty * product.price)}</span>

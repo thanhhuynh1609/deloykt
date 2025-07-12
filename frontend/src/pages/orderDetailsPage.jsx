@@ -104,7 +104,14 @@ function OrderDetailsPage() {
                     <ListGroup.Item key={item.id} className="py-3">
                       <Row>
                         <Col md={2}><Image src={item.image} alt={item.productName} fluid rounded /></Col>
-                        <Col><Link to={`/product/${item.id}`}>{item.productName}</Link></Col>
+                        <Col>
+                          <Link to={`/product/${item.product}`}>{item.productName}</Link>
+                          {item.variant_info && (
+                            <div className="text-muted small mt-1">
+                              <i className="fas fa-tag"></i> {item.variant_info}
+                            </div>
+                          )}
+                        </Col>
                         <Col>{item.qty} x {formatVND(item.price)} = <strong>{formatVND(item.qty * item.price)}</strong></Col>
                       </Row>
                     </ListGroup.Item>

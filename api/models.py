@@ -31,6 +31,31 @@ class Brand(models.Model):
         return self.title
 
 
+class Color(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    hex_code = models.CharField(max_length=7, help_text="Mã màu hex (ví dụ: #FF0000)")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Màu sắc"
+        verbose_name_plural = "Màu sắc"
+
+
+class Size(models.Model):
+    name = models.CharField(max_length=10, unique=True)
+    order = models.IntegerField(default=0, help_text="Thứ tự hiển thị")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Kích cỡ"
+        verbose_name_plural = "Kích cỡ"
+        ordering = ['order', 'name']
+
+
 class Product(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200, null=True, blank=True)
@@ -45,8 +70,48 @@ class Product(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     total_sold = models.IntegerField(default=0)
 
+    # Thêm trường để xác định sản phẩm có biến thể hay không
+    has_variants = models.BooleanField(default=False, help_text="Sản phẩm có biến thể màu sắc/size")
+
     def __str__(self):
         return self.name
+
+    def get_total_stock(self):
+        """Tính tổng số lượng tồn kho từ tất cả biến thể"""
+        if self.has_variants:
+            return self.variants.aggregate(total=models.Sum('stock_quantity'))['total'] or 0
+        return self.countInStock
+
+    def get_min_price(self):
+        """Lấy giá thấp nhất từ các biến thể"""
+        if self.has_variants:
+            min_price = self.variants.aggregate(min_price=models.Min('price'))['min_price']
+            return min_price if min_price is not None else self.price
+        return self.price
+
+
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
+    color = models.ForeignKey(Color, on_delete=models.CASCADE)
+    size = models.ForeignKey(Size, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=12, decimal_places=0, help_text="Giá cho biến thể này")
+    stock_quantity = models.IntegerField(default=0, help_text="Số lượng tồn kho")
+    sku = models.CharField(max_length=100, unique=True, blank=True, help_text="Mã SKU riêng cho biến thể")
+    image = models.ImageField(null=True, blank=True, help_text="Hình ảnh riêng cho biến thể (tùy chọn)")
+
+    def __str__(self):
+        return f"{self.product.name} - {self.color.name} - {self.size.name}"
+
+    def save(self, *args, **kwargs):
+        # Tự động tạo SKU nếu chưa có
+        if not self.sku:
+            self.sku = f"{self.product.id}-{self.color.name}-{self.size.name}".upper().replace(' ', '-')
+        super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('product', 'color', 'size')
+        verbose_name = "Biến thể sản phẩm"
+        verbose_name_plural = "Biến thể sản phẩm"
 
 
 class Review(models.Model):
@@ -104,14 +169,22 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product_variant = models.ForeignKey(ProductVariant, on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     productName = models.CharField(max_length=255, null=True, blank=True)
     qty = models.IntegerField(null=True, blank=True, default=1)
     price = models.DecimalField(max_digits=12, decimal_places=0)
     image = models.ImageField(null=True, blank=True, default='/placeholder.png')
 
+    # Thêm thông tin biến thể để lưu trữ
+    color_name = models.CharField(max_length=50, null=True, blank=True)
+    size_name = models.CharField(max_length=10, null=True, blank=True)
+
     def __str__(self) -> str:
-        return f'Order #{self.order.id} - {self.productName}'
+        variant_info = ""
+        if self.color_name and self.size_name:
+            variant_info = f" ({self.color_name} - {self.size_name})"
+        return f'Order #{self.order.id} - {self.productName}{variant_info}'
     
 
 

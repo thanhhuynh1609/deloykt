@@ -14,9 +14,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status, viewsets, permissions
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from api.models import Brand, Category, Order, OrderItem, Product, Review, ShippingAddress, PayboxWallet, PayboxTransaction, RefundRequest, Favorite
+from api.models import Brand, Category, Order, OrderItem, Product, Review, ShippingAddress, PayboxWallet, PayboxTransaction, RefundRequest, Favorite, Color, Size, ProductVariant
 from api.permissions import IsAdminUserOrReadOnly
-from api.serializers import BrandSerializer, CategorySerializer, OrderSerializer, ProductSerializer, ReviewSerializer, PayboxWalletSerializer, PayboxTransactionSerializer
+from api.serializers import BrandSerializer, CategorySerializer, OrderSerializer, ProductSerializer, ReviewSerializer, PayboxWalletSerializer, PayboxTransactionSerializer, ColorSerializer, SizeSerializer, ProductVariantSerializer
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
@@ -69,14 +69,59 @@ class CategoryViewSet(ModelViewSet):
     permission_classes = [IsAdminUserOrReadOnly]
 
 
+class ColorViewSet(ModelViewSet):
+    queryset = Color.objects.all()
+    serializer_class = ColorSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+
+
+class SizeViewSet(ModelViewSet):
+    queryset = Size.objects.all()
+    serializer_class = SizeSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+
+
+class ProductVariantViewSet(ModelViewSet):
+    queryset = ProductVariant.objects.all()
+    serializer_class = ProductVariantSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+
+    def get_queryset(self):
+        queryset = ProductVariant.objects.all()
+        product_id = self.request.query_params.get('product', None)
+        if product_id is not None:
+            queryset = queryset.filter(product=product_id)
+        return queryset
+
+
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAdminUserOrReadOnly]
-    
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         return context
+
+
+class ProductVariantDetailView(APIView):
+    """API để lấy thông tin chi tiết biến thể sản phẩm"""
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request, product_id, color_id, size_id):
+        try:
+            variant = ProductVariant.objects.get(
+                product_id=product_id,
+                color_id=color_id,
+                size_id=size_id
+            )
+            serializer = ProductVariantSerializer(variant)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ProductVariant.DoesNotExist:
+            return Response(
+                {'error': 'Biến thể sản phẩm không tồn tại'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class ReviewView(APIView):
@@ -185,16 +230,59 @@ def placeOrder(request):
 
         for x in orderItems:
             product = Product.objects.get(id=x['id'])
+
+            # Xử lý biến thể sản phẩm
+            product_variant = None
+            color_name = None
+            size_name = None
+            item_price = product.price
+
+            if 'variant_id' in x and x['variant_id']:
+                # Nếu có variant_id, sử dụng biến thể
+                try:
+                    product_variant = ProductVariant.objects.get(id=x['variant_id'])
+                    color_name = product_variant.color.name
+                    size_name = product_variant.size.name
+                    item_price = product_variant.price
+
+                    # Kiểm tra tồn kho biến thể
+                    if product_variant.stock_quantity < x['qty']:
+                        return Response(
+                            {'error': f'Không đủ hàng cho {product.name} - {color_name} - {size_name}. Chỉ còn {product_variant.stock_quantity} sản phẩm.'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+
+                    # Trừ tồn kho biến thể
+                    product_variant.stock_quantity -= x['qty']
+                    product_variant.save()
+
+                except ProductVariant.DoesNotExist:
+                    return Response(
+                        {'error': 'Biến thể sản phẩm không tồn tại'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                # Sản phẩm không có biến thể, sử dụng tồn kho chính
+                if product.countInStock < x['qty']:
+                    return Response(
+                        {'error': f'Không đủ hàng cho {product.name}. Chỉ còn {product.countInStock} sản phẩm.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                product.countInStock -= x['qty']
+                product.save()
+
+            # Tạo OrderItem
             item = OrderItem.objects.create(
                 product=product,
+                product_variant=product_variant,
                 order=order,
                 productName=product.name,
                 qty=x['qty'],
-                price=product.price,
-                image=product.image.name
+                price=item_price,
+                image=product.image.name,
+                color_name=color_name,
+                size_name=size_name
             )
-            product.countInStock -= x['qty']
-            product.save()
 
         serializer = OrderSerializer(order)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

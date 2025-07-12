@@ -3,6 +3,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 from api.views import (
     BrandViewSet, CategoryViewSet, CouponViewSet, OrderViewSet, ProductViewSet,
+    ColorViewSet, SizeViewSet, ProductVariantViewSet, ProductVariantDetailView,
     ReviewView, ReviewViewSet, StripePaymentView,
     placeOrder, update_order_to_paid, update_review,
     PayboxWalletView, PayboxTransactionListView, PayboxDepositView,
@@ -19,6 +20,9 @@ router = DefaultRouter()
 router.register('brands', BrandViewSet, basename='brands')
 router.register('category', CategoryViewSet, basename='category')
 router.register('products', ProductViewSet, basename='products')
+router.register('colors', ColorViewSet, basename='colors')
+router.register('sizes', SizeViewSet, basename='sizes')
+router.register('product-variants', ProductVariantViewSet, basename='product-variants')
 router.register('orders', OrderViewSet, basename='orders')
 router.register('reviews', ReviewViewSet, basename='reviews')
 router.register(r'coupons', CouponViewSet, basename='coupon')
@@ -30,6 +34,8 @@ urlpatterns = [*router.urls,
         name='stipe-payment'),
     path('products/<str:pk>/reviews/', ReviewView.as_view(), name='product-reviews'),
     path('products/<str:pk>/reviews/<str:review_id>/', update_review, name='update-review'),
+    path('products/<int:product_id>/variants/<int:color_id>/<int:size_id>/',
+         ProductVariantDetailView.as_view(), name='product-variant-detail'),
 
     # Paybox endpoints
     path('paybox/wallet/', PayboxWalletView.as_view(), name='paybox-wallet'),

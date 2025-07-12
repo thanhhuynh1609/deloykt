@@ -40,7 +40,7 @@ function CartPage() {
         ) : (
           <ListGroup variant="flush">
             {productsInCart.map((product) => (
-              <ListGroup.Item key={product.id} className="d-flex align-items-center">
+              <ListGroup.Item key={product.uniqueKey || product.id} className="d-flex align-items-center">
                 <Image
                   src={product.image}
                   alt={product.name}
@@ -55,6 +55,13 @@ function CartPage() {
                   >
                     {product.name}
                   </Link>
+                  {(product.color || product.size) && (
+                    <div className="text-muted small">
+                      {product.color && <span>Màu: {product.color}</span>}
+                      {product.color && product.size && <span> | </span>}
+                      {product.size && <span>Size: {product.size}</span>}
+                    </div>
+                  )}
                   <div className="text-muted">{formatVND(product.price)}</div>
                 </div>
                 <div className="d-flex align-items-center">
@@ -62,7 +69,7 @@ function CartPage() {
                     variant="light"
                     size="sm"
                     disabled={product.qty <= 1}
-                    onClick={() => updateItemQty(product.id, product.qty - 1)}
+                    onClick={() => updateItemQty(product.uniqueKey || product.id, product.qty - 1)}
                     className="border rounded-circle me-2"
                   >
                     <i className="fas fa-minus"></i>
@@ -74,7 +81,7 @@ function CartPage() {
                     variant="light"
                     size="sm"
                     disabled={product.qty >= product.countInStock}
-                    onClick={() => updateItemQty(product.id, product.qty + 1)}
+                    onClick={() => updateItemQty(product.uniqueKey || product.id, product.qty + 1)}
                     className="border rounded-circle ms-2"
                   >
                     <i className="fas fa-plus"></i>
@@ -86,7 +93,7 @@ function CartPage() {
                   variant="light"
                   size="sm"
                   className="ms-3"
-                  onClick={() => removeFromCart(product.id)}
+                  onClick={() => removeFromCart(product.uniqueKey || product.id)}
                 >
                   <i className="fas fa-trash"></i>
                 </Button>

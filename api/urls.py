@@ -1,4 +1,6 @@
 from os import path
+from . import views
+
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from api.views import (
@@ -62,6 +64,9 @@ urlpatterns = [*router.urls,
     path('favorites/', FavoriteView.as_view(), name='favorites'),
     path('products/<int:pk>/favorite/', check_favorite, name='check-favorite'),
     path('products/<str:pk>/check-purchase/', check_purchase, name='check-purchase'),
+    path('ai-search/image/', views.ai_search_by_image, name='ai_search_image'),
+    path('ai-search/text/', views.ai_search_by_text, name='ai_search_text'),
+    path('ai-search/combined/', views.ai_search_combined, name='ai_search_combined'),
 ]
 
 

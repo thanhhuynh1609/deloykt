@@ -1,66 +1,29 @@
-/* .header-border {
-  border-bottom: 1px solid #e0e0e0;
+/* Search container */
+.search-container {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-
-.nav-icon-link {
-  transition: all 0.2s ease;
-}
-
-.nav-icon-link:hover {
-  color: #0d6efd !important;
-}
-
-.nav-dropdown-custom .dropdown-menu {
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  padding: 0.5rem;
-}
-
-.nav-dropdown-custom .dropdown-item {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.nav-dropdown-custom .dropdown-item:hover {
-  background-color: #f8f9fa;
-}
-
 
 .search-form {
-  flex: 1;
-  max-width: 500px;
-  margin: 0 1rem;
-}
-
-.no-flex-grow {
-  flex-grow: 0 !important;
-}
-
-
-.search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
-  min-width: 350px;
-  padding: 0.5rem 1rem;
-}
-
-.search-btn {
-  padding: 0.5rem 0.75rem;
-}
-
-
-.search-form {
   flex: 1;
-  max-width: 500px;
-  margin: 0 1rem;
 }
 
 .search-input-with-icon {
   width: 100%;
-  min-width: 350px;
+  min-width: 300px;
   padding: 0.5rem 2.5rem 0.5rem 1rem;
-  border-radius: 8px;
+  border-radius: 999px;
   border: 1px solid #ccc;
+  background-color: #f5f5f5;
+  font-size: 14px;
 }
 
 .search-icon-btn {
@@ -78,99 +41,88 @@
 
 .search-icon-btn:hover {
   color: #0d6efd;
-} */
- /* Layout tổng */
-.header-border {
-  border-bottom: 1px solid #e0e0e0;
+}
+
+/* AI Search Button */
+.ai-search-btn {
+  border-radius: 50px !important;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 2px solid #007bff;
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  color: white;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ai-search-btn:hover {
+  background: linear-gradient(45deg, #0056b3, #004085);
+  border-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+  color: white;
+}
+
+.ai-search-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.ai-search-btn i {
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-container {
+    margin: 0.5rem 0;
+    max-width: 100%;
+  }
+  
+  .search-input-with-icon {
+    min-width: 200px;
+  }
+  
+  .ai-search-btn {
+    padding: 0.5rem;
+    min-width: 45px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ai-search-btn span {
+    display: none !important;
+  }
 }
 
 /* Logo */
 .navbar-brand {
-  font-weight: 1000;               /* Đậm nhất có thể */
-  font-size: 32px;                /* To chiều cao */
-  letter-spacing: -1px;           /* Gọn, mạnh mẽ */
-  text-transform: uppercase;      /* Viết hoa toàn bộ */
-  font-family: 'Arial Black', sans-serif;  /* Font đậm nếu không dùng Google Font */
-  flex-shrink: 0;                 /* Không bị ép nhỏ */
+  font-weight: 1000;
+  font-size: 32px;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  font-family: 'Arial Black', sans-serif;
+  flex-shrink: 0;
 }
 
-
-/* Search */
-.search-container {
-  flex: 1;
-  max-width: 500px;
-  margin: 0 1rem;
+/* Header border */
+.header-border {
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.search-form {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.search-input-with-icon {
-  width: 100%;
-  min-width: 300px;
-  padding: 0.5rem 2.5rem 0.5rem 1rem;
-  border-radius: 999px;
-  border: 1px solid #ccc;
-  background-color: #f5f5f5;
-  font-size: 14px;
-}
-
-.search-icon-btn {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  color: #333;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.search-icon-btn:hover {
-  color: #0d6efd;
-}
-
-/* Nav icons */
+/* Navigation icons */
 .nav-icon-link {
-  padding: 0 10px;
-  font-size: 18px;
-  transition: all 0.2s ease;
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.2rem;
 }
 
 .nav-icon-link:hover {
-  color: #0d6efd !important;
+  color: #007bff !important;
 }
 
-/* Dropdown */
-.nav-dropdown-custom .dropdown-menu {
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  padding: 0.5rem;
-}
-
-.nav-dropdown-custom .dropdown-item {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.nav-dropdown-custom .dropdown-item:hover {
-  background-color: #f8f9fa;
-}
-.navbar-nav .nav-link {
-  font-size: 13px;           /* ✅ Nhỏ hơn chút (từ 14px → 13px) */
-  font-weight: 600;          /* ✅ Đậm hơn (từ 500 → 600) */
-  color: #333 !important;
-  margin: 0 8px;
-  transition: color 0.2s ease;
-  text-transform: capitalize;  /* (Tùy chọn) chữ cái đầu viết hoa */
-}
-
-.navbar-nav .nav-link:hover {
-  color: #0d6efd !important;
+.badge-sm {
+  font-size: 0.6rem;
+  padding: 0.2rem 0.4rem;
 }

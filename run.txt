@@ -106,3 +106,36 @@ Cài redis-server bằng link: https://github.com/tporadowski/redis/releases (gi
            chạy backend: uvicorn backend.asgi:application (k dùng runserver nữa)
 - frontend: npm install socket.io-client
             npm start
+            ### Cài đặt AI dependencies:
+```
+pip install transformers==4.35.0
+pip install torch==2.1.0
+pip install torchvision==0.16.0
+pip install sentence-transformers==2.2.2
+pip install scikit-learn==1.3.0
+```
+
+### Download AI models (chạy lần đầu - khoảng 1.5GB):
+```
+python -c "from transformers import CLIPModel, CLIPProcessor; CLIPModel.from_pretrained('openai/clip-vit-base-patch32'); CLIPProcessor.from_pretrained('openai/clip-vit-base-patch32')"
+python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+```
+
+### Pre-compute embeddings cho tất cả sản phẩm (tăng tốc độ search):
+```
+python manage.py precompute_embeddings
+```
+
+### Chạy với AI Search:
+- Backend: `python manage.py runserver` (hoặc uvicorn cho chat)
+- Frontend: `npm start`
+
+### Tính năng AI Search:
+- Tìm kiếm bằng hình ảnh: Upload ảnh để tìm sản phẩm tương tự
+- Tìm kiếm bằng mô tả: Mô tả sản phẩm bằng ngôn ngữ tự nhiên
+- Tìm kiếm kết hợp: Sử dụng cả text và hình ảnh
+
+### Lưu ý:
+- Models sẽ tải về ~1.5GB lần đầu
+- Cache embeddings sẽ lưu trong thư mục `ai_cache/`
+- Có thể xóa cache để recompute: `rm -rf ai_cache/`

@@ -21,8 +21,12 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 import stripe
-
-
+from .ai_search import ai_search_service
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import ProductSerializer
 
 class BrandViewSet(ModelViewSet):
     queryset = Brand.objects.all()
@@ -945,4 +949,134 @@ def check_purchase(request, pk):
     ).exists()
     
     return Response({'has_purchased': has_purchased})
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+def ai_search_by_image(request):
+    """AI search by image"""
+    try:
+        if 'image' not in request.FILES:
+            return Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        image = request.FILES['image']
+        limit = int(request.data.get('limit', 5))
+        
+        results = ai_search_service.search_by_image(image, limit=limit)
+        
+        response_data = []
+        for result in results:
+            product_data = ProductSerializer(result['product']).data
+            product_data['compatibility_percent'] = result['compatibility_percent']
+            response_data.append(product_data)
+        
+        return Response({
+            'products': response_data,
+            'count': len(response_data)
+        })
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+def ai_search_by_text(request):
+    """AI search by text description"""
+    try:
+        text = request.data.get('text', '').strip()
+        if not text:
+            return Response({'error': 'No text provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        limit = int(request.data.get('limit', 5))
+        
+        results = ai_search_service.search_by_text(text, limit=limit)
+        
+        response_data = []
+        for result in results:
+            product_data = ProductSerializer(result['product']).data
+            product_data['compatibility_percent'] = result['compatibility_percent']
+            response_data.append(product_data)
+        
+        return Response({
+            'products': response_data,
+            'count': len(response_data)
+        })
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+def ai_search_combined(request):
+    """Combined AI search with both image and text"""
+    try:
+        image = request.FILES.get('image')
+        text = request.data.get('text', '').strip()
+        limit = int(request.data.get('limit', 5))
+        
+        if not image and not text:
+            return Response({'error': 'Provide either image or text'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        image_results = []
+        text_results = []
+        
+        if image:
+            image_results = ai_search_service.search_by_image(image, limit=limit*2)
+        
+        if text:
+            text_results = ai_search_service.search_by_text(text, limit=limit*2)
+        
+        # Combine results with weighted scores
+        combined_results = {}
+        
+        # Add image results
+        for result in image_results:
+            product_id = result['product'].id
+            combined_results[product_id] = {
+                'product': result['product'],
+                'image_score': result['similarity'],
+                'text_score': 0,
+                'combined_score': result['similarity'] * 0.6  # Weight image 60%
+            }
+        
+        # Add text results
+        for result in text_results:
+            product_id = result['product'].id
+            if product_id in combined_results:
+                combined_results[product_id]['text_score'] = result['similarity']
+                combined_results[product_id]['combined_score'] = (
+                    combined_results[product_id]['image_score'] * 0.6 + 
+                    result['similarity'] * 0.4
+                )
+            else:
+                combined_results[product_id] = {
+                    'product': result['product'],
+                    'image_score': 0,
+                    'text_score': result['similarity'],
+                    'combined_score': result['similarity'] * 0.4  # Weight text 40%
+                }
+        
+        # Sort by combined score
+        sorted_results = sorted(
+            combined_results.values(), 
+            key=lambda x: x['combined_score'], 
+            reverse=True
+        )[:limit]
+        
+        response_data = []
+        for result in sorted_results:
+            product_data = ProductSerializer(result['product']).data
+            compatibility_percent = min(100, max(0, int(result['combined_score'] * 100)))
+            
+            # Debug log
+            print(f"Product {result['product'].name}: score={result['combined_score']}, percent={compatibility_percent}")
+            
+            product_data['compatibility_percent'] = compatibility_percent
+            response_data.append(product_data)
+        
+        return Response({
+            'products': response_data,
+            'count': len(response_data)
+        })
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

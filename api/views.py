@@ -117,6 +117,21 @@ class ProductViewSet(ModelViewSet):
         context = super().get_serializer_context()
         return context
 
+    def update(self, request, *args, **kwargs):
+        """Override update to handle file upload errors"""
+        try:
+            return super().update(request, *args, **kwargs)
+        except Exception as e:
+            return Response({
+                'error': f'Update failed: {str(e)}',
+                'error_type': type(e).__name__,
+                'request_data': {
+                    'has_files': bool(request.FILES),
+                    'files': list(request.FILES.keys()) if request.FILES else [],
+                    'data_keys': list(request.data.keys())
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ProductVariantDetailView(APIView):
     """API để lấy thông tin chi tiết biến thể sản phẩm"""
@@ -1302,7 +1317,7 @@ def debug_env(request):
     env_vars = {
         'STRIPE_PUBLISHABLE_KEY': 'Set' if os.getenv('STRIPE_PUBLISHABLE_KEY') else 'Missing',
         'STRIPE_SECRET_KEY': 'Set' if os.getenv('STRIPE_SECRET_KEY') else 'Missing',
-        'CLOUDINARY_CLOUD_NAME': 'Set' if os.getenv('CLOUDINARY_CLOUD_NAME') else 'Missing',
+        'CLOUDINARY_CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'Missing'),  # Show actual value
         'CLOUDINARY_API_KEY': 'Set' if os.getenv('CLOUDINARY_API_KEY') else 'Missing',
         'CLOUDINARY_API_SECRET': 'Set' if os.getenv('CLOUDINARY_API_SECRET') else 'Missing',
         'DATABASE_URL': 'Set' if os.getenv('DATABASE_URL') else 'Missing',
@@ -1316,10 +1331,23 @@ def debug_env(request):
         'MEDIA_URL': getattr(settings, 'MEDIA_URL', 'Not set'),
     }
 
+    # Check Cloudinary config
+    cloudinary_config = {}
+    try:
+        import cloudinary
+        cloudinary_config = {
+            'cloud_name': cloudinary.config().cloud_name,
+            'api_key': 'Set' if cloudinary.config().api_key else 'Missing',
+            'api_secret': 'Set' if cloudinary.config().api_secret else 'Missing',
+        }
+    except Exception as e:
+        cloudinary_config = {'error': str(e)}
+
     return JsonResponse({
         'environment_variables': env_vars,
         'django_settings': django_settings,
-        'stripe_api_key_in_stripe_module': 'Set' if stripe.api_key else 'Missing'
+        'stripe_api_key_in_stripe_module': 'Set' if stripe.api_key else 'Missing',
+        'cloudinary_config': cloudinary_config
     })
 
 

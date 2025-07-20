@@ -120,6 +120,8 @@ const AdminProducts = () => {
     const { name, value, files, type, checked } = e.target;
     if (name === 'image') {
       const file = files[0];
+      console.log('Image file selected:', file);
+
       setFormData(prev => ({
         ...prev,
         image: file
@@ -127,11 +129,19 @@ const AdminProducts = () => {
 
       // Create preview URL
       if (file) {
+        console.log('Creating image preview...');
         const reader = new FileReader();
         reader.onloadend = () => {
+          console.log('Image preview created:', reader.result);
           setImagePreview(reader.result);
         };
+        reader.onerror = (error) => {
+          console.error('Error reading file:', error);
+        };
         reader.readAsDataURL(file);
+      } else {
+        console.log('No file selected, clearing preview');
+        setImagePreview('');
       }
     } else if (type === 'checkbox') {
       setFormData(prev => ({

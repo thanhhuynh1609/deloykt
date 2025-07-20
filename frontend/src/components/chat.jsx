@@ -15,13 +15,44 @@ function ChatBox({ userId, currentUserId, token, userName, isAdmin }) {
       .then((res) => res.json())
       .then(setMessages);
 
-    ws.current = new WebSocket(`ws://localhost:8000/ws/chat/${roomName}/`);
+    // Get WebSocket URL based on environment
+    const getWebSocketURL = () => {
+      if (process.env.NODE_ENV === 'production') {
+        // In production, use wss:// and current domain
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${protocol}//${window.location.host}/ws/chat/${roomName}/`;
+      }
+      // In development, use localhost
+      return `ws://localhost:8000/ws/chat/${roomName}/`;
+    };
+
+    const wsUrl = getWebSocketURL();
+    console.log('WebSocket connecting to:', wsUrl);
+
+    ws.current = new WebSocket(wsUrl);
+
+    ws.current.onopen = () => {
+      console.log('WebSocket connected successfully');
+    };
+
     ws.current.onmessage = (e) => {
       const data = JSON.parse(e.data);
       setMessages((prev) => [...prev, data]);
     };
 
-    return () => ws.current.close();
+    ws.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    ws.current.onclose = (event) => {
+      console.log('WebSocket closed:', event.code, event.reason);
+    };
+
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+      }
+    };
   }, [roomName, token]);
 
   useEffect(() => {
@@ -35,10 +66,18 @@ function ChatBox({ userId, currentUserId, token, userName, isAdmin }) {
 
   const sendMessage = () => {
     if (!input.trim()) return;
-    ws.current.send(
-      JSON.stringify({ message: input, sender_id: currentUserId })
-    );
-    setInput("");
+
+    // Check WebSocket state before sending
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(
+        JSON.stringify({ message: input, sender_id: currentUserId })
+      );
+      setInput("");
+    } else {
+      console.error('WebSocket is not connected. State:', ws.current?.readyState);
+      // Optionally show user notification
+      alert('Kết nối chat bị gián đoạn. Vui lòng tải lại trang.');
+    }
   };
 
   return (

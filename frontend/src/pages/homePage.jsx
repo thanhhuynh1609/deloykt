@@ -154,7 +154,7 @@ function HomePage() {
 
     
 {/* Browse by Dress Style */}
-<section className="dress-style-section py-5" style={{ backgroundColor: "#f2f2f2", borderRadius: "20px", margin: "40px 0" }}>
+{/* <section className="dress-style-section py-5" style={{ backgroundColor: "#f2f2f2", borderRadius: "20px", margin: "40px 0" }}>
   <Container>
     <div style={{
       borderRadius: "12px",
@@ -170,7 +170,7 @@ function HomePage() {
       />
     </div>
   </Container>
-</section>
+</section> */}
 
 
 

@@ -25,7 +25,8 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('user/', include('user.urls')),
-    path('ws/', include('chat.routing')),
+    path('api/chat/', include('chat.urls')),  # Chat HTTP endpoints
+    # WebSocket routing is handled by ASGI, not HTTP URLs
 ]
 
 # Serve static and media files

@@ -46,7 +46,11 @@ echo "📁 Collecting static files..."
 python manage.py collectstatic --noinput || echo "⚠️ Collectstatic failed, continuing..."
 
 echo "🗄️ Running database migrations..."
-python manage.py migrate || echo "⚠️ Migrations failed, continuing..."
+python manage.py makemigrations --noinput || echo "⚠️ Makemigrations failed"
+python manage.py migrate --noinput || echo "⚠️ Migrations failed"
+
+echo "🎯 Setting up production environment..."
+python manage.py setup_production || echo "⚠️ Production setup failed"
 
 echo "🔧 Creating cache directories..."
 mkdir -p ai_cache

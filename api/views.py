@@ -1129,11 +1129,51 @@ def health_check(request):
     except Exception as e:
         redis_status = f"ERROR: {str(e)}"
 
+    # Check database tables
+    try:
+        from django.contrib.auth.models import User
+        from api.models import Product, Category
+        user_count = User.objects.count()
+        product_count = Product.objects.count()
+        category_count = Category.objects.count()
+        tables_info = f"Users: {user_count}, Products: {product_count}, Categories: {category_count}"
+    except Exception as e:
+        tables_info = f"Tables ERROR: {str(e)}"
+
     return JsonResponse({
         'status': 'healthy',
         'message': 'E-commerce API is running',
         'database': db_status,
         'redis': redis_status,
-        'django_settings': os.getenv('DJANGO_SETTINGS_MODULE', 'Not set')
+        'django_settings': os.getenv('DJANGO_SETTINGS_MODULE', 'Not set'),
+        'tables': tables_info
     })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def setup_production(request):
+    """
+    Manual production setup endpoint (for free tier without shell)
+    """
+    try:
+        from django.core.management import call_command
+        from io import StringIO
+
+        # Capture command output
+        out = StringIO()
+        call_command('setup_production', stdout=out)
+        output = out.getvalue()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Production setup completed',
+            'output': output
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Setup failed: {str(e)}'
+        }, status=500)
 

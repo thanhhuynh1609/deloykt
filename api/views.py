@@ -1106,8 +1106,34 @@ def health_check(request):
     """
     Health check endpoint for Render deployment
     """
+    try:
+        # Test database connection
+        from django.db import connection
+        cursor = connection.cursor()
+        cursor.execute("SELECT 1")
+        db_status = "OK"
+    except Exception as e:
+        db_status = f"ERROR: {str(e)}"
+
+    try:
+        # Test Redis connection
+        import redis
+        import os
+        redis_url = os.getenv('REDIS_URL')
+        if redis_url:
+            r = redis.from_url(redis_url)
+            r.ping()
+            redis_status = "OK"
+        else:
+            redis_status = "No REDIS_URL"
+    except Exception as e:
+        redis_status = f"ERROR: {str(e)}"
+
     return JsonResponse({
         'status': 'healthy',
-        'message': 'E-commerce API is running'
+        'message': 'E-commerce API is running',
+        'database': db_status,
+        'redis': redis_status,
+        'django_settings': os.getenv('DJANGO_SETTINGS_MODULE', 'Not set')
     })
 

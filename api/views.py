@@ -43,6 +43,21 @@ class BrandViewSet(ModelViewSet):
     serializer_class = BrandSerializer
     permission_classes = [IsAdminUserOrReadOnly]
 
+    def update(self, request, *args, **kwargs):
+        """Override update to handle file upload errors"""
+        try:
+            return super().update(request, *args, **kwargs)
+        except Exception as e:
+            return Response({
+                'error': f'Brand update failed: {str(e)}',
+                'error_type': type(e).__name__,
+                'request_data': {
+                    'has_files': bool(request.FILES),
+                    'files': list(request.FILES.keys()) if request.FILES else [],
+                    'data_keys': list(request.data.keys())
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class CouponViewSet(viewsets.ModelViewSet):
     queryset = Coupon.objects.all()
@@ -81,6 +96,21 @@ class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUserOrReadOnly]
+
+    def update(self, request, *args, **kwargs):
+        """Override update to handle file upload errors"""
+        try:
+            return super().update(request, *args, **kwargs)
+        except Exception as e:
+            return Response({
+                'error': f'Category update failed: {str(e)}',
+                'error_type': type(e).__name__,
+                'request_data': {
+                    'has_files': bool(request.FILES),
+                    'files': list(request.FILES.keys()) if request.FILES else [],
+                    'data_keys': list(request.data.keys())
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ColorViewSet(ModelViewSet):

@@ -52,7 +52,8 @@ export const UserProvider = ({ children }) => {
         id: userData.id,
         username: userData.username,
         email: userData.email,
-        isAdmin: data.isAdmin,
+        // Use isAdmin from userData (server response) or fallback to JWT data
+        isAdmin: userData.isAdmin !== undefined ? userData.isAdmin : data.isAdmin,
         // Merge server data with existing localStorage data
         first_name: userData.first_name || existingUserInfo.first_name || "",
         last_name: userData.last_name || existingUserInfo.last_name || "",
@@ -65,6 +66,12 @@ export const UserProvider = ({ children }) => {
       };
 
       console.log("Login - Setting full user info:", fullUserInfo);
+      console.log("Login - isAdmin debug:", {
+        "userData.isAdmin": userData.isAdmin,
+        "data.isAdmin": data.isAdmin,
+        "final isAdmin": fullUserInfo.isAdmin,
+        "isAdmin type": typeof fullUserInfo.isAdmin
+      });
 
       setUserInfo(fullUserInfo);
       localStorage.setItem("userInfo", JSON.stringify(fullUserInfo));

@@ -12,6 +12,11 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
   // Check if admin access is required
   if (adminOnly && !userInfo.isAdmin) {
+    console.log("ProtectedRoute - Admin check failed:", {
+      userInfo: userInfo,
+      isAdmin: userInfo.isAdmin,
+      adminOnly: adminOnly
+    });
     return <Navigate to="/" replace />;
   }
 

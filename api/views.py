@@ -27,6 +27,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import ProductSerializer
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 class BrandViewSet(ModelViewSet):
     queryset = Brand.objects.all()
@@ -1079,4 +1082,16 @@ def ai_search_combined(request):
         
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def health_check(request):
+    """
+    Health check endpoint for Render deployment
+    """
+    return JsonResponse({
+        'status': 'healthy',
+        'message': 'E-commerce API is running'
+    })
 

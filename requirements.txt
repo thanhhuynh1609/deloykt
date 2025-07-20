@@ -23,6 +23,8 @@ whitenoise==6.5.0
 
 # Image processing
 Pillow==9.5.0
+cloudinary==1.36.0
+django-cloudinary-storage==0.3.0
 
 # Payment
 stripe==5.2.0

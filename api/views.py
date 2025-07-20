@@ -317,7 +317,7 @@ class ReviewViewSet(ModelViewSet):
     permission_classes = [IsAdminUserOrReadOnly]
 
 
-stripe.api_key = settings.STRIPE_API_KEY
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @api_view(['POST'])
@@ -1288,4 +1288,37 @@ def create_superuser(request):
             'status': 'error',
             'message': f'Failed to create superuser: {str(e)}'
         }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def debug_env(request):
+    """
+    Debug endpoint to check environment variables
+    """
+    import os
+    from django.conf import settings
+
+    env_vars = {
+        'STRIPE_PUBLISHABLE_KEY': 'Set' if os.getenv('STRIPE_PUBLISHABLE_KEY') else 'Missing',
+        'STRIPE_SECRET_KEY': 'Set' if os.getenv('STRIPE_SECRET_KEY') else 'Missing',
+        'CLOUDINARY_CLOUD_NAME': 'Set' if os.getenv('CLOUDINARY_CLOUD_NAME') else 'Missing',
+        'CLOUDINARY_API_KEY': 'Set' if os.getenv('CLOUDINARY_API_KEY') else 'Missing',
+        'CLOUDINARY_API_SECRET': 'Set' if os.getenv('CLOUDINARY_API_SECRET') else 'Missing',
+        'DATABASE_URL': 'Set' if os.getenv('DATABASE_URL') else 'Missing',
+        'REDIS_URL': 'Set' if os.getenv('REDIS_URL') else 'Missing',
+    }
+
+    # Check Django settings
+    django_settings = {
+        'STRIPE_SECRET_KEY': 'Set' if hasattr(settings, 'STRIPE_SECRET_KEY') and settings.STRIPE_SECRET_KEY else 'Missing',
+        'DEFAULT_FILE_STORAGE': getattr(settings, 'DEFAULT_FILE_STORAGE', 'Not set'),
+        'MEDIA_URL': getattr(settings, 'MEDIA_URL', 'Not set'),
+    }
+
+    return JsonResponse({
+        'environment_variables': env_vars,
+        'django_settings': django_settings,
+        'stripe_api_key_in_stripe_module': 'Set' if stripe.api_key else 'Missing'
+    })
 

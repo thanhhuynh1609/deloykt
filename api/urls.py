@@ -13,7 +13,7 @@ from api.views import (
     AdminPayboxWalletListView, AdminPayboxTransactionListView,
     RejectRefundRequestView, DeleteRefundRequestView, RefundRequestView,
     AdminRefundRequestListView, ApproveRefundRequestView,
-    FavoriteView, check_favorite, check_purchase, health_check, setup_production, debug_users
+    FavoriteView, check_favorite, check_purchase, health_check, setup_production, debug_users, debug_env
 )
 from chat.views import chat_history
 
@@ -70,6 +70,7 @@ urlpatterns = [*router.urls,
     path('health/', health_check, name='health-check'),
     path('setup/', setup_production, name='setup-production'),
     path('debug-users/', debug_users, name='debug-users'),
+    path('debug-env/', debug_env, name='debug-env'),
 ]
 
 

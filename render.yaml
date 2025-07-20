@@ -7,9 +7,8 @@ services:
     startCommand: "gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT"
     plan: starter
     healthCheckPath: /api/health/
+    pythonVersion: "3.10.13"
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.13
       - key: NODE_VERSION
         value: 18.17.0
       - key: DJANGO_SETTINGS_MODULE
@@ -45,6 +44,7 @@ services:
     buildCommand: "./build.sh"
     startCommand: "python manage.py runworker"
     plan: starter
+    pythonVersion: "3.10.13"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: backend.settings_render

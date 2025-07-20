@@ -5,6 +5,9 @@ set -o errexit  # exit on error
 
 echo "🚀 Starting build process..."
 
+# Set Python version explicitly
+export PYTHON_VERSION=3.10.13
+
 # Install Python dependencies
 echo "📦 Installing Python dependencies..."
 pip install --upgrade pip

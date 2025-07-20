@@ -1151,7 +1151,7 @@ def health_check(request):
 
 
 @csrf_exempt
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def setup_production(request):
     """
     Manual production setup endpoint (for free tier without shell)
@@ -1162,7 +1162,16 @@ def setup_production(request):
 
         # Capture command output
         out = StringIO()
+
+        # Run migrations first
+        out.write("🗄️ Running migrations...\n")
+        call_command('makemigrations', stdout=out, verbosity=2)
+        call_command('migrate', stdout=out, verbosity=2)
+
+        # Then run setup
+        out.write("🎯 Running production setup...\n")
         call_command('setup_production', stdout=out)
+
         output = out.getvalue()
 
         return JsonResponse({
@@ -1174,6 +1183,7 @@ def setup_production(request):
     except Exception as e:
         return JsonResponse({
             'status': 'error',
-            'message': f'Setup failed: {str(e)}'
+            'message': f'Setup failed: {str(e)}',
+            'traceback': str(e)
         }, status=500)
 

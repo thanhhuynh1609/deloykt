@@ -21,7 +21,14 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 import stripe
-from .ai_search import ai_search_service
+
+# Conditional import for AI search
+try:
+    from .ai_search import ai_search_service
+    AI_SEARCH_AVAILABLE = True
+except ImportError:
+    ai_search_service = None
+    AI_SEARCH_AVAILABLE = False
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -957,6 +964,9 @@ def check_purchase(request, pk):
 @parser_classes([MultiPartParser, FormParser])
 def ai_search_by_image(request):
     """AI search by image"""
+    if not AI_SEARCH_AVAILABLE:
+        return Response({'error': 'AI search not available'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
     try:
         if 'image' not in request.FILES:
             return Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
@@ -983,6 +993,9 @@ def ai_search_by_image(request):
 @api_view(['POST'])
 def ai_search_by_text(request):
     """AI search by text description"""
+    if not AI_SEARCH_AVAILABLE:
+        return Response({'error': 'AI search not available'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
     try:
         text = request.data.get('text', '').strip()
         if not text:
@@ -1010,6 +1023,9 @@ def ai_search_by_text(request):
 @parser_classes([MultiPartParser, FormParser])
 def ai_search_combined(request):
     """Combined AI search with both image and text"""
+    if not AI_SEARCH_AVAILABLE:
+        return Response({'error': 'AI search not available'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
     try:
         image = request.FILES.get('image')
         text = request.data.get('text', '').strip()

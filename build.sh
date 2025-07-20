@@ -21,7 +21,12 @@ pip install --only-binary=Pillow Pillow==9.5.0
 
 # Install other dependencies
 echo "📦 Installing remaining dependencies..."
-pip install -r requirements.txt
+if [ -f "requirements-minimal.txt" ]; then
+    echo "📦 Using minimal requirements for faster deployment..."
+    pip install -r requirements-minimal.txt
+else
+    pip install -r requirements.txt
+fi
 
 # Install Node.js and build frontend
 echo "🔧 Installing Node.js dependencies and building frontend..."

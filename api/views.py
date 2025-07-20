@@ -1322,3 +1322,39 @@ def debug_env(request):
         'stripe_api_key_in_stripe_module': 'Set' if stripe.api_key else 'Missing'
     })
 
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def test_upload(request):
+    """
+    Test file upload endpoint
+    """
+    try:
+        if 'file' not in request.FILES:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'No file provided'
+            }, status=400)
+
+        uploaded_file = request.FILES['file']
+
+        # Try to save file
+        from django.core.files.storage import default_storage
+        file_name = default_storage.save(f'test/{uploaded_file.name}', uploaded_file)
+        file_url = default_storage.url(file_name)
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'File uploaded successfully',
+            'file_name': file_name,
+            'file_url': file_url,
+            'storage_backend': str(type(default_storage).__name__)
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Upload failed: {str(e)}',
+            'error_type': type(e).__name__
+        }, status=500)
+

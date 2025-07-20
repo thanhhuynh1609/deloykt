@@ -1,7 +1,23 @@
 import axios from "axios";
 
-// Set base URL directly to Django backend
-axios.defaults.baseURL = 'http://localhost:8000';
+// Set base URL based on environment
+const getBaseURL = () => {
+    // Check for custom API URL first
+    if (process.env.REACT_APP_API_URL) {
+        return process.env.REACT_APP_API_URL;
+    }
+
+    // In production (Render), use current domain
+    if (process.env.NODE_ENV === 'production') {
+        return window.location.origin;
+    }
+
+    // In development, use localhost
+    return 'http://localhost:8000';
+};
+
+axios.defaults.baseURL = getBaseURL();
+console.log('API Base URL:', getBaseURL());
 
 // Set default headers for JSON
 axios.defaults.headers.common['Content-Type'] = 'application/json';

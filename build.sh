@@ -35,8 +35,9 @@ cd frontend
 # Install dependencies
 npm ci --only=production
 
-# Build React app
-npm run build
+# Build React app for production
+echo "🔧 Building React app for production..."
+NODE_ENV=production npm run build
 
 # Go back to root directory
 cd ..

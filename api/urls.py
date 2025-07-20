@@ -13,7 +13,7 @@ from api.views import (
     AdminPayboxWalletListView, AdminPayboxTransactionListView,
     RejectRefundRequestView, DeleteRefundRequestView, RefundRequestView,
     AdminRefundRequestListView, ApproveRefundRequestView,
-    FavoriteView, check_favorite, check_purchase, health_check, setup_production
+    FavoriteView, check_favorite, check_purchase, health_check, setup_production, debug_users
 )
 from chat.views import chat_history
 
@@ -69,6 +69,7 @@ urlpatterns = [*router.urls,
     path('ai-search/combined/', views.ai_search_combined, name='ai_search_combined'),
     path('health/', health_check, name='health-check'),
     path('setup/', setup_production, name='setup-production'),
+    path('debug-users/', debug_users, name='debug-users'),
 ]
 
 

@@ -1151,6 +1151,41 @@ def health_check(request):
 
 
 @csrf_exempt
+@require_http_methods(["GET"])
+def debug_users(request):
+    """
+    Debug endpoint to check user admin status
+    """
+    try:
+        from django.contrib.auth.models import User
+
+        users_info = []
+        for user in User.objects.all():
+            users_info.append({
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'is_staff': user.is_staff,
+                'is_superuser': user.is_superuser,
+                'is_staff_type': type(user.is_staff).__name__,
+                'is_superuser_type': type(user.is_superuser).__name__,
+                'isAdmin_calculated': bool(user.is_staff or user.is_superuser)
+            })
+
+        return JsonResponse({
+            'status': 'success',
+            'users': users_info,
+            'total_users': len(users_info)
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+
+@csrf_exempt
 @require_http_methods(["GET", "POST"])
 def setup_production(request):
     """
@@ -1185,5 +1220,72 @@ def setup_production(request):
             'status': 'error',
             'message': f'Setup failed: {str(e)}',
             'traceback': str(e)
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def create_superuser(request):
+    """
+    Create superuser endpoint for free tier
+    GET: Show form, POST: Create user
+    """
+    if request.method == "GET":
+        # Return simple HTML form
+        html = """
+        <!DOCTYPE html>
+        <html>
+        <head><title>Create Superuser</title></head>
+        <body>
+            <h2>Create Superuser</h2>
+            <form method="POST">
+                <p>Username: <input type="text" name="username" required></p>
+                <p>Email: <input type="email" name="email" required></p>
+                <p>Password: <input type="password" name="password" required></p>
+                <p><button type="submit">Create Superuser</button></p>
+            </form>
+        </body>
+        </html>
+        """
+        return HttpResponse(html)
+
+    try:
+        from django.contrib.auth.models import User
+
+        username = request.POST.get('username') or request.GET.get('username')
+        email = request.POST.get('email') or request.GET.get('email')
+        password = request.POST.get('password') or request.GET.get('password')
+
+        if not all([username, email, password]):
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Username, email, and password are required'
+            }, status=400)
+
+        # Check if user already exists
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': f'User {username} already exists'
+            }, status=400)
+
+        # Create superuser
+        user = User.objects.create_superuser(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Superuser {username} created successfully',
+            'user_id': user.id,
+            'admin_url': '/admin/'
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Failed to create superuser: {str(e)}'
         }, status=500)
 

@@ -5,12 +5,18 @@ from djoser.conf import settings
 from django.contrib.auth.hashers import make_password
 
 class MyUserSerializer(UserSerializer):
+    isAdmin = serializers.SerializerMethodField()
+
     class Meta(UserSerializer.Meta):
-        fields = ('id','email','username','password')
-        read_only_fields = ()
+        fields = ('id','email','username','password','isAdmin')
+        read_only_fields = ('isAdmin',)
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
         }
+
+    def get_isAdmin(self, obj):
+        """Ensure isAdmin is always boolean"""
+        return bool(obj.is_staff or obj.is_superuser)
 
     def update(self, instance, validated_data):
         if (validated_data.get('password')):
@@ -31,7 +37,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         data['username'] = self.user.username
         data['email'] = self.user.email
-        data['isAdmin'] = self.user.is_staff
+        # Ensure isAdmin is always boolean (not 1/0)
+        data['isAdmin'] = bool(self.user.is_staff or self.user.is_superuser)
 
         return data
     

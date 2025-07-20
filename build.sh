@@ -17,7 +17,7 @@ pip install --upgrade pip
 
 # Install Pillow first with pre-compiled wheel
 echo "📦 Installing Pillow with pre-compiled wheel..."
-pip install --only-binary=Pillow Pillow>=9.0.0,<11.0.0
+pip install --only-binary=Pillow Pillow==9.5.0
 
 # Install other dependencies
 echo "📦 Installing remaining dependencies..."

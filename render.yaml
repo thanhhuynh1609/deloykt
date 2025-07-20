@@ -46,6 +46,8 @@ services:
     plan: starter
     pythonVersion: "3.10.13"
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.13"
       - key: DJANGO_SETTINGS_MODULE
         value: backend.settings_render
       - key: DEBUG

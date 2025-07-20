@@ -5,12 +5,22 @@ set -o errexit  # exit on error
 
 echo "🚀 Starting build process..."
 
+# Check Python version
+echo "🐍 Python version: $(python --version)"
+
 # Set Python version explicitly
 export PYTHON_VERSION=3.10.13
 
 # Install Python dependencies
 echo "📦 Installing Python dependencies..."
 pip install --upgrade pip
+
+# Install Pillow first with pre-compiled wheel
+echo "📦 Installing Pillow with pre-compiled wheel..."
+pip install --only-binary=Pillow Pillow>=9.0.0,<11.0.0
+
+# Install other dependencies
+echo "📦 Installing remaining dependencies..."
 pip install -r requirements.txt
 
 # Install Node.js and build frontend

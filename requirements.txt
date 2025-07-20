@@ -43,13 +43,13 @@ social-auth-app-django==4.0.0
 social-auth-core==4.3.0
 python3-openid==3.2.0
 
-# AI/ML dependencies (optional - uncomment to enable)
-# torch==2.1.0
-# torchvision==0.16.0
-# transformers==4.35.0
-# sentence-transformers==2.2.2
-# scikit-learn==1.3.0
-# numpy==1.24.3
+# AI/ML dependencies (enabled for production)
+torch==2.1.0
+torchvision==0.16.0
+transformers==4.35.0
+sentence-transformers==2.2.2
+scikit-learn==1.3.0
+numpy==1.24.3
 
 # Other dependencies
 asgiref==3.6.0

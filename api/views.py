@@ -1008,9 +1008,23 @@ def check_purchase(request, pk):
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
 def ai_search_by_image(request):
-    """AI search by image"""
+    """AI search by image with fallback"""
     if not AI_SEARCH_AVAILABLE:
-        return Response({'error': 'AI search not available'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        # Fallback: return random products
+        from django.db.models import Q
+        products = Product.objects.all()[:6]
+        response_data = []
+        for i, product in enumerate(products):
+            product_data = ProductSerializer(product).data
+            product_data['compatibility_percent'] = 85 - (i * 5)  # Fake compatibility
+            response_data.append(product_data)
+
+        return Response({
+            'products': response_data,
+            'count': len(response_data),
+            'fallback': True,
+            'message': 'AI search unavailable, showing sample products'
+        })
 
     try:
         if 'image' not in request.FILES:
@@ -1037,9 +1051,30 @@ def ai_search_by_image(request):
 
 @api_view(['POST'])
 def ai_search_by_text(request):
-    """AI search by text description"""
+    """AI search by text description with fallback"""
     if not AI_SEARCH_AVAILABLE:
-        return Response({'error': 'AI search not available'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        # Fallback: simple text search
+        text = request.data.get('text', '').strip()
+        if not text:
+            return Response({'error': 'No text provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from django.db.models import Q
+        products = Product.objects.filter(
+            Q(name__icontains=text) | Q(description__icontains=text)
+        )[:6]
+
+        response_data = []
+        for i, product in enumerate(products):
+            product_data = ProductSerializer(product).data
+            product_data['compatibility_percent'] = 90 - (i * 3)  # Fake compatibility
+            response_data.append(product_data)
+
+        return Response({
+            'products': response_data,
+            'count': len(response_data),
+            'fallback': True,
+            'message': 'AI search unavailable, using basic text search'
+        })
 
     try:
         text = request.data.get('text', '').strip()
@@ -1467,3 +1502,81 @@ def debug_websocket(request):
             'error_type': type(e).__name__
         }, status=500)
 
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def debug_server(request):
+    """
+    Debug server configuration
+    """
+    import sys
+
+    # Check if running under Daphne
+    server_info = {
+        'server_software': request.META.get('SERVER_SOFTWARE', 'Unknown'),
+        'wsgi_version': getattr(sys, 'version', 'Unknown'),
+        'asgi_support': 'daphne' in sys.modules or 'channels' in sys.modules,
+        'websocket_support': hasattr(request, 'scope'),
+        'request_method': request.method,
+        'request_headers': dict(request.headers),
+    }
+
+    return JsonResponse({
+        'server_info': server_info,
+        'debug_info': {
+            'is_daphne': 'daphne' in sys.modules,
+            'is_channels': 'channels' in sys.modules,
+            'python_path': sys.executable,
+            'django_version': getattr(django, 'VERSION', 'Unknown') if 'django' in sys.modules else 'Not loaded'
+        }
+    })
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def debug_ai(request):
+    """
+    Debug AI search configuration
+    """
+    try:
+        ai_status = {
+            'ai_search_available': AI_SEARCH_AVAILABLE,
+            'ai_search_service': ai_search_service is not None,
+        }
+
+        # Try to import AI modules
+        ai_modules = {}
+        try:
+            import torch
+            ai_modules['torch'] = torch.__version__
+        except ImportError:
+            ai_modules['torch'] = 'Not installed'
+
+        try:
+            import transformers
+            ai_modules['transformers'] = transformers.__version__
+        except ImportError:
+            ai_modules['transformers'] = 'Not installed'
+
+        try:
+            import sentence_transformers
+            ai_modules['sentence_transformers'] = sentence_transformers.__version__
+        except ImportError:
+            ai_modules['sentence_transformers'] = 'Not installed'
+
+        return JsonResponse({
+            'ai_status': ai_status,
+            'ai_modules': ai_modules,
+            'fallback_enabled': True,
+            'endpoints': {
+                'image_search': '/api/ai-search/image/',
+                'text_search': '/api/ai-search/text/',
+                'combined_search': '/api/ai-search/combined/'
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'error': f'AI debug failed: {str(e)}',
+            'error_type': type(e).__name__
+        }, status=500)

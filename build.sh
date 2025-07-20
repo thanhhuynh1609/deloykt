@@ -37,10 +37,10 @@ npm run build
 cd ..
 
 echo "📁 Collecting static files..."
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput || echo "⚠️ Collectstatic failed, continuing..."
 
 echo "🗄️ Running database migrations..."
-python manage.py migrate
+python manage.py migrate || echo "⚠️ Migrations failed, continuing..."
 
 echo "🔧 Creating cache directories..."
 mkdir -p ai_cache

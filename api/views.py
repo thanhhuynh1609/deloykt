@@ -1416,3 +1416,54 @@ def test_upload(request):
             'error_type': type(e).__name__
         }, status=500)
 
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def debug_websocket(request):
+    """
+    Debug WebSocket configuration
+    """
+    try:
+        from django.conf import settings
+        from channels.layers import get_channel_layer
+
+        # Test channel layer
+        channel_layer = get_channel_layer()
+        channel_layer_info = {
+            'backend': str(type(channel_layer).__name__),
+            'config': getattr(channel_layer, 'hosts', 'No hosts info') if hasattr(channel_layer, 'hosts') else 'No config'
+        }
+
+        # Test Redis connection
+        redis_test = 'Unknown'
+        try:
+            import redis
+            redis_url = os.getenv('REDIS_URL')
+            if redis_url:
+                r = redis.from_url(redis_url)
+                r.ping()
+                redis_test = 'Connected'
+            else:
+                redis_test = 'No REDIS_URL'
+        except Exception as e:
+            redis_test = f'Failed: {str(e)}'
+
+        return JsonResponse({
+            'websocket_config': {
+                'channel_layer': channel_layer_info,
+                'redis_connection': redis_test,
+                'asgi_application': 'backend.asgi:application',
+                'websocket_routing': 'chat.routing.websocket_urlpatterns'
+            },
+            'test_urls': {
+                'websocket_url': f"wss://{request.get_host()}/ws/chat/test_room/",
+                'chat_messages_api': f"https://{request.get_host()}/api/chat/messages/test_room/"
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'error': f'WebSocket debug failed: {str(e)}',
+            'error_type': type(e).__name__
+        }, status=500)
+

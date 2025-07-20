@@ -86,6 +86,11 @@ const AISearch = ({ show, onHide }) => {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         setResults(response.data.products);
+
+        // Show fallback message if AI is not available
+        if (response.data.fallback) {
+          setError(`⚠️ ${response.data.message || 'Đang sử dụng tìm kiếm cơ bản'}`);
+        }
       }
     } catch (err) {
       setError('Có lỗi xảy ra khi tìm kiếm: ' + (err.response?.data?.error || err.message));

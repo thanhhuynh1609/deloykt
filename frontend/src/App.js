@@ -21,6 +21,7 @@ import PaymentPage from "./pages/paymentPage";
 import SearchPage from "./pages/searchPage";
 import PayboxPage from "./pages/PayboxPage";
 import FavoritesPage from "./pages/favoritesPage";
+import TKBPage from "./pages/tkb";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -58,7 +59,7 @@ const AppContent = () => {
     setKeyword(keywordParam);
   }, [keywordParam]);
 
-  const isAdminRoute = location.pathname.startsWith("/admin");
+  const isAdminRoute = location.pathname.startsWith("/admin")|| location.pathname === "/tkb";
 
   return (
     <div>
@@ -89,6 +90,7 @@ const AppContent = () => {
                         <Route path="/cart" element={<CartPage />} />
                         <Route path="/user/chat" element={<UserChat />} />
                         <Route path="/favorites" element={<FavoritesPage />} />
+                        <Route path="/tkb" element={<TKBPage />} />
                       </Routes>
                     </Container>
                   ) : (
@@ -104,6 +106,7 @@ const AppContent = () => {
                       <Route path="/admin/paybox" element={<ProtectedRoute adminOnly={true}><AdminPaybox /></ProtectedRoute>} />
                       <Route path="/admin/refunds" element={<ProtectedRoute adminOnly={true}><AdminRefund /></ProtectedRoute>} />
                       <Route path="/admin/coupons" element={<ProtectedRoute adminOnly={true}><AdminCoupons /></ProtectedRoute>} />
+                      <Route path="/tkb" element={<TKBPage />} />
                     </Routes>
                   )}
                 </FavoriteProvider>

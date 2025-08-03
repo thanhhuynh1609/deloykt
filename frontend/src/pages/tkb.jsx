@@ -1,8 +1,11 @@
-import React, { useEffect } from "react";
-import { Container, Row, Col, Table, Alert, Button } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Table, Alert, Offcanvas, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import "./TKBPage.css";
 
 const TKBPage = () => {
+    const [showMenu, setShowMenu] = useState(false);
+
     useEffect(() => {
         document.title = "Thời khóa biểu sinh viên | UDA";
     }, []);
@@ -13,124 +16,148 @@ const TKBPage = () => {
     const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
 
     return (
-        <div style={{ textTransform: 'none' }}> {/* Toàn bộ trang KHÔNG in hoa */}
+        <div style={{ textTransform: 'none' }}>
             {/* Header */}
             <div className="w-100">
                 <Row className="align-items-center m-0 p-2" style={{ backgroundColor: '#009933' }}>
-                    <Col xs={4} className="d-flex align-items-center">
+                    <Col xs={8} md={4} className="d-flex align-items-center">
                         <img
                             src="https://my.uda.edu.vn/filetailen/anhsv/99022.jpg"
                             alt="Avatar"
                             className="rounded-circle me-2"
-                            style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                         />
-                        <p style={{ margin: 0, color: 'white', fontSize: '18px' }}>Huỳnh Nguyễn Kim Thanh</p>
+                        <p className="m-0 text-white fs-6">Huỳnh Nguyễn Kim Thanh</p>
                     </Col>
-                    <Col className="text-end">
-                        <Link to="https://my.uda.edu.vn/sv/test_dk" className="btn btn-link text-white text-decoration-none me-2" style={{ textTransform: 'none', fontSize: '18px' }}>Đánh giá</Link>
-                        <Link to="https://my.uda.edu.vn/sv/sv_ctdt" className="btn btn-link text-white text-decoration-none me-2" style={{ textTransform: 'none', fontSize: '18px' }}>Thông tin Lớp</Link>
-                        <Link to="https://my.uda.edu.vn/sv/thongtinsv" className="btn btn-link text-white text-decoration-none me-2" style={{ textTransform: 'none', fontSize: '18px' }}>Góc sinh viên</Link>
-                        <Link to="https://my.uda.edu.vn/sv/doipass" className="btn btn-link text-white text-decoration-none" style={{ textTransform: 'none', fontSize: '18px' }}>Hệ thống</Link>
+                    <Col xs={4} md={8} className="d-flex justify-content-end align-items-center">
+                        {/* Mobile Menu Icon */}
+                        <Button variant="link" className="d-md-none text-white fs-3" onClick={() => setShowMenu(true)}>
+                            <i className="bi bi-list"></i>
+                        </Button>
 
+                        {/* PC View Buttons */}
+                        <div className="d-none d-md-flex flex-wrap justify-content-md-end gap-2">
+                            <Link to="https://my.uda.edu.vn/sv/test_dk" className="btn btn-link header-btn">Đánh giá</Link>
+                            <Link to="https://my.uda.edu.vn/sv/sv_ctdt" className="btn btn-link header-btn">Thông tin Lớp</Link>
+                            <Link to="https://my.uda.edu.vn/sv/thongtinsv" className="btn btn-link header-btn">Góc sinh viên</Link>
+                            <Link to="https://my.uda.edu.vn/sv/doipass" className="btn btn-link header-btn">Hệ thống</Link>
+                        </div>
                     </Col>
                 </Row>
             </div>
 
+            {/* Offcanvas Menu */}
+            <Offcanvas show={showMenu} onHide={() => setShowMenu(false)} placement="end">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Menu</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+                    <div className="d-flex flex-column gap-3">
+                        <Link to="https://my.uda.edu.vn/sv/test_dk" className="btn btn-outline-success">Đánh giá</Link>
+                        <Link to="https://my.uda.edu.vn/sv/sv_ctdt" className="btn btn-outline-success">Thông tin Lớp</Link>
+                        <Link to="https://my.uda.edu.vn/sv/thongtinsv" className="btn btn-outline-success">Góc sinh viên</Link>
+                        <Link to="https://my.uda.edu.vn/sv/doipass" className="btn btn-outline-success">Hệ thống</Link>
+                    </div>
+                </Offcanvas.Body>
+            </Offcanvas>
+
             <Container className="mt-4">
-                <h5>
+                <h5 className="mb-3">
                     <i className="bi bi-calendar-check"></i> Hôm nay {weekday} ngày: {formattedDate}
                 </h5>
 
                 {/* TKB hiện tại */}
                 <div className="p-3 bg-success bg-opacity-10 mt-3 rounded">
-                    <h6 style={{ textTransform: 'none', fontSize: '18px' }}><i className="bi bi-calendar3"></i> Thời khóa biểu hiện tại</h6>
-                    <Table striped bordered hover className="mt-3">
-                        <thead>
-                            <tr>
-                                <th style={{ textTransform: 'none' }}>Buổi</th>
-                                <th style={{ textTransform: 'none' }}>Thứ</th>
-                                <th style={{ textTransform: 'none' }}>Tiết</th>
-                                <th style={{ textTransform: 'none' }}>Phòng</th>
-                                <th style={{ textTransform: 'none' }}>Học phần</th>
-                                <th style={{ textTransform: 'none' }}>Giảng viên</th>
-                                <th style={{ textTransform: 'none' }}>Lớp học tập</th>
-                            </tr>
-                        </thead>
-                        <tbody style={{ fontSize: '14px' }}>
-                            <tr>
-                                <td>Sáng</td>
-                                <td>2</td>
-                                <td>1-6</td>
-                                <td>707</td>
-                                <td>Chủ nghĩa xã hội khoa học 1 (1tc)</td>
-                                <td>ThS. Nguyễn Thị Thu Vân</td>
-                                <td>6555(ST22D,ST22C,GD22A)</td>
-                            </tr>
-                            <tr>
-                                <td>Chiều</td>
-                                <td>2</td>
-                                <td>4-6</td>
-                                <td>602</td>
-                                <td>Đồ án công nghệ phần mềm (1tc)</td>
-                                <td>ThS. Nguyễn Quốc Vương</td>
-                                <td>6555(ST22D,ST22C,GD22A)</td>
-                            </tr>
-                            <tr>
-                                <td>Sáng</td>
-                                <td>3</td>
-                                <td>4-6</td>
-                                <td>101</td>
-                                <td>Đa văn hóa (1tc)</td>
-                                <td>ThS. Lê Thị Hồng Thúy</td>
-                                <td>7203(ST22C,ST22D,GD22B,HR22A)</td>
-                            </tr>
-                            <tr>
-                                <td>Chiều</td>
-                                <td>3</td>
-                                <td>1-3</td>
-                                <td>101</td>
-                                <td>Machine learning 2 (3tc)</td>
-                                <td>ThS. Lê Nân</td>
-                                <td>ST22D</td>
-                            </tr>
-                            <tr>
-                                <td>Sáng</td>
-                                <td>5</td>
-                                <td>4-6</td>
-                                <td>707</td>
-                                <td>Lập trình IoT (3tc)</td>
-                                <td>TS. Trần Quang Khương</td>
-                                <td>ST22D</td>
-                            </tr>
-                            <tr>
-                                <td>Chiều</td>
-                                <td>5</td>
-                                <td>1-6</td>
-                                <td>714</td>
-                                <td>Quản Trị Mạng 2 (3tc)</td>
-                                <td>ThS. Trần Văn Giáp</td>
-                                <td>ST22D</td>
-                            </tr>
-                            <tr>
-                                <td>Sáng</td>
-                                <td>6</td>
-                                <td>1-3</td>
-                                <td>906</td>
-                                <td>Điện toán đám mây (3tc)</td>
-                                <td>ThS. Lê Hữu Lập</td>
-                                <td>ST22D</td>
-                            </tr>
-                            <tr>
-                                <td>Chiều</td>
-                                <td>6</td>
-                                <td>4-6</td>
-                                <td>103</td>
-                                <td>DevOps (3tc)</td>
-                                <td>TS. Lê Nở</td>
-                                <td>ST22D</td>
-                            </tr>
-                        </tbody>
-                    </Table>
+                    <h6 className="tkb-title"><i className="bi bi-calendar3"></i> Thời khóa biểu hiện tại</h6>
+                    <div className="table-responsive">
+                        <Table striped bordered hover className="mt-3">
+                            <thead>
+                                <tr>
+                                    <th>Buổi</th>
+                                    <th>Thứ</th>
+                                    <th>Tiết</th>
+                                    <th>Phòng</th>
+                                    <th>Học phần</th>
+                                    <th>Giảng viên</th>
+                                    <th>Lớp học tập</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="tkb-cell">Sáng</td>
+                                    <td className="tkb-cell">2</td>
+                                    <td className="tkb-cell">1-6</td>
+                                    <td className="tkb-cell">707</td>
+                                    <td className="tkb-cell">Chủ nghĩa xã hội khoa học 1 (1tc)</td>
+                                    <td className="tkb-cell">ThS. Nguyễn Thị Thu Vân</td>
+                                    <td className="tkb-cell">6555(ST22D,ST22C,GD22A)</td>
+                                </tr>
+                                <tr>
+                                    <td className="tkb-cell">Chiều</td>
+                                    <td className="tkb-cell">2</td>
+                                    <td className="tkb-cell">4-6</td>
+                                    <td className="tkb-cell">602</td>
+                                    <td className="tkb-cell">Đồ án công nghệ phần mềm (1tc)</td>
+                                    <td className="tkb-cell">ThS. Nguyễn Quốc Vương</td>
+                                    <td className="tkb-cell">6555(ST22D,ST22C,GD22A)</td>
+                                </tr>
+                                <tr>
+                                    <td className="tkb-cell">Sáng</td>
+                                    <td className="tkb-cell">3</td>
+                                    <td className="tkb-cell">4-6</td>
+                                    <td className="tkb-cell">101</td>
+                                    <td className="tkb-cell">Đa văn hóa (1tc)</td>
+                                    <td className="tkb-cell">ThS. Lê Thị Hồng Thúy</td>
+                                    <td className="tkb-cell">7203(ST22C,ST22D,GD22B,HR22A)</td>
+                                </tr>
+                                <tr>
+                                    <td className="tkb-cell">Chiều</td>
+                                    <td className="tkb-cell">3</td>
+                                    <td className="tkb-cell">1-3</td>
+                                    <td className="tkb-cell">101</td>
+                                    <td className="tkb-cell">Machine learning 2 (3tc)</td>
+                                    <td className="tkb-cell">ThS. Lê Nân</td>
+                                    <td className="tkb-cell">ST22D</td>
+                                </tr>
+                                <tr>
+                                    <td className="tkb-cell">Sáng</td>
+                                    <td className="tkb-cell">5</td>
+                                    <td className="tkb-cell">4-6</td>
+                                    <td className="tkb-cell">707</td>
+                                    <td className="tkb-cell">Lập trình IoT (3tc)</td>
+                                    <td className="tkb-cell">TS. Trần Quang Khương</td>
+                                    <td className="tkb-cell">ST22D</td>
+                                </tr>
+                                <tr>
+                                    <td className="tkb-cell">Chiều</td>
+                                    <td className="tkb-cell">5</td>
+                                    <td className="tkb-cell">1-6</td>
+                                    <td className="tkb-cell">714</td>
+                                    <td className="tkb-cell">Quản Trị Mạng 2 (3tc)</td>
+                                    <td className="tkb-cell">ThS. Trần Văn Giáp</td>
+                                    <td className="tkb-cell">ST22D</td>
+                                </tr>
+                                <tr>
+                                    <td className="tkb-cell">Sáng</td>
+                                    <td className="tkb-cell">6</td>
+                                    <td className="tkb-cell">1-3</td>
+                                    <td className="tkb-cell">906</td>
+                                    <td className="tkb-cell">Điện toán đám mây (3tc)</td>
+                                    <td className="tkb-cell">ThS. Lê Hữu Lập</td>
+                                    <td className="tkb-cell">ST22D</td>
+                                </tr>
+                                <tr>
+                                    <td className="tkb-cell">Chiều</td>
+                                    <td className="tkb-cell">6</td>
+                                    <td className="tkb-cell">4-6</td>
+                                    <td className="tkb-cell">103</td>
+                                    <td className="tkb-cell">DevOps (3tc)</td>
+                                    <td className="tkb-cell">TS. Lê Nở</td>
+                                    <td className="tkb-cell">ST22D</td>
+                                </tr>
+                            </tbody>
+                        </Table>
+                    </div>
 
                     <Alert variant="danger" className="mt-3">
                         <strong>Thông báo nghỉ!</strong>
@@ -144,7 +171,7 @@ const TKBPage = () => {
 
                 {/* TKB sắp tới */}
                 <div className="p-3 bg-success bg-opacity-10 mt-3 rounded">
-                    <h6><i className="bi bi-calendar4"></i> Thời khóa biểu sắp tới</h6>
+                    <h6 className="tkb-title"><i className="bi bi-calendar4"></i> Thời khóa biểu sắp tới</h6>
                     <Alert variant="danger" className="mt-3">
                         <i className="bi bi-exclamation-triangle-fill"></i> TKB sắp tới chưa có, xem TKB hiện tại!
                     </Alert>

@@ -48,6 +48,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import UserChat from "./pages/UserChat";
 
 import "./App.css";
+import TKBLoginPage from "./pages/tkbLogin";
 
 const AppContent = () => {
   const location = useLocation();
@@ -59,7 +60,7 @@ const AppContent = () => {
     setKeyword(keywordParam);
   }, [keywordParam]);
 
-  const isAdminRoute = location.pathname.startsWith("/admin")|| location.pathname === "/tkb";
+  const isAdminRoute = location.pathname.startsWith("/admin")|| location.pathname === "/tkb" || location.pathname === "/tkblogin";
 
   return (
     <div>
@@ -91,6 +92,7 @@ const AppContent = () => {
                         <Route path="/user/chat" element={<UserChat />} />
                         <Route path="/favorites" element={<FavoritesPage />} />
                         <Route path="/tkb" element={<TKBPage />} />
+                        <Route path="/tkblogin" element={<TKBLoginPage />} />
                       </Routes>
                     </Container>
                   ) : (
@@ -107,6 +109,7 @@ const AppContent = () => {
                       <Route path="/admin/refunds" element={<ProtectedRoute adminOnly={true}><AdminRefund /></ProtectedRoute>} />
                       <Route path="/admin/coupons" element={<ProtectedRoute adminOnly={true}><AdminCoupons /></ProtectedRoute>} />
                       <Route path="/tkb" element={<TKBPage />} />
+                      <Route path="/tkblogin" element={<TKBLoginPage />} />
                     </Routes>
                   )}
                 </FavoriteProvider>

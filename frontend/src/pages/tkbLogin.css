@@ -1,0 +1,16 @@
+.login-pagee {
+    /* background-color: #f8f9fa; */
+    background-image: url('https://reviewedu.net/wp-content/uploads/2021/07/dai-hoc-dong-a-2-1.jpg');
+    min-height: calc(100vh - 150px);
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+ul {
+    padding-left: 20px;
+}
+
+ul li {
+    margin-bottom: 8px;
+}

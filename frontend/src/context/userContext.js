@@ -103,7 +103,7 @@ export const UserProvider = ({ children }) => {
     setUserInfo(null);
     localStorage.removeItem("authTokens");
     // Keep userInfo in localStorage for next login - only remove auth tokens
-    // localStorage.removeItem("userInfo"); // Comment this out to preserve profile data
+    localStorage.removeItem("userInfo"); // Comment this out to preserve profile data
     console.log("Logout - Keeping userInfo in localStorage for next login");
     // httpService.setJwt(undefined)
   };

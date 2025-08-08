@@ -51,7 +51,7 @@ function HomePage() {
        <div
   className="main-banner hero-banner"
   style={{
-    backgroundImage: `url(${process.env.PUBLIC_URL}/images/Rectangle2.png)`,
+    backgroundImage: `url("https://shop-co-demo.vercel.app/_next/static/media/hero-desktop.67872bf5.png")`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',

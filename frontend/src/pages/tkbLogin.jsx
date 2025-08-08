@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button, Card, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "./tkbLogin.css";
@@ -8,6 +8,10 @@ const TKBLoginPage = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    useEffect(() => {
+            document.title = "Đăng nhập sinh viên | UDA";
+        }, []);
+    
 
     const handleLogin = (e) => {
         e.preventDefault();

@@ -31,7 +31,10 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "tnbhstore.online",
+    "www.tnbhstore.online",
+]
 
 
 # Application definition
@@ -269,6 +272,8 @@ CSRF_COOKIE_SAMESITE = None  # Allow cross-site requests
 
 # Exempt API endpoints from CSRF
 CSRF_TRUSTED_ORIGINS = [
+    "https://tnbhstore.online",
+    "https://www.tnbhstore.online",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",

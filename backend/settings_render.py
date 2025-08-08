@@ -10,6 +10,8 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 # Allowed hosts for Render
 ALLOWED_HOSTS = [
+    'tnbhstore.online',
+    'www.tnbhstore.online',
     '.onrender.com',  # Render domains
     'localhost',
     '127.0.0.1',

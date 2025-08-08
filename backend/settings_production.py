@@ -9,6 +9,8 @@ DEBUG = False
 
 # Allowed hosts - thay đổi theo domain của bạn
 ALLOWED_HOSTS = [
+    'tnbhstore.online',
+    'www.tnbhstore.online',
     'your-domain.com',
     'www.your-domain.com', 
     'your-server-ip',  # IP của server

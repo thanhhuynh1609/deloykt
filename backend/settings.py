@@ -25,17 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG',True)
-
-ALLOWED_HOSTS = [
-    "tnbhstore.online",
-    "www.tnbhstore.online",
-    "ecommerce-web-7q4f.onrender.com"
-]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -273,9 +269,6 @@ CSRF_COOKIE_SAMESITE = None  # Allow cross-site requests
 
 # Exempt API endpoints from CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "https://tnbhstore.online",
-    "https://www.tnbhstore.online",
-    "https://ecommerce-web-7q4f.onrender.com",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",

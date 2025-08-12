@@ -134,20 +134,27 @@
 
 /* AI Search Button */
 .ai-search-btn {
-  background: linear-gradient(45deg, #007bff, #0056b3);
+  background: linear-gradient(45deg, #ffffff, #e0e0e0) !important; /* nền trắng - xám nhạt */
   border: none;
   border-radius: 25px;
   padding: 12px 24px;
   font-weight: 600;
+  color: #000; /* chữ/icon đen */
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* bóng đen nhạt */
 }
 
 .ai-search-btn:hover {
-  background: linear-gradient(45deg, #0056b3, #004085);
+  background: linear-gradient(45deg, #555555, #000000) !important; /* nền xám đậm - đen */
+  color: #fff; /* chữ/icon trắng khi hover */
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
+
+.ai-search-btn i {
+  filter: grayscale(100%) !important; /* icon thành trắng đen */
+}
+
 
 /* Modal enhancements */
 .modal-header {

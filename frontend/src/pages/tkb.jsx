@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Table, Alert, Offcanvas, Button } from "react-bootstrap";
+import { Container, Row, Col, Table, Alert, Offcanvas, Button, NavDropdown, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import "./TKBPage.css";
 
@@ -18,30 +18,66 @@ const TKBPage = () => {
     return (
         <div style={{ textTransform: 'none' }}>
             {/* Header */}
-            <div className="w-100">
-                <Row className="align-items-center m-0 p-2" style={{ backgroundColor: '#009933' }}>
-                    <Col xs={8} md={4} className="d-flex align-items-center">
+            <div className="w-100" style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                zIndex: 1000,
+                width: "100%",
+            }}>
+                <Row className="align-items-center m-0 p-2" style={{ backgroundColor: '#009933', maxHeight: '50px' }}>
+                    {/* Avatar + Menu */}
+                    <Col xs={12} className="d-flex align-items-center gap-3">
+
+                        {/* Avatar */}
                         <img
                             src="https://my.uda.edu.vn/filetailen/anhsv/99022.jpg"
                             alt="Avatar"
-                            className="rounded-circle me-2"
-                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                            className="rounded-circle"
+                            style={{ width: '60px', height: '60px' }}
                         />
-                        <p className="m-0 text-white fs-6">Huỳnh Nguyễn Kim Thanh</p>
-                    </Col>
-                    <Col xs={4} md={8} className="d-flex justify-content-end align-items-center">
-                        {/* Mobile Menu Icon */}
-                        <Button variant="link" className="d-md-none text-white fs-3" onClick={() => setShowMenu(true)}>
-                            <i className="bi bi-list"></i>
-                        </Button>
 
-                        {/* PC View Buttons */}
-                        <div className="d-none d-md-flex flex-wrap justify-content-md-end gap-2">
-                            <Link to="https://my.uda.edu.vn/sv/test_dk" className="btn btn-link header-btn">Đánh giá</Link>
-                            <Link to="https://my.uda.edu.vn/sv/sv_ctdt" className="btn btn-link header-btn">Thông tin Lớp</Link>
-                            <Link to="https://my.uda.edu.vn/sv/thongtinsv" className="btn btn-link header-btn">Góc sinh viên</Link>
-                            <Link to="https://my.uda.edu.vn/sv/doipass" className="btn btn-link header-btn">Hệ thống</Link>
-                        </div>
+                        {/* Menu với title + icon trắng */}
+                        <Nav className="flex-row" style={{ paddingBottom: "20px" }}>
+                            <NavDropdown
+                                title={<span style={{ color: "white", fontSize: "14px" }}><i className="bi bi-bar-chart me-1" style={{ color: "white" }}></i> Thông báo</span>}
+                                id="nav-dropdown-1"
+                            >
+                                <NavDropdown.Item as={Link} to="https://my.uda.edu.vn/sv/test_dk">Đánh giá học phần</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="#">Khảo sát giảng viên</NavDropdown.Item>
+                            </NavDropdown>
+                            <NavDropdown
+                                title={<span style={{ color: "white", fontSize: "14px" }}><i className="bi bi-bar-chart me-1" style={{ color: "white" }}></i> Đánh giá</span>}
+                                id="nav-dropdown-1"
+                            >
+                                <NavDropdown.Item as={Link} to="https://my.uda.edu.vn/sv/test_dk">Đánh giá học phần</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="#">Khảo sát giảng viên</NavDropdown.Item>
+                            </NavDropdown>
+
+                            <NavDropdown
+                                title={<span style={{ color: "white", fontSize: "14px" }}><i className="bi bi-book me-1"></i> Thông tin Lớp</span>}
+                                id="nav-dropdown-2"
+                            >
+                                <NavDropdown.Item as={Link} to="https://my.uda.edu.vn/sv/sv_ctdt">Chương trình đào tạo</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="#">Thời khóa biểu</NavDropdown.Item>
+                            </NavDropdown>
+
+                            <NavDropdown
+                                title={<span style={{ color: "white", fontSize: "14px" }}><i className="bi bi-person me-1"></i> Góc sinh viên</span>}
+                                id="nav-dropdown-3"
+                            >
+                                <NavDropdown.Item as={Link} to="https://my.uda.edu.vn/sv/thongtinsv">Thông tin cá nhân</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="#">Điểm số</NavDropdown.Item>
+                            </NavDropdown>
+
+                            <NavDropdown
+                                title={<span style={{ color: "white", fontSize: "14px" }}><i className="bi bi-gear me-1"></i> Hệ thống</span>}
+                                id="nav-dropdown-4"
+                            >
+                                <NavDropdown.Item as={Link} to="https://my.uda.edu.vn/sv/doipass">Đổi mật khẩu</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="#">Đăng xuất</NavDropdown.Item>
+                            </NavDropdown>
+                        </Nav>
                     </Col>
                 </Row>
             </div>
@@ -61,16 +97,16 @@ const TKBPage = () => {
                 </Offcanvas.Body>
             </Offcanvas>
 
-            <Container className="mt-4">
+            <Container className="mt-4" style={{ paddingTop: "80px" }}>
                 <h5 className="mb-3">
                     <i className="bi bi-calendar-check"></i> Hôm nay {weekday} ngày: {formattedDate}
                 </h5>
 
                 {/* TKB hiện tại */}
-                <div className="p-3 bg-success bg-opacity-10 mt-3 rounded">
-                    <h6 className="tkb-title"><i className="bi bi-calendar3"></i> Thời khóa biểu hiện tại</h6>
+                <div className="p-3 bg-opacity-10 mt-3 rounded tkbht" style={{ backgroundColor: "#DFF0D8" }}>
+                    <h6 className="tkb-title" style={{ color: "#3C763D" }}><i className="bi bi-calendar3"></i> Thời khóa biểu hiện tại</h6>
                     <div className="table-responsive">
-                        <Table  bordered hover className="mt-3 bg-white">
+                        <Table bordered hover className="mt-3 bg-white">
                             <thead>
                                 <tr>
                                     <th>Buổi</th>
@@ -165,40 +201,40 @@ const TKBPage = () => {
                             {/* <Alert variant="light">
                                 <i className="bi bi-info-circle"></i> Chưa có thông báo nghỉ!
                             </Alert> */}
-                            <Table  bordered hover className="mt-3 bg-white">
-                            <thead>
-                                <tr>
-                                    <th>Buổi</th>
-                                    <th>Thứ</th>
-                                    <th>Tiết</th>
-                                    <th>Phòng</th>
-                                    <th>Học phần</th>
-                                    <th>Giảng viên</th>
-                                    <th>Lớp học tập</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="tkb-cell">Sáng</td>
-                                    <td className="tkb-cell">2</td>
-                                    <td className="tkb-cell">1-6</td>
-                                    <td className="tkb-cell">707</td>
-                                    <td className="tkb-cell">Chủ nghĩa xã hội khoa học 1 (1tc)</td>
-                                    <td className="tkb-cell">ThS. Nguyễn Thị Thu Vân</td>
-                                    <td className="tkb-cell">6555(ST22D,ST22C,GD22A)</td>
-                                </tr>
-                                <tr>
-                                    <td className="tkb-cell">Chiều</td>
-                                    <td className="tkb-cell">2</td>
-                                    <td className="tkb-cell">4-6</td>
-                                    <td className="tkb-cell">602</td>
-                                    <td className="tkb-cell">Đồ án công nghệ phần mềm (1tc)</td>
-                                    <td className="tkb-cell">ThS. Nguyễn Quốc Vương</td>
-                                    <td className="tkb-cell">6555(ST22D,ST22C,GD22A)</td>
-                                </tr>
-                                
-                            </tbody>
-                        </Table>
+                            <Table bordered hover className="mt-3 bg-white">
+                                <thead>
+                                    <tr>
+                                        <th>Buổi</th>
+                                        <th>Thứ</th>
+                                        <th>Tiết</th>
+                                        <th>Phòng</th>
+                                        <th>Học phần</th>
+                                        <th>Giảng viên</th>
+                                        <th>Lớp học tập</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="tkb-cell">Sáng</td>
+                                        <td className="tkb-cell">3</td>
+                                        <td className="tkb-cell">4-6</td>
+                                        <td className="tkb-cell">101</td>
+                                        <td className="tkb-cell">Đa văn hóa (1tc)</td>
+                                        <td className="tkb-cell">ThS. Lê Thị Hồng Thúy</td>
+                                        <td className="tkb-cell">7203(ST22C,ST22D,GD22B,HR22A)</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="tkb-cell">Chiều</td>
+                                        <td className="tkb-cell">3</td>
+                                        <td className="tkb-cell">1-3</td>
+                                        <td className="tkb-cell">101</td>
+                                        <td className="tkb-cell">Machine learning 2 (3tc)</td>
+                                        <td className="tkb-cell">ThS. Lê Nân</td>
+                                        <td className="tkb-cell">ST22D</td>
+                                    </tr>
+
+                                </tbody>
+                            </Table>
                         </div>
                     </Alert>
                 </div>

@@ -2,11 +2,14 @@
 .header-btn {
     color: white !important;
     text-decoration: none !important;
-    font-size: 16px;
+    font-size: 14px !important;
     padding: 4px 8px;
 }
 .table td, .table th {
     padding: 8px 8px !important; /* hoặc 2px nếu muốn sát hơn nữa */
+}
+.dropdown-toggle::after {
+    color: white !important;
 }
 /* Title */
 .tkb-title {
@@ -18,6 +21,7 @@
 .tkb-cell {
     font-size: 14px;
 }
+
 
 /* Mobile view adjustments */
 @media (max-width: 576px) {

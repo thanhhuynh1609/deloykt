@@ -70,7 +70,7 @@ const TKBPage = () => {
                 <div className="p-3 bg-success bg-opacity-10 mt-3 rounded">
                     <h6 className="tkb-title"><i className="bi bi-calendar3"></i> Thời khóa biểu hiện tại</h6>
                     <div className="table-responsive">
-                        <Table striped bordered hover className="mt-3">
+                        <Table  bordered hover className="mt-3 bg-white">
                             <thead>
                                 <tr>
                                     <th>Buổi</th>
@@ -162,9 +162,43 @@ const TKBPage = () => {
                     <Alert variant="danger" className="mt-3">
                         <strong>Thông báo nghỉ!</strong>
                         <div className="mt-2">
-                            <Alert variant="light">
+                            {/* <Alert variant="light">
                                 <i className="bi bi-info-circle"></i> Chưa có thông báo nghỉ!
-                            </Alert>
+                            </Alert> */}
+                            <Table  bordered hover className="mt-3 bg-white">
+                            <thead>
+                                <tr>
+                                    <th>Buổi</th>
+                                    <th>Thứ</th>
+                                    <th>Tiết</th>
+                                    <th>Phòng</th>
+                                    <th>Học phần</th>
+                                    <th>Giảng viên</th>
+                                    <th>Lớp học tập</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="tkb-cell">Sáng</td>
+                                    <td className="tkb-cell">2</td>
+                                    <td className="tkb-cell">1-6</td>
+                                    <td className="tkb-cell">707</td>
+                                    <td className="tkb-cell">Chủ nghĩa xã hội khoa học 1 (1tc)</td>
+                                    <td className="tkb-cell">ThS. Nguyễn Thị Thu Vân</td>
+                                    <td className="tkb-cell">6555(ST22D,ST22C,GD22A)</td>
+                                </tr>
+                                <tr>
+                                    <td className="tkb-cell">Chiều</td>
+                                    <td className="tkb-cell">2</td>
+                                    <td className="tkb-cell">4-6</td>
+                                    <td className="tkb-cell">602</td>
+                                    <td className="tkb-cell">Đồ án công nghệ phần mềm (1tc)</td>
+                                    <td className="tkb-cell">ThS. Nguyễn Quốc Vương</td>
+                                    <td className="tkb-cell">6555(ST22D,ST22C,GD22A)</td>
+                                </tr>
+                                
+                            </tbody>
+                        </Table>
                         </div>
                     </Alert>
                 </div>

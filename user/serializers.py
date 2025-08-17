@@ -3,6 +3,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 from djoser.serializers import UserSerializer, User
 from djoser.conf import settings
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 class MyUserSerializer(UserSerializer):
     isAdmin = serializers.SerializerMethodField()
@@ -33,14 +35,24 @@ class AdminUserDeleteSerializer(serializers.Serializer):
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        data = super().validate(attrs)
-
-        data['username'] = self.user.username
-        data['email'] = self.user.email
-        # Ensure isAdmin is always boolean (not 1/0)
-        data['isAdmin'] = bool(self.user.is_staff or self.user.is_superuser)
-
-        return data
+        username = attrs.get('username')
+        password = attrs.get('password')
+        
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+        
+        if user is None:
+            raise serializers.ValidationError({
+                'detail': 'Tài khoản hoặc mật khẩu không đúng'
+            })
+        
+        if not user.is_active:
+            raise serializers.ValidationError({
+                'detail': 'Tài khoản đã bị vô hiệu hóa'
+            })
+        
+        # Continue with normal JWT token generation
+        return super().validate(attrs)
     
 # class MyTokenRefreshSerializer(TokenRefreshSerializer):
 #     def validate(self, attrs):

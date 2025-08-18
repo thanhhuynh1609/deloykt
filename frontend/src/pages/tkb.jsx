@@ -232,6 +232,24 @@ const TKBPage = () => {
                                         <td className="tkb-cell">ThS. Lê Nân</td>
                                         <td className="tkb-cell">ST22D</td>
                                     </tr>
+                                    <tr>
+                                        <td className="tkb-cell">Sáng</td>
+                                        <td className="tkb-cell">6</td>
+                                        <td className="tkb-cell">1-3</td>
+                                        <td className="tkb-cell">906</td>
+                                        <td className="tkb-cell">Điện toán đám mây (3tc)</td>
+                                        <td className="tkb-cell">ThS. Lê Hữu Lập</td>
+                                        <td className="tkb-cell">ST22D</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="tkb-cell">Chiều</td>
+                                        <td className="tkb-cell">6</td>
+                                        <td className="tkb-cell">4-6</td>
+                                        <td className="tkb-cell">103</td>
+                                        <td className="tkb-cell">DevOps (3tc)</td>
+                                        <td className="tkb-cell">TS. Lê Nở</td>
+                                        <td className="tkb-cell">ST22D</td>
+                                    </tr>
 
                                 </tbody>
                             </Table>

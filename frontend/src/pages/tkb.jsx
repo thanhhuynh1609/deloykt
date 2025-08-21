@@ -242,9 +242,33 @@ const TKBPage = () => {
                 {/* TKB sắp tới */}
                 <div className="p-3 bg-success bg-opacity-10 mt-3 rounded">
                     <h6 className="tkb-title"><i className="bi bi-calendar4"></i> Thời khóa biểu sắp tới</h6>
-                    <Alert variant="danger" className="mt-3">
+                    {/* <Alert variant="danger" className="mt-3">
                         <i className="bi bi-exclamation-triangle-fill"></i> TKB sắp tới chưa có, xem TKB hiện tại!
-                    </Alert>
+                    </Alert> */}
+                    <Table bordered hover className="mt-3 bg-white">
+                                <thead>
+                                    <tr>
+                                        <th>Buổi</th>
+                                        <th>Thứ</th>
+                                        <th>Tiết</th>
+                                        <th>Phòng</th>
+                                        <th>Học phần</th>
+                                        <th>Giảng viên</th>
+                                        <th>Lớp học tập</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="tkb-cell">Sáng</td>
+                                        <td className="tkb-cell">CN</td>
+                                        <td className="tkb-cell"></td>
+                                        <td className="tkb-cell">Lab(T2)</td>
+                                        <td className="tkb-cell">Gặp mặt doanh nghiệp</td>
+                                        <td className="tkb-cell"></td>
+                                        <td className="tkb-cell">Khoa CNTT Khóa 22</td>
+                                    </tr>
+                                </tbody>
+                            </Table>
                 </div>
             </Container>
         </div>

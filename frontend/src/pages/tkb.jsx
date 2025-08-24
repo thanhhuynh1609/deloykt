@@ -182,7 +182,7 @@ const TKBPage = () => {
                                     <td className="tkb-cell">ThS. Lê Hữu Lập</td>
                                     <td className="tkb-cell">ST22D</td>
                                 </tr>
-                                <tr>
+                                <tr>    
                                     <td className="tkb-cell">Chiều</td>
                                     <td className="tkb-cell">6</td>
                                     <td className="tkb-cell">4-6</td>
@@ -198,10 +198,10 @@ const TKBPage = () => {
                     <Alert variant="danger" className="mt-3">
                         <strong>Thông báo nghỉ!</strong>
                         <div className="mt-2">
-                            {/* <Alert variant="light">
+                            <Alert variant="light">
                                 <i className="bi bi-info-circle"></i> Chưa có thông báo nghỉ!
-                            </Alert> */}
-                            <Table bordered hover className="mt-3 bg-white">
+                            </Alert>
+                            {/* <Table bordered hover className="mt-3 bg-white">
                                 <thead>
                                     <tr>
                                         <th>Buổi</th>
@@ -234,7 +234,7 @@ const TKBPage = () => {
                                     </tr>
 
                                 </tbody>
-                            </Table>
+                            </Table> */}
                         </div>
                     </Alert>
                 </div>
@@ -242,10 +242,10 @@ const TKBPage = () => {
                 {/* TKB sắp tới */}
                 <div className="p-3 bg-success bg-opacity-10 mt-3 rounded">
                     <h6 className="tkb-title"><i className="bi bi-calendar4"></i> Thời khóa biểu sắp tới</h6>
-                    {/* <Alert variant="danger" className="mt-3">
+                    <Alert variant="danger" className="mt-3">
                         <i className="bi bi-exclamation-triangle-fill"></i> TKB sắp tới chưa có, xem TKB hiện tại!
-                    </Alert> */}
-                    <Table bordered hover className="mt-3 bg-white">
+                    </Alert>
+                    {/* <Table bordered hover className="mt-3 bg-white">
                                 <thead>
                                     <tr>
                                         <th>Buổi</th>
@@ -268,7 +268,7 @@ const TKBPage = () => {
                                         <td className="tkb-cell">Khoa CNTT Khóa 22</td>
                                     </tr>
                                 </tbody>
-                            </Table>
+                            </Table> */}
                 </div>
             </Container>
         </div>

@@ -36,6 +36,8 @@ import AdminRefund from "./pages/admin/AdminRefund";
 import AdminCoupons from "./pages/admin/AdminCoupons";
 import AdminChat from "./pages/admin/AdminChat";
 
+import FloatingAdminChatButton from './components/FloatingAdminChatButton';
+
 // Context providers
 import { ProductsProvider } from "./context/productsContext";
 import { CartProvider } from "./context/cartContext";
@@ -117,6 +119,7 @@ const AppContent = () => {
             </ProductsProvider>
           </main>
           {!isAdminRoute && <Footer />}
+          <FloatingAdminChatButton />
         </PayboxProvider>
       </UserProvider>
     </div>

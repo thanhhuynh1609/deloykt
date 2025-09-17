@@ -212,30 +212,39 @@ class ReviewView(APIView):
             )
 
         # Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
-        alreadyExists = product.review_set.filter(user=user).exists()
+        if product.review_set.filter(user=user).exists():
+            return Response(
+                {'detail': 'Product Already Reviewed!'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        if alreadyExists:
-            return Response({'detail': 'Product Already Reviewed!'}, status=status.HTTP_400_BAD_REQUEST)
+        # Lấy giá trị rating và comment từ request, đảm bảo an toàn
+        rating_value = data.get('rating')
+        comment_value = data.get('comment', '')
 
-        if data['rating'] == 0:
-            return Response({'detail': 'Please select a rating from 1 to 5!'}, status=status.HTTP_400_BAD_REQUEST)
+        if rating_value is None or rating_value == 0:
+            return Response(
+                {'detail': 'Please select a rating from 1 to 5!'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         with transaction.atomic():
+            # Tạo review mới
             review = Review.objects.create(
                 product=product,
                 user=user,
                 name=user.username,
-                rating=data['rating'],
-                comment=data['comment'],
+                rating=rating_value,
+                comment=comment_value,
             )
 
-            product.rating = (product.rating * product.numReviews +
-                              data['rating'])/(product.numReviews + 1)
+            # Nếu product.rating là None, set = 0 trước khi tính toán
+            current_rating = product.rating or 0
+            product.rating = (current_rating * product.numReviews + rating_value) / (product.numReviews + 1)
             product.numReviews += 1
             product.save()
 
             serializer = ReviewSerializer(review)
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

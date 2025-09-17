@@ -34,6 +34,7 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = [
     "tnbhstore.online",
     "www.tnbhstore.online",
+    "localhost",
 ]
 
 
@@ -263,6 +264,7 @@ SIMPLE_JWT = {
 
 
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
 # CSRF settings
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS

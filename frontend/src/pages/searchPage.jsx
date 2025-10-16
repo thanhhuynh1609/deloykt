@@ -150,7 +150,7 @@ function SearchPage() {
   return (
     <AdminRedirect>
       <div className="search-page">
-        <Container>
+        <Container fluid> 
           <Row className="mb-4">
             <Col>
               <nav aria-label="breadcrumb">
@@ -163,7 +163,7 @@ function SearchPage() {
           </Row>
           
           <Row>
-            <Col md={3}>
+            <Col md={3} lg={3}>
               <div className="filter-sidebar">
                 <div className="filter-header">
                   <h3>Filters</h3>
@@ -317,7 +317,7 @@ function SearchPage() {
               </div>
             </Col>
             
-            <Col md={9}>
+         <Col md={9} lg={9}>
               <div className="sort-container">
                 <h2 className="search-title">
                   {keyword ? `Kết quả tìm kiếm cho "${keyword}"` : "Casual"}

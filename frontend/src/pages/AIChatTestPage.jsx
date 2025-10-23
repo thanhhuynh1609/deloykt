@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import AIChatTester from '../components/AIChatTester';
-import AIChatbox from '../components/AIChatbox';
+import AIChatWidget from '../components/AIChatWidget';
 
 const AIChatTestPage = () => {
   const [showChatbox, setShowChatbox] = useState(false);
@@ -33,7 +33,7 @@ const AIChatTestPage = () => {
               Open AI Chatbox
             </Button>
 
-            <AIChatbox
+            <AIChatWidget
               show={showChatbox}
               onHide={() => setShowChatbox(false)}
               userInfo={{first_name: 'Test User'}}

@@ -1,32 +1,39 @@
-import React, { useState, useContext } from 'react';
-import { Button } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Button, Badge } from 'react-bootstrap';
 import { FaRobot, FaTimes } from 'react-icons/fa';
-import AIChatbox from './AIChatbox';
-import UserContext from "../context/userContext";
-import './AIChatbox.css';
+import AIChatWidget from './AIChatWidget';
+import './FloatingChatButton.css';
 
 const FloatingChatButton = () => {
-  const [showChatbox, setShowChatbox] = useState(false);
-  const { userInfo } = useContext(UserContext);
+  const [showChat, setShowChat] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const handleToggleChatbox = () => {
-    setShowChatbox(!showChatbox);
+  const toggleChat = () => {
+    setShowChat(!showChat);
+    if (!showChat) {
+      setUnreadCount(0); // Reset unread count when opening
+    }
   };
 
   return (
     <>
-      <Button
-        className="floating-chat-btn ai-chat"
-        onClick={handleToggleChatbox}
-        title="Trợ lý AI"
+      <Button 
+        className="floating-chat-btn"
+        onClick={toggleChat}
+        title="Chat với AI"
       >
-        {showChatbox ? <FaTimes /> : <FaRobot />}
+        {showChat ? <FaTimes /> : <FaRobot />}
+        {unreadCount > 0 && !showChat && (
+          <Badge pill bg="danger" className="unread-badge">
+            {unreadCount}
+          </Badge>
+        )}
       </Button>
-
-      <AIChatbox
-        show={showChatbox}
-        onHide={() => setShowChatbox(false)}
-        userInfo={userInfo}
+      
+      <AIChatWidget 
+        show={showChat} 
+        onToggle={toggleChat}
+        userInfo={{first_name: 'User'}} // Thay bằng user info thực
       />
     </>
   );

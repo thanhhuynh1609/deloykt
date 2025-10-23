@@ -5,17 +5,37 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0080ff;  
   border: none;
   color: white;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); */
   z-index: 1040;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+}
+.floating-chat-btn::before {
+  content: "Chat AI";
+  position: absolute;
+  right: 70px;              /* cách nút 70px về bên trái */
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(0);
+  transition: all 0.2s ease;
+}
+
+.floating-chat-btn:hover::before {
+  opacity: 1;
+  transform: translateY(-2px);
 }
 
 .floating-chat-btn:hover {

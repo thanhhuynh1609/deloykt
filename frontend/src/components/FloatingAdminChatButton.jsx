@@ -1,21 +1,23 @@
 import React, { useState, useContext } from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Badge } from 'react-bootstrap';
 import { FaComments, FaTimes } from 'react-icons/fa';
-import ChatBox from './chat';
+import AdminChatWidget from './AdminChatWidget';
 import UserContext from "../context/userContext";
-import './AIChatbox.css';
+import './FloatingAdminChatButton.css';
 
 const FloatingAdminChatButton = () => {
-  const [showChatbox, setShowChatbox] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { userInfo, authTokens } = useContext(UserContext);
   
-  const adminId = 1; // ID admin
   const userId = userInfo?.id;
   const token = authTokens?.access;
-  const userName = userInfo?.username;
 
-  const handleToggleChatbox = () => {
-    setShowChatbox(!showChatbox);
+  const toggleChat = () => {
+    setShowChat(!showChat);
+    if (!showChat) {
+      setUnreadCount(0); // Reset unread count when opening
+    }
   };
 
   // Không hiển thị nếu chưa đăng nhập
@@ -23,28 +25,23 @@ const FloatingAdminChatButton = () => {
 
   return (
     <>
-      <Button
-        className="floating-chat-btn admin-chat"
-        onClick={handleToggleChatbox}
+      <Button 
+        className="floating-admin-chat-btn"
+        onClick={toggleChat}
         title="Chat với Admin"
       >
-        {showChatbox ? <FaTimes /> : <FaComments />}
+        {showChat ? <FaTimes /> : <FaComments />}
+        {unreadCount > 0 && !showChat && (
+          <Badge pill bg="danger" className="admin-unread-badge">
+            {unreadCount}
+          </Badge>
+        )}
       </Button>
-
-      <Modal show={showChatbox} onHide={() => setShowChatbox(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Chat với Admin</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ padding: '20px' }}>
-          <ChatBox
-            userId={adminId}
-            currentUserId={userId}
-            token={token}
-            userName={userName}
-            isAdmin={false}
-          />
-        </Modal.Body>
-      </Modal>
+      
+      <AdminChatWidget 
+        show={showChat} 
+        onToggle={toggleChat}
+      />
     </>
   );
 };

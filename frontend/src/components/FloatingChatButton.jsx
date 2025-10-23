@@ -17,8 +17,9 @@ const FloatingChatButton = () => {
 
   return (
     <>
-      <Button 
+      <button 
         className="floating-chat-btn"
+        variant="none"
         onClick={toggleChat}
         title="Chat với AI"
       >
@@ -28,7 +29,7 @@ const FloatingChatButton = () => {
             {unreadCount}
           </Badge>
         )}
-      </Button>
+      </button>
       
       <AIChatWidget 
         show={showChat} 

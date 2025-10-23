@@ -122,8 +122,12 @@ const AppContent = () => {
             </ProductsProvider>
           </main>
           {!isAdminRoute && <Footer />}
-          <FloatingAdminChatButton />
-          <FloatingChatButton />
+          {!isAdminRoute && (
+            <>
+              <FloatingAdminChatButton />
+              <FloatingChatButton />
+            </>
+          )}
         </PayboxProvider>
       </UserProvider>
     </div>

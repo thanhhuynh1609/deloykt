@@ -20,7 +20,7 @@
 }
 
 .admin-chat-header {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); /* Màu đỏ cho admin */
+  background: #0080ff; /* Màu đỏ cho admin */
   color: white;
   padding: 16px 20px;
   display: flex;
@@ -150,8 +150,8 @@
 }
 
 .admin-message.admin-message .admin-message-bubble {
-  background: #dc3545;
-  color: white;
+  background: white;
+  color: black;
   border-bottom-left-radius: 6px;
 }
 

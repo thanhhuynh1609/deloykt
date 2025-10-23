@@ -5,7 +5,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); /* Màu đỏ cho admin */
+  background: #e02f35;
   border: none;
   color: white;
   font-size: 24px;
@@ -17,7 +17,25 @@
   justify-content: center;
   transition: all 0.3s ease;
 }
-
+.floating-admin-chat-btn::before{
+  content: "Alo chủ sốp";
+  position: absolute;
+  right: 70px;              /* cách nút 70px về bên trái */
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(0);
+  transition: all 0.2s ease;
+}
+.floating-admin-chat-btn:hover::before{
+  opacity: 1;
+  transform: translateY(-2px);
+}
 .floating-admin-chat-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);

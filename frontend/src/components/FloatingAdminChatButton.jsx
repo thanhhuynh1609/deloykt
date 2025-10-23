@@ -25,7 +25,7 @@ const FloatingAdminChatButton = () => {
 
   return (
     <>
-      <Button 
+      <button 
         className="floating-admin-chat-btn"
         onClick={toggleChat}
         title="Chat với Admin"
@@ -36,7 +36,7 @@ const FloatingAdminChatButton = () => {
             {unreadCount}
           </Badge>
         )}
-      </Button>
+      </button>
       
       <AdminChatWidget 
         show={showChat} 

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect  } from "react";
 import { Navbar, Nav, Container, NavDropdown, Badge, Button } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import UserContext from "../context/userContext";
@@ -19,9 +19,29 @@ function Header({ keyword, setKeyword }) {
   }
 
   const [showAISearch, setShowAISearch] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Cuộn xuống và đã cuộn quá 100px -> ẩn header
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Cuộn lên -> hiện header
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   return (
-    <header className="header-border">
+    <header className={`header-border ${!isVisible ? 'header-hidden' : ''}`}>
       <Navbar bg="white" expand="lg" className="py-3">
         <Container>
           {/* Logo */}

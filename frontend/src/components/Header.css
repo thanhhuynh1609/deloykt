@@ -1,3 +1,6 @@
+body {
+  padding-top: 80px; /* Điều chỉnh theo chiều cao header */
+}
 /* Search container */
 .search-container {
   flex: 1;
@@ -108,7 +111,18 @@
 
 /* Header border */
 .header-border {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  z-index: 1030;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease-in-out;
   border-bottom: 1px solid #e0e0e0;
+}
+.header-hidden {
+  transform: translateY(-100%); /* Ẩn header bằng cách đẩy lên trên */
 }
 
 /* Navigation icons */
@@ -126,3 +140,13 @@
   font-size: 0.6rem;
   padding: 0.2rem 0.4rem;
 }
+
+/* Thêm vào cuối file Header.css */
+/* .header-border {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 1030;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+} */
+

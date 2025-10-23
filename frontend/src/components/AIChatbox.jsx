@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form, Card, Badge, Spinner } from 'react-bootstrap';
 import { FaRobot, FaPaperPlane, FaTimes, FaUser } from 'react-icons/fa';
 import './AIChatbox.css';
-
+import httpService from '../services/httpService';
 const AIChatbox = ({ show, onHide, userInfo }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -77,7 +77,7 @@ const AIChatbox = ({ show, onHide, userInfo }) => {
 
       console.log('Sending request data:', requestData);
 
-      const response = await fetch('http://localhost:8000/ai/chat/', {
+      const response = await fetch('/ai/chat/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

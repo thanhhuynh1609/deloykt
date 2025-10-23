@@ -35,8 +35,10 @@ import AdminPaybox from "./pages/admin/AdminPaybox";
 import AdminRefund from "./pages/admin/AdminRefund";
 import AdminCoupons from "./pages/admin/AdminCoupons";
 import AdminChat from "./pages/admin/AdminChat";
+import AIChatTestPage from "./pages/AIChatTestPage";
 
 import FloatingAdminChatButton from './components/FloatingAdminChatButton';
+import FloatingChatButton from "./components/FloatingChatButton";
 
 // Context providers
 import { ProductsProvider } from "./context/productsContext";
@@ -93,6 +95,7 @@ const AppContent = () => {
                         <Route path="/cart" element={<CartPage />} />
                         <Route path="/user/chat" element={<UserChat />} />
                         <Route path="/favorites" element={<FavoritesPage />} />
+                        <Route path="/ai-chat-test" element={<AIChatTestPage />} />
                         <Route path="/tkb" element={<TKBPage />} />
                         <Route path="/tkblogin" element={<TKBLoginPage />} />
                       </Routes>
@@ -120,6 +123,7 @@ const AppContent = () => {
           </main>
           {!isAdminRoute && <Footer />}
           <FloatingAdminChatButton />
+          <FloatingChatButton />
         </PayboxProvider>
       </UserProvider>
     </div>

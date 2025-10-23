@@ -85,14 +85,15 @@ if not DEBUG:
 
 # CORS settings for production
 CORS_ALLOWED_ORIGINS = [
-    "https://your-app-name.onrender.com",  # Replace with your actual Render URL
+    "https://www.tnbhstore.online/",
+    # Replace with your actual Render URL
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF settings
 CSRF_TRUSTED_ORIGINS = [
-    "https://your-app-name.onrender.com",  # Replace with your actual Render URL
+    "https://www.tnbhstore.online/",
 ]
 
 # Email configuration

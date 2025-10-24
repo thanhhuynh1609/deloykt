@@ -84,9 +84,9 @@ function ProfilePage(props) {
 
       // Set avatar preview - prioritize userInfo.avatar, fallback to sample
       const currentAvatar =
-        userInfo.avatar && userInfo.avatar !== "/images/sample.png"
+        userInfo.avatar && userInfo.avatar !== "https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?semt=ais_hybrid&w=740&q=80"
           ? userInfo.avatar
-          : "/images/sample.png";
+          : "https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?semt=ais_hybrid&w=740&q=80";
       setAvatarPreview(currentAvatar);
 
       // Check if user has completed profile info
@@ -258,7 +258,7 @@ function ProfilePage(props) {
         setUploadProgress(0);
         // Reset to original avatar
         const originalAvatar =
-          userInfo && userInfo.avatar ? userInfo.avatar : "/images/sample.png";
+          userInfo && userInfo.avatar ? userInfo.avatar : "https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?semt=ais_hybrid&w=740&q=80";
         console.log("Resetting to original avatar:", originalAvatar);
         setAvatarPreview(originalAvatar);
       }
@@ -358,12 +358,12 @@ function ProfilePage(props) {
                   style={{ cursor: "pointer" }}
                 >
                   <img
-                    src={avatarPreview || "/images/sample.png"}
+                    src={avatarPreview || "https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?semt=ais_hybrid&w=740&q=80"}
                     alt="Avatar"
                     className="profile-avatar"
                     onError={(e) => {
                       console.log("Avatar load error, falling back to sample");
-                      e.target.src = "/image/sample.png";
+                      e.target.src = "https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg?semt=ais_hybrid&w=740&q=80";
                     }}
                   />
                   <input
@@ -840,7 +840,7 @@ function ProfilePage(props) {
                         <h5 className="form-section-title">
                           <i className="fas fa-shield-alt"></i> Đổi mật khẩu
                         </h5>
-                        {/* <Form.Group className="form-group">
+                        <Form.Group className="form-group">
                           <Form.Label className="form-label">
                             Mật khẩu hiện tại
                           </Form.Label>
@@ -852,7 +852,7 @@ function ProfilePage(props) {
                             className="form-control"
                             required
                           />
-                        </Form.Group> */}
+                        </Form.Group>
                         <Form.Group className="form-group">
                           <Form.Label className="form-label">
                             Mật khẩu mới

@@ -348,13 +348,13 @@ const AdminProducts = () => {
           <Col>
             <Card>
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Products Management</h5>
+                <h5 className="mb-0">Quản lý sản phẩ  m</h5>
                 <Button 
                   variant="primary" 
                   onClick={() => handleShowModal()}
                 >
                   <i className="fas fa-plus me-2"></i>
-                  Add Product
+                  Thêm sản phẩm
                 </Button>
               </Card.Header>
               <Card.Body>
@@ -362,32 +362,38 @@ const AdminProducts = () => {
                   <thead>
                     <tr>
                       <th onClick={() => handleSort('name')}>
-                        Name
-                        {sortField === 'name' && (
+                        ID
+                        {sortField === 'id' && (
                           <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
                         )}
                       </th>
                       <th>Image</th>
                       <th onClick={() => handleSort('brand')}>
-                        Brand
+                        Tên
+                        {sortField === 'name' && (
+                          <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                        )}
+                      </th>
+                      <th onClick={() => handleSort('brand')}>
+                        Thương hiệu
                         {sortField === 'brand' && (
                           <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
                         )}
                       </th>
                       <th onClick={() => handleSort('category')}>
-                        Category
+                        Loại
                         {sortField === 'category' && (
                           <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
                         )}
                       </th>
                       <th onClick={() => handleSort('price')}>
-                        Price
+                        Giá
                         {sortField === 'price' && (
                           <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
                         )}
                       </th>
                       <th onClick={() => handleSort('countInStock')}>
-                        Stock
+                        Số lượng
                         {sortField === 'countInStock' && (
                           <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
                         )}
@@ -404,7 +410,7 @@ const AdminProducts = () => {
                           <i className={`fas fa-sort-${sortOrder === 'asc' ? 'up' : 'down'} ms-1`}></i>
                         )}
                       </th>
-                      <th>Actions</th>
+                      <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>

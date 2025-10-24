@@ -76,7 +76,7 @@ const AIChatWidget = ({ show, onToggle, userInfo }) => {
         context: {}
       };
 
-      console.log('Sending request data:', requestData);
+      
 
       const response = await httpService.post('/ai/chat/', requestData);
 
@@ -277,13 +277,13 @@ const AIChatWidget = ({ show, onToggle, userInfo }) => {
                   onChange={(e) => setInputMessage(e.target.value)}
                   disabled={isLoading}
                 />
-                <Button 
+                <button className='submit-message'
                   type="submit" 
                   variant="primary"
                   disabled={isLoading || !inputMessage.trim()}
                 >
                   {isLoading ? <Spinner size="sm" /> : <FaPaperPlane />}
-                </Button>
+                </button>
               </div>
             </Form>
           </div>

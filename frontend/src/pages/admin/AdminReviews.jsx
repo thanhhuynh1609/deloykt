@@ -124,7 +124,7 @@ const AdminReviews = () => {
           <Col>
             <Card>
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Reviews Management</h5>
+                <h5 className="mb-0">Quản lý đánh giá</h5>
               </Card.Header>
               <Card.Body>
                 {loading ? (
@@ -134,12 +134,12 @@ const AdminReviews = () => {
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th>Product</th>
-                        <th>User</th>
+                        <th>Sản phẩm</th>
+                        <th>Người dùng</th>
                         <th>Rating</th>
-                        <th>Comment</th>
-                        <th>Date</th>
-                        <th>Actions</th>
+                        <th>Đánh giá</th>
+                        <th>Ngày</th>
+                        <th>Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>

@@ -20,18 +20,18 @@ const AdminHeader = () => {
     <Navbar className="admin-header" expand="lg">
       <div className="admin-header-content">
         <div className="header-left">
-          <button className="sidebar-toggle">
+          {/* <button className="sidebar-toggle">
             <i className="fas fa-bars"></i>
-          </button>
+          </button> */}
 
           <div className="logo">
             <i className="fas fa-circle" style={{ color: '#00BCD4' }}></i>
-            <span className="logo-text">Pluto</span>
+            <span className="logo-text">TNBH Store</span>
           </div>
         </div>
 
         <div className="header-center">
-          <h4 className="page-title">Dashboard</h4>
+          <h4 className="page-title">Quản Lý</h4>
         </div>
 
         <div className="header-right">
@@ -75,18 +75,18 @@ const AdminHeader = () => {
               </Dropdown.Toggle>
 
               <Dropdown.Menu className="user-menu">
-                <Dropdown.Item as={Link} to="/admin/profile">
+                {/* <Dropdown.Item as={Link} to="/admin/profile">
                   <i className="fas fa-user"></i>
-                  Profile
+                  Thông tin cá nhân
                 </Dropdown.Item>
                 <Dropdown.Item as={Link} to="/admin/settings">
                   <i className="fas fa-cog"></i>
-                  Settings
+                  Cài đặt
                 </Dropdown.Item>
-                <Dropdown.Divider />
+                <Dropdown.Divider /> */}
                 <Dropdown.Item onClick={handleLogout}>
                   <i className="fas fa-sign-out-alt"></i>
-                  Logout
+                  Đăng xuất
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>

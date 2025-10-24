@@ -187,6 +187,11 @@
 .admin-typing-indicator span:nth-child(3) {
   animation-delay: 0.4s;
 }
+.ad-submit-message{
+ background-color: blue !important;
+  color: white !important;
+  transition:none !important;
+}
 
 @keyframes adminSlideInUp {
   from {

@@ -68,7 +68,7 @@ function OrdersList(props) {
                 </td>
                 <td>
                     <LinkContainer to={`/orders/${order.id}/`}>
-                        <Button className="btn-sm btn-light">Details</Button>
+                        <Button className="btn-sm btn-light">Chi tiết</Button>
                     </LinkContainer>
                 </td>
               </tr>

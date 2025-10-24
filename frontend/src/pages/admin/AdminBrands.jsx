@@ -125,13 +125,13 @@ const AdminBrands = () => {
           <Col>
             <Card>
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Brands Management</h5>
+                <h5 className="mb-0">Quản lý thương hiệu</h5>
                 <Button 
                   variant="primary" 
                   onClick={() => handleShowModal()}
                 >
                   <i className="fas fa-plus me-2"></i>
-                  Add Brand
+                  Thêm thương hiệu
                 </Button>
               </Card.Header>
               <Card.Body>
@@ -139,10 +139,10 @@ const AdminBrands = () => {
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Image</th>
-                      <th>Title</th>
-                      <th>Description</th>
-                      <th>Actions</th>
+                      <th>Ảnh</th>
+                      <th>Tên</th>
+                      <th>Thông tin</th>
+                      <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>

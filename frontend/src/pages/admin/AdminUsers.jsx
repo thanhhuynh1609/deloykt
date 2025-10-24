@@ -201,13 +201,13 @@ const AdminUsers = () => {
           <Col>
             <Card>
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Users Management</h5>
+                <h5 className="mb-0">Quản lý người dùng</h5>
                 <Button
                   variant="primary"
                   onClick={handleAddUser}
                 >
                   <i className="fas fa-plus me-2"></i>
-                  Add User
+                  Thêm người dùng
                 </Button>
               </Card.Header>
               <Card.Body>
@@ -215,11 +215,11 @@ const AdminUsers = () => {
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Username</th>
+                      <th>Tên</th>
                       <th>Email</th>
-                      <th>Status</th>
-                      <th>Joined</th>
-                      <th>Actions</th>
+                      <th>Trạng thái</th>
+                      <th>Ngày</th>
+                      <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -68,6 +68,13 @@
   align-items: flex-start;
   gap: 8px;
 }
+.submit-message{
+  width: 15%;
+  background-color: #0080ff;
+  border: none;
+  color: white;
+}
+
 
 .message-avatar {
   width: 32px;

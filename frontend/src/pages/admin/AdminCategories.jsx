@@ -125,13 +125,13 @@ const AdminCategories = () => {
           <Col>
             <Card>
               <Card.Header className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Categories Management</h5>
+                <h5 className="mb-0">Quản lý phân loại</h5>
                 <Button 
                   variant="primary" 
                   onClick={() => handleShowModal()}
                 >
                   <i className="fas fa-plus me-2"></i>
-                  Add Category
+                  Thêm loại
                 </Button>
               </Card.Header>
               <Card.Body>
@@ -139,10 +139,10 @@ const AdminCategories = () => {
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Image</th>
-                      <th>Title</th>
-                      <th>Description</th>
-                      <th>Actions</th>
+                      <th>Ảnh</th>
+                      <th>Tên loại</th>
+                      <th>Thông tin</th>
+                      <th>Hành động</th>
                     </tr>
                   </thead>
                   <tbody>

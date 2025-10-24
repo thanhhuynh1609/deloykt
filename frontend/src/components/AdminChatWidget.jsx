@@ -60,12 +60,11 @@ const AdminChatWidget = ({ show, onToggle }) => {
 
       // Initialize WebSocket
       const wsUrl = getWebSocketURL();
-      console.log('Admin Chat WebSocket connecting to:', wsUrl);
+      
 
       const websocket = new WebSocket(wsUrl);
 
       websocket.onopen = () => {
-        console.log('Admin Chat WebSocket connected successfully');
         setWs(websocket);
         setIsConnected(true); // Đặt connected = true
       };
@@ -81,7 +80,6 @@ const AdminChatWidget = ({ show, onToggle }) => {
       };
 
       websocket.onclose = (event) => {
-        console.log('Admin Chat WebSocket closed:', event.code, event.reason);
         setWs(null);
         setIsConnected(false);
       };
@@ -215,9 +213,9 @@ const AdminChatWidget = ({ show, onToggle }) => {
                   onKeyPress={handleKeyPress}
                   disabled={!isConnected} // Sử dụng isConnected
                 />
-                <Button 
+                <Button className='ad-submit-message'
                   type="submit" 
-                  variant="primary"
+                  variant="none"
                   disabled={!isConnected || !inputMessage.trim()} // Sử dụng isConnected
                 >
                   {isConnected ? <FaPaperPlane /> : <Spinner size="sm" />}

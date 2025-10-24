@@ -19,14 +19,14 @@ const AdminSidebar = () => {
           </div>
           <div className="admin-details">
             <h6>{userInfo?.username?.toUpperCase() || 'ADMIN'}</h6>
-            <small>Administrator</small>
+            <small>Quản trị viên</small>
           </div>
         </div>
       </div>
 
       <Nav className="flex-column sidebar-nav">
         <div className="nav-section">
-          <small className="nav-section-title">MANAGEMENT</small>
+          <small className="nav-section-title">Quản lý</small>
 
           <Nav.Item>
             <Nav.Link
@@ -35,7 +35,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
             >
               <i className="fas fa-tachometer-alt"></i>
-              Dashboard
+              Trang chính
             </Nav.Link>
           </Nav.Item>
 
@@ -46,7 +46,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/products') ? 'active' : ''}`}
             >
               <i className="fas fa-box"></i>
-              Products
+              Sản phẩm
             </Nav.Link>
           </Nav.Item>
 
@@ -57,7 +57,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/categories') ? 'active' : ''}`}
             >
               <i className="fas fa-tags"></i>
-              Categories
+              Loại
             </Nav.Link>
           </Nav.Item>
 
@@ -68,7 +68,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/brands') ? 'active' : ''}`}
             >
               <i className="fas fa-trademark"></i>
-              Brands
+              Thương hiệu
             </Nav.Link>
           </Nav.Item>
 
@@ -79,7 +79,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/orders') ? 'active' : ''}`}
             >
               <i className="fas fa-shopping-cart"></i>
-              Orders
+              Đơn hàng
             </Nav.Link>
           </Nav.Item>
 
@@ -90,7 +90,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/users') ? 'active' : ''}`}
             >
               <i className="fas fa-users"></i>
-              Users
+              Người dùng
             </Nav.Link>
           </Nav.Item>
 
@@ -101,7 +101,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/reviews') ? 'active' : ''}`}
             >
               <i className="fas fa-star"></i>
-              Reviews
+              Đánh giá
             </Nav.Link>
           </Nav.Item>
 
@@ -112,7 +112,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/paybox') ? 'active' : ''}`}
             >
               <i className="fas fa-wallet"></i>
-              Paybox
+              Ví Paybox
             </Nav.Link>
           </Nav.Item>
 
@@ -134,7 +134,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/chat') ? 'active' : ''}`}
             >
               <i className="fas fa-comments"></i>
-              Chat
+              Tin nhắn
             </Nav.Link>
           </Nav.Item>
 
@@ -145,7 +145,7 @@ const AdminSidebar = () => {
               className={`sidebar-link ${isActive('/admin/refunds') ? 'active' : ''}`}
             >
               <i className="fas fa-undo-alt"></i>
-              Refund Requests
+              Yêu cầu hoàn tiền
             </Nav.Link>
           </Nav.Item>
 

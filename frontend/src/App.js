@@ -22,6 +22,8 @@ import SearchPage from "./pages/searchPage";
 import PayboxPage from "./pages/PayboxPage";
 import FavoritesPage from "./pages/favoritesPage";
 import TKBPage from "./pages/tkb";
+import NotFound from "./pages/NotFound";
+
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -98,6 +100,7 @@ const AppContent = () => {
                         <Route path="/ai-chat-test" element={<AIChatTestPage />} />
                         <Route path="/tkb" element={<TKBPage />} />
                         <Route path="/tkblogin" element={<TKBLoginPage />} />
+                        <Route path="*" element={<NotFound />} />
                       </Routes>
                     </Container>
                   ) : (

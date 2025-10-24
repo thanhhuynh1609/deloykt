@@ -24,12 +24,17 @@ const AdminDashboard = () => {
         httpService.get('/api/orders/'),
         httpService.get('/api/products/')
       ]);
+      const [totalUsers] = await Promise.all([
+        httpService.get('/auth/users/'),
+      ]);
+       const orders = ordersRes.data || [];
+       const totalRevenue = orders.reduce((sum, o) => sum + Number(o.totalPrice || 0), 0);
 
       setStats({
-        totalUsers: 2500, // Mock data - you can implement user count API
+        totalUsers: totalUsers.data.length - 1 || 0, // Mock data - you can implement user count API
         totalOrders: ordersRes.data.length || 0,
         totalProducts: productsRes.data.length || 0,
-        totalRevenue: 123.50 // Mock data - calculate from orders
+        totalRevenue: totalRevenue // Mock data - calculate from orders
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -50,7 +55,7 @@ const AdminDashboard = () => {
                   </div>
                   <div className="stat-info">
                     <h3>{stats.totalUsers}</h3>
-                    <p>Total Users</p>
+                    <p>Người dùng</p>
                   </div>
                 </div>
               </Card.Body>
@@ -66,7 +71,7 @@ const AdminDashboard = () => {
                   </div>
                   <div className="stat-info">
                     <h3>{stats.totalProducts}</h3>
-                    <p>Products</p>
+                    <p>Sản phẩm</p>
                   </div>
                 </div>
               </Card.Body>
@@ -82,7 +87,7 @@ const AdminDashboard = () => {
                   </div>
                   <div className="stat-info">
                     <h3>{stats.totalOrders}</h3>
-                    <p>Orders</p>
+                    <p>Đơn hàng </p>
                   </div>
                 </div>
               </Card.Body>
@@ -94,11 +99,12 @@ const AdminDashboard = () => {
               <Card.Body>
                 <div className="stat-content">
                   <div className="stat-icon">
-                    <i className="fas fa-dollar-sign"></i>
+                    {/* <i className="fas fa-dollar-sign"></i> */}
+                    <h2>VND</h2>
                   </div>
                   <div className="stat-info">
-                    <h3>${stats.totalRevenue}</h3>
-                    <p>Revenue</p>
+                    <h3>{stats.totalRevenue.toLocaleString('vi-VN')}</h3>
+                    <p>Doanh thu</p>
                   </div>
                 </div>
               </Card.Body>
@@ -111,29 +117,29 @@ const AdminDashboard = () => {
           <Col lg={6}>
             <Card>
               <Card.Header>
-                <h5 className="mb-0">Recent Orders</h5>
+                <h5 className="mb-0">Đơn hàng gần đây</h5>
               </Card.Header>
               <Card.Body>
                 <div className="recent-activity">
                   <div className="activity-item">
                     <i className="fas fa-shopping-cart text-primary"></i>
                     <div className="activity-content">
-                      <p><strong>New order #1234</strong></p>
-                      <small className="text-muted">2 minutes ago</small>
+                      <p><strong>Đơn hàng mới #1234</strong></p>
+                      <small className="text-muted">2 phút trước</small>
                     </div>
                   </div>
                   <div className="activity-item">
                     <i className="fas fa-user text-success"></i>
                     <div className="activity-content">
-                      <p><strong>New user registered</strong></p>
-                      <small className="text-muted">5 minutes ago</small>
+                      <p><strong>Người dùng mới</strong></p>
+                      <small className="text-muted">5 phút trước</small>
                     </div>
                   </div>
                   <div className="activity-item">
                     <i className="fas fa-box text-warning"></i>
                     <div className="activity-content">
-                      <p><strong>Product updated</strong></p>
-                      <small className="text-muted">10 minutes ago</small>
+                      <p><strong>Cập nhật sản phẩm</strong></p>
+                      <small className="text-muted">10 phút trước</small>
                     </div>
                   </div>
                 </div>
@@ -144,29 +150,29 @@ const AdminDashboard = () => {
           <Col lg={6}>
             <Card>
               <Card.Header>
-                <h5 className="mb-0">Quick Actions</h5>
+                <h5 className="mb-0">Thao tác nhanh</h5>
               </Card.Header>
               <Card.Body>
                 <div className="quick-actions">
                   <Link to="/admin/products" className="btn btn-primary me-2 mb-2">
                     <i className="fas fa-plus me-1"></i>
-                    Add Product
+                    Thêm sản phẩm
                   </Link>
                   <Link to="/admin/orders" className="btn btn-success me-2 mb-2">
                     <i className="fas fa-eye me-1"></i>
-                    View Orders
+                    Xem đơn hàng
                   </Link>
                   <Link to="/admin/users" className="btn btn-info me-2 mb-2">
                     <i className="fas fa-users me-1"></i>
-                    Manage Users
+                    QL người dùng
                   </Link>
                   <Link to="/admin/categories" className="btn btn-warning me-2 mb-2">
                     <i className="fas fa-tags me-1"></i>
-                    Categories
+                    Danh mục
                   </Link>
-                  <Link to="/admin/reviews" className="btn btn-secondary mb-2">
+                  <Link to="/admin/reviews" className="btn btn-primary mb-2">
                     <i className="fas fa-star me-1"></i>
-                    Reviews
+                    Đánh giá
                   </Link>
                 </div>
               </Card.Body>

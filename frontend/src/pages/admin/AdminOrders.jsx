@@ -86,19 +86,19 @@ const AdminOrders = () => {
           <Col>
             <Card>
               <Card.Header>
-                <h5 className="mb-0">Orders Management</h5>
+                <h5 className="mb-0">Quản lý đơn hàng</h5>
               </Card.Header>
               <Card.Body>
                 <Table responsive hover>
                   <thead>
                     <tr>
-                      <th>Order ID</th>
-                      <th>Customer</th>
-                      <th>Date</th>
-                      <th>Total</th>
-                      <th>Payment</th>
-                      <th>Status</th>
-                      <th>Actions</th>
+                      <th>ID</th>
+                      <th>Người mua</th>
+                      <th>Ngày</th>
+                      <th>Tiền</th>
+                      <th>thanh toán</th>
+                      <th>trạng thái</th>
+                      <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>

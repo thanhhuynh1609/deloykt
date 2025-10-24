@@ -56,14 +56,14 @@ function Header({ keyword, setKeyword }) {
             {/* Search Box */}
             <div className="search-container d-flex align-items-center">
               <SearchBox keyword={keyword} setKeyword={setKeyword} />
-              <Button 
+              {/* <Button 
                 variant="outline-primary" 
                 className="ms-2 ai-search-btn"
                 onClick={() => setShowAISearch(true)}
                 title="Tìm kiếm bằng AI"
               >
                 <i className="fas fa-camera"></i>
-              </Button>
+              </Button> */}
             </div>
 
             {/* Icon Right */}
